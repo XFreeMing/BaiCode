@@ -672,7 +672,7 @@ async fn preconnected_sampler_reuses_authenticated_websocket_for_classifications
         handshake.header("x-openai-internal-codex-responses-lite"),
         Some("true".to_owned())
     );
-    assert_eq!(handshake.header("session-id"), Some("session-1".to_owned()));
+    assert!(handshake.header("session-id").is_none());
     assert_eq!(
         handshake.header("originator"),
         Some("guardian-v2-test".to_owned())
@@ -974,7 +974,7 @@ async fn sampler_retries_expired_websockets_on_another_warm_connection() -> Resu
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn sampler_uses_http_with_a_fresh_identity_when_warm_connections_expire() -> Result<()> {
+async fn sampler_uses_http_without_session_identifiers_when_warm_connections_expire() -> Result<()> {
     skip_if_no_network!(Ok(()));
 
     let response = vec![
