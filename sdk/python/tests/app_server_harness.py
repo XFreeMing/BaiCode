@@ -228,7 +228,7 @@ class AppServerHarness:
 
     def app_server_config(self) -> CodexConfig:
         """Prefer the CI binary, then a local debug build, then the installed runtime."""
-        binary_name = "baicode.exe" if os.name == "nt" else "baicode"
+        binary_name = "baic.exe" if os.name == "nt" else "baic"
         debug_binary = Path(__file__).resolve().parents[3] / "codex-rs/target/debug" / binary_name
         codex_bin = os.environ.get("CODEX_EXEC_PATH")
         if codex_bin is None and debug_binary.is_file():

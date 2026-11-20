@@ -25,7 +25,7 @@ fn winget_package_starts_and_reselects_daemon() -> Result<()> {
     for directory in ["bin", "codex-path", "codex-resources/voice"] {
         std::fs::create_dir_all(package.join(directory))?;
     }
-    copy_executable(&codex_utils_cargo_bin::cargo_bin("baicode")?, &codex)?;
+    copy_executable(&codex_utils_cargo_bin::cargo_bin("baic")?, &codex)?;
     for helper in [
         "codex-code-mode-host.exe",
         "codex-path/rg.exe",
@@ -79,7 +79,7 @@ fn winget_package_starts_and_reselects_daemon() -> Result<()> {
     }
     let selected_metadata: Value =
         serde_json::from_slice(&std::fs::read(current.join("codex-package.json"))?)?;
-    metadata["entrypoint"] = "bin/baicode.exe".into();
+    metadata["entrypoint"] = "bin/baic.exe".into();
     assert_eq!(selected_metadata, metadata);
     let selected_voice: Value = serde_json::from_slice(&std::fs::read(
         current.join("codex-resources/voice/manifest.json"),
@@ -88,7 +88,7 @@ fn winget_package_starts_and_reselects_daemon() -> Result<()> {
         selected_voice,
         serde_json::json!({
             "sha256": {
-                "bin/baicode.exe": checksum,
+                "bin/baic.exe": checksum,
                 "codex-resources/voice/runtime": "untouched"
             }
         })

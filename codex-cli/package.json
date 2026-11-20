@@ -4,14 +4,14 @@
   "description": "BaiCode is a local coding CLI.",
   "license": "Apache-2.0",
   "bin": {
-    "baicode": "bin/baicode.js"
+    "baic": "bin/baic.js"
   },
   "type": "module",
   "engines": {
     "node": ">=16"
   },
   "files": [
-    "bin/baicode.js"
+    "bin/baic.js"
   ],
   "repository": {
     "type": "git",

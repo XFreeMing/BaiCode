@@ -16,7 +16,7 @@ from urllib.parse import urlsplit
 
 
 def _resolve_codex_cmd() -> List[str]:
-    """Resolve the Codex CLI to invoke `baicode sandbox windows`.
+    """Resolve the Codex CLI to invoke `baic sandbox windows`.
 
     Prefer local builds (debug first), then fall back to PATH.
     Returns the argv prefix to run Codex.
@@ -26,15 +26,15 @@ def _resolve_codex_cmd() -> List[str]:
     cargo_target = os.environ.get("CARGO_TARGET_DIR")
 
     candidates = [
-        ws_root / "target" / "debug" / "baicode.exe",
-        ws_root / "target" / "release" / "baicode.exe",
+        ws_root / "target" / "debug" / "baic.exe",
+        ws_root / "target" / "release" / "baic.exe",
     ]
     if cargo_target:
         cargo_base = Path(cargo_target)
         candidates.extend(
             [
-                cargo_base / "debug" / "baicode.exe",
-                cargo_base / "release" / "baicode.exe",
+                cargo_base / "debug" / "baic.exe",
+                cargo_base / "release" / "baic.exe",
             ]
         )
 
@@ -42,8 +42,8 @@ def _resolve_codex_cmd() -> List[str]:
         if candidate.exists():
             return [str(candidate)]
 
-    if shutil.which("baicode"):
-        return ["baicode"]
+    if shutil.which("baic"):
+        return ["baic"]
 
     raise FileNotFoundError(
         "Codex CLI not found. Build it first, e.g.\n"

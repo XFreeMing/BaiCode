@@ -214,7 +214,7 @@ pub(crate) async fn prune(daemon: &Daemon, root: &Path, settings: &DaemonSetting
             || local.is_some_and(|digest| blake3::Hash::from_hex(digest).is_ok()))
             || !matches!(
                 manifest.entrypoint.as_str(),
-                "bin/baicode" | "bin/baicode.exe"
+                "bin/baic" | "bin/baic.exe"
             )
         {
             continue;
@@ -229,8 +229,8 @@ pub(crate) async fn prune(daemon: &Daemon, root: &Path, settings: &DaemonSetting
         while let Some(child) = pending.pop() {
             // The Unix installer adds this alias; it never traverses outside the release.
             #[cfg(unix)]
-            if child == path.join("baicode")
-                && std::fs::read_link(&child).ok().as_deref() == Some(Path::new("bin/baicode"))
+            if child == path.join("baic")
+                && std::fs::read_link(&child).ok().as_deref() == Some(Path::new("bin/baic"))
             {
                 continue;
             }

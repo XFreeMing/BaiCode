@@ -189,7 +189,7 @@ async fn same_named_executor_mcps_keep_calls_and_approvals_separate() -> Result<
             .to_string(),
         )?;
         let mut executor = Command::from(codex_utils_process::background_command(
-            codex_utils_cargo_bin::cargo_bin("baicode")?,
+            codex_utils_cargo_bin::cargo_bin("baic")?,
         ))
         .args(["exec-server", "--listen", "ws://127.0.0.1:0"])
         .env("CODEX_HOME", home.path())

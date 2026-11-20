@@ -156,7 +156,7 @@ pub(crate) fn is_archived_session_error(
 fn archived_session_guidance(err: &color_eyre::Report) -> Option<String> {
     let err = err.to_string();
     let message = &err[err.find("session ")?..];
-    if !message.contains(" is archived. Run `baicode unarchive ") {
+    if !message.contains(" is archived. Run `baic unarchive ") {
         return None;
     }
     let message = message

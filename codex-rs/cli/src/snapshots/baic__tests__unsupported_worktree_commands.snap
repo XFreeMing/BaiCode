@@ -1,0 +1,13 @@
+---
+source: cli/src/main.rs
+assertion_line: 3324
+expression: "errors.join(\"\\n\")"
+---
+baic --worktree doctor: `--worktree` supports new interactive sessions, `baic fork`, `baic exec`, and `baic exec fork`
+baic fork --worktree: `baic fork --worktree` requires an explicit session ID
+baic fork --worktree --last: `baic fork --worktree` requires an explicit session ID
+baic exec resume --worktree session: `--worktree` cannot resume an existing session; use `baic exec fork --worktree`
+baic exec review --worktree: `--worktree` is not supported for code review
+baic resume --worktree session: `--worktree` supports new interactive sessions, `baic fork`, `baic exec`, and `baic exec fork`
+baic archive session --worktree: `--worktree` supports new interactive sessions, `baic fork`, `baic exec`, and `baic exec fork`
+baic queue --thread session --message hi --worktree: `--worktree` supports new interactive sessions, `baic fork`, `baic exec`, and `baic exec fork`

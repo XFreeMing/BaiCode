@@ -33,12 +33,12 @@ class AssembleTests(unittest.TestCase):
             "version": f"0.0.0+{self.commit}",
             "target": "aarch64-unknown-linux-musl",
             "variant": "codex",
-            "entrypoint": "bin/baicode",
+            "entrypoint": "bin/baic",
             "resourcesDir": "codex-resources",
             "pathDir": "codex-path",
         }
         (self.package / "codex-package.json").write_text(json.dumps(self.metadata))
-        (self.package / "bin/baicode").write_bytes(b"unchanged app")
+        (self.package / "bin/baic").write_bytes(b"unchanged app")
         self.helper = self.root / "helper.exe"
         self.helper.write_bytes(b"private helper")
         self.helper.chmod(0o755)
@@ -85,7 +85,7 @@ class AssembleTests(unittest.TestCase):
                 runtime, receipt = self.make_runtime(target, plugin)
                 (runtime / "unlisted-file").write_bytes(b"must not ship")
                 windows = target.endswith("windows-msvc")
-                entrypoint = "bin/baicode.exe" if windows else "bin/baicode"
+                entrypoint = "bin/baic.exe" if windows else "bin/baic"
                 self.metadata.update(target=target, entrypoint=entrypoint)
                 (self.package / entrypoint).write_bytes(b"unchanged app")
                 (self.package / "codex-package.json").write_text(
@@ -320,10 +320,10 @@ class AssembleTests(unittest.TestCase):
                 seal(staged, target)
                 self.metadata.update(
                     target=target,
-                    entrypoint="bin/baicode.exe",
+                    entrypoint="bin/baic.exe",
                     version="0.154.0-beta.2",
                 )
-                (self.package / "bin/baicode.exe").write_bytes(b"unchanged app")
+                (self.package / "bin/baic.exe").write_bytes(b"unchanged app")
                 (self.package / "codex-package.json").write_text(
                     json.dumps(self.metadata)
                 )
@@ -482,7 +482,7 @@ class AssembleTests(unittest.TestCase):
                 json.loads((runtime / "runtime.json").read_text()), receipt
             )
             self.assertEqual(
-                (self.package / "bin/baicode").read_bytes(), b"unchanged app"
+                (self.package / "bin/baic").read_bytes(), b"unchanged app"
             )
 
     def test_copies_app_unchanged_and_records_distinct_linux_targets(self):
@@ -495,8 +495,8 @@ class AssembleTests(unittest.TestCase):
             self.output,
             runtime=runtime,
         )
-        self.assertEqual((self.output / "bin/baicode").read_bytes(), b"unchanged app")
-        self.assertEqual((self.package / "bin/baicode").read_bytes(), b"unchanged app")
+        self.assertEqual((self.output / "bin/baic").read_bytes(), b"unchanged app")
+        self.assertEqual((self.package / "bin/baic").read_bytes(), b"unchanged app")
         self.assertFalse((self.package / "codex-resources/voice").exists())
         self.assertEqual(
             (self.output / "codex-package.json").read_bytes(),
@@ -513,7 +513,7 @@ class AssembleTests(unittest.TestCase):
                 "voiceTarget": "aarch64-unknown-linux-gnu",
                 "appVersion": self.metadata["version"],
                 "sha256": {
-                    "bin/baicode": hashlib.sha256(b"unchanged app").hexdigest(),
+                    "bin/baic": hashlib.sha256(b"unchanged app").hexdigest(),
                     "codex-resources/voice/bin/codex-voice-host": hashlib.sha256(
                         b"private helper"
                     ).hexdigest(),
@@ -580,7 +580,7 @@ class AssembleTests(unittest.TestCase):
                         "voiceTarget": target,
                         "appVersion": self.metadata["version"],
                         "sha256": {
-                            "bin/baicode": hashlib.sha256(b"unchanged app").hexdigest(),
+                            "bin/baic": hashlib.sha256(b"unchanged app").hexdigest(),
                             "codex-resources/voice/bin/codex-voice-host": hashlib.sha256(
                                 b"private helper"
                             ).hexdigest(),
@@ -594,7 +594,7 @@ class AssembleTests(unittest.TestCase):
                         },
                     },
                 )
-                self.assertEqual((output / "bin/baicode").read_bytes(), b"unchanged app")
+                self.assertEqual((output / "bin/baic").read_bytes(), b"unchanged app")
                 self.assertEqual(
                     (
                         output / "codex-resources/voice/bin/codex-voice-host"
@@ -630,7 +630,7 @@ class AssembleTests(unittest.TestCase):
                     runtime=runtime,
                 )
         self.assertFalse(self.output.exists())
-        self.assertEqual((self.package / "bin/baicode").read_bytes(), b"unchanged app")
+        self.assertEqual((self.package / "bin/baic").read_bytes(), b"unchanged app")
 
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ export type ThreadErrorEvent = {
   message: string;
 };
 
-/** Top-level JSONL events emitted by baicode exec. */
+/** Top-level JSONL events emitted by baic exec. */
 export type ThreadEvent =
   | ThreadStartedEvent
   | TurnStartedEvent

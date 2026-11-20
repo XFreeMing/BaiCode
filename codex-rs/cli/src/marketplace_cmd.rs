@@ -31,7 +31,7 @@ use crate::plugin_cmd::configured_marketplace_sources;
 use crate::plugin_cmd::load_cli_auth_manager;
 
 #[derive(Debug, Parser)]
-#[command(bin_name = "baicode plugin marketplace")]
+#[command(bin_name = "baic plugin marketplace")]
 pub struct MarketplaceCli {
     #[clap(flatten)]
     pub config_overrides: CliConfigOverrides,
@@ -59,8 +59,8 @@ enum MarketplaceSubcommand {
 
 #[derive(Debug, Parser)]
 #[command(
-    bin_name = "baicode plugin marketplace add",
-    after_help = "Examples:\n  baicode plugin marketplace add ./path/to/marketplace\n  baicode plugin marketplace add owner/repo --ref main\n  baicode plugin marketplace add https://github.com/owner/repo --sparse plugins/foo"
+    bin_name = "baic plugin marketplace add",
+    after_help = "Examples:\n  baic plugin marketplace add ./path/to/marketplace\n  baic plugin marketplace add owner/repo --ref main\n  baic plugin marketplace add https://github.com/owner/repo --sparse plugins/foo"
 )]
 struct AddMarketplaceArgs {
     /// Marketplace source: a local path, owner/repo[@ref], HTTPS Git URL, or SSH Git URL.
@@ -85,7 +85,7 @@ struct AddMarketplaceArgs {
 }
 
 #[derive(Debug, Parser)]
-#[command(bin_name = "baicode plugin marketplace list")]
+#[command(bin_name = "baic plugin marketplace list")]
 struct ListMarketplaceArgs {
     /// Output marketplace list as JSON.
     #[arg(long = "json")]
@@ -94,8 +94,8 @@ struct ListMarketplaceArgs {
 
 #[derive(Debug, Parser)]
 #[command(
-    bin_name = "baicode plugin marketplace upgrade",
-    after_help = "Examples:\n  baicode plugin marketplace upgrade\n  baicode plugin marketplace upgrade debug"
+    bin_name = "baic plugin marketplace upgrade",
+    after_help = "Examples:\n  baic plugin marketplace upgrade\n  baic plugin marketplace upgrade debug"
 )]
 struct UpgradeMarketplaceArgs {
     /// Optional configured marketplace name to upgrade. Omit to upgrade all Git marketplaces.
@@ -109,8 +109,8 @@ struct UpgradeMarketplaceArgs {
 
 #[derive(Debug, Parser)]
 #[command(
-    bin_name = "baicode plugin marketplace remove",
-    after_help = "Example:\n  baicode plugin marketplace remove debug"
+    bin_name = "baic plugin marketplace remove",
+    after_help = "Example:\n  baic plugin marketplace remove debug"
 )]
 struct RemoveMarketplaceArgs {
     /// Configured marketplace name to remove.

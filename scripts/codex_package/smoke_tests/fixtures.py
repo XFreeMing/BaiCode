@@ -209,7 +209,7 @@ def code_mode_host_debug_symbols(
 ) -> Path:
     target = pytestconfig.getoption("package_target")
     binaries = {
-        "baicode",
+        "baic",
         "codex-app-server",
         "codex-code-mode-host",
         "codex-exec-server",

@@ -65,7 +65,7 @@ fn colorize(text: &str, style: Style) -> String {
 #[allow(clippy::print_stderr)]
 fn print_websocket_startup_banner(addr: SocketAddr) {
     let title = colorize(
-        "baicode app-server (WebSockets)",
+        "baic app-server (WebSockets)",
         Style::new().bold().cyan(),
     );
     let listening_label = colorize("listening on:", Style::new().dimmed());

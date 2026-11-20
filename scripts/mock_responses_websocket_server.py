@@ -170,7 +170,7 @@ model_provider = "localapi_ws"
 model_reasoning_effort = "medium"
 
 
-start codex with `baicode --profile localapi_ws`
+start codex with `baic --profile localapi_ws`
 """)
     sys.stdout.flush()
 

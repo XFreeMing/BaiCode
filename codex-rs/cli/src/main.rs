@@ -101,11 +101,11 @@ use codex_terminal_detection::TerminalName;
     // If a sub‑command is given, ignore requirements of the default args.
     subcommand_negates_reqs = true,
     // The executable is sometimes invoked via a platform‑specific name like
-    // `baicode-x86_64-unknown-linux-musl`, but the help output should always use
-    // the generic `baicode` command name that users run.
-    name = "baicode",
-    bin_name = "baicode",
-    override_usage = "baicode [OPTIONS] [PROMPT]\n       baicode [OPTIONS] <COMMAND> [ARGS]"
+    // `baic-x86_64-unknown-linux-musl`, but the help output should always use
+    // the generic `baic` command name that users run.
+    name = "baic",
+    bin_name = "baic",
+    override_usage = "baic [OPTIONS] [PROMPT]\n       baic [OPTIONS] <COMMAND> [ARGS]"
 )]
 struct MultitoolCli {
     #[clap(flatten)]
@@ -915,7 +915,7 @@ async fn dispatch_cli(
         && let Some(command_endpoint) = &options.remote
         && root_endpoint != command_endpoint
     {
-        anyhow::bail!("`baicode {command}` received conflicting remote server endpoints");
+        anyhow::bail!("`baic {command}` received conflicting remote server endpoints");
     }
     let root_remote = agents_options
         .and_then(|options| options.remote.remote.clone())
@@ -951,7 +951,7 @@ async fn dispatch_cli(
             );
             if open_agents_overview {
                 if interactive.prompt.is_some() || !interactive.images.is_empty() {
-                    anyhow::bail!("`baicode agents` does not accept an initial prompt or images");
+                    anyhow::bail!("`baic agents` does not accept an initial prompt or images");
                 }
                 if root_remote.is_some()
                     && (interactive.oss
@@ -969,7 +969,7 @@ async fn dispatch_cli(
                             }))
                 {
                     anyhow::bail!(
-                        "`baicode agents` cannot apply local provider or additional-directory overrides to a remote server"
+                        "`baic agents` cannot apply local provider or additional-directory overrides to a remote server"
                     );
                 }
                 interactive.agents_overview = true;
@@ -986,7 +986,7 @@ async fn dispatch_cli(
                 && let Some(exec_endpoint) = &exec_cli.remote
                 && root_endpoint != exec_endpoint
             {
-                anyhow::bail!("`baicode exec` received conflicting remote server endpoints");
+                anyhow::bail!("`baic exec` received conflicting remote server endpoints");
             }
             exec_cli.remote = exec_cli.remote.or(root_remote);
             exec_cli.remote_auth_token_env = exec_cli
@@ -1013,7 +1013,7 @@ async fn dispatch_cli(
                 root_remote_auth_token_env.as_deref(),
                 "review",
             )?;
-            let mut exec_cli = ExecCli::try_parse_from(["baicode", "exec"])?;
+            let mut exec_cli = ExecCli::try_parse_from(["baic", "exec"])?;
             exec_cli
                 .shared
                 .inherit_exec_root_options(&interactive.shared);
@@ -1541,7 +1541,7 @@ async fn dispatch_cli(
             #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
             {
                 let _ = loader_overrides;
-                anyhow::bail!("`baicode sandbox` is not supported on this operating system");
+                anyhow::bail!("`baic sandbox` is not supported on this operating system");
             }
         }
         Some(Subcommand::Debug(DebugCommand { subcommand })) => match subcommand {
@@ -1692,7 +1692,7 @@ fn profile_v2_for_subcommand<'a>(
             subcommand: DebugSubcommand::PromptInput(_),
         }) => Ok(Some(profile_v2)),
         _ => anyhow::bail!(
-            "--profile only applies to runtime commands, `baicode mcp`, and `baicode migrate-nfs-db`: `baicode`, `baicode exec`, `baicode review`, `baicode resume`, `baicode queue`, `baicode archive`, `baicode delete`, `baicode unarchive`, `baicode fork`, `baicode mcp`, `baicode migrate-nfs-db`, `baicode sandbox`, and `baicode debug prompt-input`."
+            "--profile only applies to runtime commands, `baic mcp`, and `baic migrate-nfs-db`: `baic`, `baic exec`, `baic review`, `baic resume`, `baic queue`, `baic archive`, `baic delete`, `baic unarchive`, `baic fork`, `baic mcp`, `baic migrate-nfs-db`, `baic sandbox`, and `baic debug prompt-input`."
         ),
     }
 }
@@ -1979,12 +1979,12 @@ fn reject_remote_mode_for_subcommand(
 ) -> anyhow::Result<()> {
     if let Some(remote) = remote {
         anyhow::bail!(
-            "`--remote {remote}` is only supported for interactive TUI commands, not `baicode {subcommand}`"
+            "`--remote {remote}` is only supported for interactive TUI commands, not `baic {subcommand}`"
         );
     }
     if remote_auth_token_env.is_some() {
         anyhow::bail!(
-            "`--remote-auth-token-env` is only supported for interactive TUI commands, not `baicode {subcommand}`"
+            "`--remote-auth-token-env` is only supported for interactive TUI commands, not `baic {subcommand}`"
         );
     }
     Ok(())
@@ -2014,12 +2014,12 @@ fn reject_unsupported_worktree_for_subcommand(
         None => Ok(()),
         Some(Subcommand::Fork(command)) if command.session_id.is_some() && !command.last => Ok(()),
         Some(Subcommand::Fork(_)) => {
-            anyhow::bail!("`baicode fork --worktree` requires an explicit session ID")
+            anyhow::bail!("`baic fork --worktree` requires an explicit session ID")
         }
         Some(Subcommand::Exec(command)) => match &command.command {
             None | Some(ExecCommand::Fork(_)) => Ok(()),
             Some(ExecCommand::Resume(_)) => anyhow::bail!(
-                "`--worktree` cannot resume an existing session; use `baicode exec fork --worktree`"
+                "`--worktree` cannot resume an existing session; use `baic exec fork --worktree`"
             ),
             Some(ExecCommand::Review(_)) => {
                 anyhow::bail!("`--worktree` is not supported for code review")
@@ -2027,7 +2027,7 @@ fn reject_unsupported_worktree_for_subcommand(
         },
         _ => {
             anyhow::bail!(
-                "`--worktree` supports new interactive sessions, `baicode fork`, `baicode exec`, and `baicode exec fork`"
+                "`--worktree` supports new interactive sessions, `baic fork`, `baic exec`, and `baic exec fork`"
             )
         }
     }
@@ -2053,7 +2053,7 @@ fn reject_root_strict_config_for_subcommand(
 /// flag should be rejected after parsing.
 ///
 /// `--strict-config` is parsed on the root interactive CLI so commands like
-/// `baicode --strict-config` continue to work for the TUI and for wrappers that
+/// `baic --strict-config` continue to work for the TUI and for wrappers that
 /// forward root options into another command shape. Clap will still accept that
 /// root flag before the dispatcher knows which subcommand the user selected, so
 /// unsupported subcommands need an explicit post-parse reject path.
@@ -2111,7 +2111,7 @@ fn reject_strict_config_for_unsupported_subcommand(
     subcommand: &str,
 ) -> anyhow::Result<()> {
     if strict_config {
-        anyhow::bail!("`--strict-config` is not supported for `baicode {subcommand}`");
+        anyhow::bail!("`--strict-config` is not supported for `baic {subcommand}`");
     }
     Ok(())
 }
@@ -2301,7 +2301,7 @@ fn confirm(prompt: &str) -> std::io::Result<bool> {
     Ok(answer.eq_ignore_ascii_case("y") || answer.eq_ignore_ascii_case("yes"))
 }
 
-/// Build the final `TuiCli` for a `baicode resume` invocation.
+/// Build the final `TuiCli` for a `baic resume` invocation.
 fn finalize_resume_interactive(
     mut interactive: TuiCli,
     root_config_overrides: CliConfigOverrides,
@@ -2312,7 +2312,7 @@ fn finalize_resume_interactive(
     mut resume_cli: TuiCli,
 ) -> TuiCli {
     // Start with the parsed interactive CLI so resume shares the same
-    // configuration surface area as `baicode` without additional flags.
+    // configuration surface area as `baic` without additional flags.
     // Clap assigns the first positional to `session_id`. With `--last`, reinterpret it as the
     // prompt when no second positional prompt was provided.
     let resume_session_id = if last && resume_cli.prompt.is_none() {
@@ -2336,7 +2336,7 @@ fn finalize_resume_interactive(
     interactive
 }
 
-/// Build the final `TuiCli` for a `baicode fork` invocation.
+/// Build the final `TuiCli` for a `baic fork` invocation.
 fn finalize_fork_interactive(
     mut interactive: TuiCli,
     root_config_overrides: CliConfigOverrides,
@@ -2346,7 +2346,7 @@ fn finalize_fork_interactive(
     mut fork_cli: TuiCli,
 ) -> TuiCli {
     // Start with the parsed interactive CLI so fork shares the same
-    // configuration surface area as `baicode` without additional flags.
+    // configuration surface area as `baic` without additional flags.
     // Clap assigns the first positional to `session_id`. With `--last`, reinterpret it as the
     // prompt when no second positional prompt was provided.
     let fork_session_id = if last && fork_cli.prompt.is_none() {
@@ -2439,7 +2439,7 @@ fn merge_interactive_cli_flags(interactive: &mut TuiCli, subcommand_cli: TuiCli)
 
 fn print_completion(cmd: CompletionCommand) {
     let mut app = MultitoolCli::command();
-    let name = "baicode";
+    let name = "baic";
     generate(cmd.shell, &mut app, name, &mut std::io::stdout());
 }
 
@@ -2454,7 +2454,7 @@ mod tests {
     #[test]
     fn interactive_tui_future_stays_bounded() {
         let future = run_interactive_tui(
-            TuiCli::parse_from(["baicode"]),
+            TuiCli::parse_from(["baic"]),
             /*remote*/ None,
             /*remote_auth_token_env*/ None,
             Arg0DispatchPaths::default(),
@@ -2679,32 +2679,32 @@ enabled = true
     #[test]
     fn profile_v2_is_rejected_for_config_management_subcommands() {
         assert!(
-            profile_v2_for_args(&["baicode", "--profile", "work", "features", "list"]).is_err()
+            profile_v2_for_args(&["baic", "--profile", "work", "features", "list"]).is_err()
         );
     }
 
     #[test]
     fn profile_v2_is_allowed_for_runtime_subcommands() {
         assert_eq!(
-            profile_v2_for_args(&["baicode", "--profile", "work", "resume"])
+            profile_v2_for_args(&["baic", "--profile", "work", "resume"])
                 .expect("resume supports profile-v2")
                 .as_deref(),
             Some("work")
         );
         assert_eq!(
-            profile_v2_for_args(&["baicode", "--profile", "work", "debug", "prompt-input"])
+            profile_v2_for_args(&["baic", "--profile", "work", "debug", "prompt-input"])
                 .expect("debug prompt-input supports profile-v2")
                 .as_deref(),
             Some("work")
         );
         assert_eq!(
-            profile_v2_for_args(&["baicode", "--profile", "work", "mcp", "list"])
+            profile_v2_for_args(&["baic", "--profile", "work", "mcp", "list"])
                 .expect("mcp supports profile-v2")
                 .as_deref(),
             Some("work")
         );
         assert_eq!(
-            profile_v2_for_args(&["baicode", "--profile", "work", "sandbox"])
+            profile_v2_for_args(&["baic", "--profile", "work", "sandbox"])
                 .expect("sandbox supports config profile")
                 .as_deref(),
             Some("work")
@@ -2713,7 +2713,7 @@ enabled = true
 
     #[test]
     fn import_remains_an_interactive_prompt() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "import"]).expect("parse");
+        let cli = MultitoolCli::try_parse_from(["baic", "import"]).expect("parse");
 
         assert!(cli.subcommand.is_none());
         assert_eq!(cli.interactive.prompt.as_deref(), Some("import"));
@@ -2722,7 +2722,7 @@ enabled = true
     #[test]
     fn profile_v2_rejects_non_plain_names_at_parse_time() {
         assert!(
-            MultitoolCli::try_parse_from(["baicode", "--profile", "nested/work", "resume"])
+            MultitoolCli::try_parse_from(["baic", "--profile", "nested/work", "resume"])
                 .is_err()
         );
     }
@@ -2730,18 +2730,18 @@ enabled = true
     #[test]
     fn worktree_flag_supports_interactive_exec_and_explicit_fork_positions() {
         let arguments = [
-            vec!["baicode", "--worktree"],
-            vec!["baicode", "--worktree", "hello"],
-            vec!["baicode", "--worktree", "exec", "hello"],
-            vec!["baicode", "exec", "--worktree", "hello"],
+            vec!["baic", "--worktree"],
+            vec!["baic", "--worktree", "hello"],
+            vec!["baic", "--worktree", "exec", "hello"],
+            vec!["baic", "exec", "--worktree", "hello"],
             vec![
-                "baicode",
+                "baic",
                 "fork",
                 "--worktree",
                 "019f1234-5678-7000-8000-000000000001",
             ],
             vec![
-                "baicode",
+                "baic",
                 "exec",
                 "fork",
                 "--worktree",
@@ -2765,15 +2765,15 @@ enabled = true
     #[test]
     fn worktree_flag_rejects_unsupported_session_and_management_commands() {
         let arguments = [
-            vec!["baicode", "--worktree", "doctor"],
-            vec!["baicode", "fork", "--worktree"],
-            vec!["baicode", "fork", "--worktree", "--last"],
-            vec!["baicode", "exec", "resume", "--worktree", "session"],
-            vec!["baicode", "exec", "review", "--worktree"],
-            vec!["baicode", "resume", "--worktree", "session"],
-            vec!["baicode", "archive", "session", "--worktree"],
+            vec!["baic", "--worktree", "doctor"],
+            vec!["baic", "fork", "--worktree"],
+            vec!["baic", "fork", "--worktree", "--last"],
+            vec!["baic", "exec", "resume", "--worktree", "session"],
+            vec!["baic", "exec", "review", "--worktree"],
+            vec!["baic", "resume", "--worktree", "session"],
+            vec!["baic", "archive", "session", "--worktree"],
             vec![
-                "baicode",
+                "baic",
                 "queue",
                 "--thread",
                 "session",
@@ -2799,7 +2799,7 @@ enabled = true
     #[test]
     fn exec_resume_last_accepts_prompt_positional() {
         let cli =
-            MultitoolCli::try_parse_from(["baicode", "exec", "--json", "resume", "--last", "2+2"])
+            MultitoolCli::try_parse_from(["baic", "exec", "--json", "resume", "--last", "2+2"])
                 .expect("parse should succeed");
 
         let Some(Subcommand::Exec(exec)) = cli.subcommand else {
@@ -2817,7 +2817,7 @@ enabled = true
     #[test]
     fn exec_resume_accepts_output_flags_after_subcommand() {
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "exec",
             "resume",
             "session-123",
@@ -2851,7 +2851,7 @@ enabled = true
     #[test]
     fn dangerous_bypass_conflicts_with_approval_policy() {
         let err = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "--dangerously-bypass-approvals-and-sandbox",
             "--ask-for-approval",
             "on-request",
@@ -2864,7 +2864,7 @@ enabled = true
     #[test]
     fn approve_for_me_configures_interactive_mode() {
         for flag in ["--approve-for-me", "--not-so-yolo"] {
-            let mut cli = MultitoolCli::try_parse_from(["baicode", flag]).expect("parse flag");
+            let mut cli = MultitoolCli::try_parse_from(["baic", flag]).expect("parse flag");
 
             assert!(cli.interactive.auto_review);
             cli.interactive
@@ -2885,8 +2885,8 @@ enabled = true
     #[test]
     fn not_so_yolo_alias_is_hidden_from_help() {
         for args in [
-            &["baicode", "--help"][..],
-            &["baicode", "exec", "--help"][..],
+            &["baic", "--help"][..],
+            &["baic", "exec", "--help"][..],
         ] {
             let help = help_from_args(args);
 
@@ -2896,7 +2896,7 @@ enabled = true
 
     #[test]
     fn approve_for_me_defaults_propagate_from_root_to_exec() {
-        let exec = finalize_exec_from_args(&["baicode", "--approve-for-me", "exec", "summarize"]);
+        let exec = finalize_exec_from_args(&["baic", "--approve-for-me", "exec", "summarize"]);
 
         assert_eq!(
             exec.config_overrides.raw_overrides,
@@ -2912,7 +2912,7 @@ enabled = true
     #[test]
     fn later_exec_sandbox_partially_overrides_approve_for_me() {
         let exec = finalize_exec_from_args(&[
-            "baicode",
+            "baic",
             "--approve-for-me",
             "exec",
             "--sandbox",
@@ -2936,7 +2936,7 @@ enabled = true
     #[test]
     fn later_approve_for_me_overrides_root_exec_sandbox() {
         let exec = finalize_exec_from_args(&[
-            "baicode",
+            "baic",
             "--sandbox",
             "read-only",
             "exec",
@@ -2957,7 +2957,7 @@ enabled = true
     #[test]
     fn later_resume_approval_policy_partially_overrides_approve_for_me() {
         let interactive = finalize_resume_from_args(&[
-            "baicode",
+            "baic",
             "--approve-for-me",
             "resume",
             "--ask-for-approval",
@@ -2981,7 +2981,7 @@ enabled = true
     #[test]
     fn later_approve_for_me_overrides_root_tui_approval_policy() {
         let interactive = finalize_resume_from_args(&[
-            "baicode",
+            "baic",
             "--ask-for-approval",
             "never",
             "resume",
@@ -3006,7 +3006,7 @@ enabled = true
             vec!["--ask-for-approval", "on-request"],
             vec!["--dangerously-bypass-approvals-and-sandbox"],
         ] {
-            let mut args = vec!["baicode", "--approve-for-me"];
+            let mut args = vec!["baic", "--approve-for-me"];
             args.extend(conflicting_args);
 
             let error =
@@ -3032,7 +3032,7 @@ enabled = true
     #[test]
     fn debug_prompt_input_parses_prompt_and_images() {
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "debug",
             "prompt-input",
             "hello",
@@ -3057,7 +3057,7 @@ enabled = true
 
     #[test]
     fn debug_models_parses_bundled_flag() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "debug", "models", "--bundled"])
+        let cli = MultitoolCli::try_parse_from(["baic", "debug", "models", "--bundled"])
             .expect("parse");
 
         let Some(Subcommand::Debug(DebugCommand {
@@ -3088,7 +3088,7 @@ enabled = true
 
     #[test]
     fn queue_help_lists_supported_options() {
-        let help = help_from_args(&["baicode", "queue", "--help"]);
+        let help = help_from_args(&["baic", "queue", "--help"]);
         let (general, local) = help
             .split_once("Local server options (without --remote):")
             .unwrap();
@@ -3105,19 +3105,19 @@ enabled = true
 
     #[test]
     fn plugin_marketplace_help_uses_plugin_namespace() {
-        let help = help_from_args(&["baicode", "plugin", "marketplace", "--help"]);
+        let help = help_from_args(&["baic", "plugin", "marketplace", "--help"]);
         assert!(
-            help.contains("Usage: baicode plugin marketplace [OPTIONS] <COMMAND>"),
+            help.contains("Usage: baic plugin marketplace [OPTIONS] <COMMAND>"),
             "{help}"
         );
 
         for (subcommand, usage) in [
-            ("add", "Usage: baicode plugin marketplace add"),
-            ("list", "Usage: baicode plugin marketplace list"),
-            ("upgrade", "Usage: baicode plugin marketplace upgrade"),
-            ("remove", "Usage: baicode plugin marketplace remove"),
+            ("add", "Usage: baic plugin marketplace add"),
+            ("list", "Usage: baic plugin marketplace list"),
+            ("upgrade", "Usage: baic plugin marketplace upgrade"),
+            ("remove", "Usage: baic plugin marketplace remove"),
         ] {
-            let help = help_from_args(&["baicode", "plugin", "marketplace", subcommand, "--help"]);
+            let help = help_from_args(&["baic", "plugin", "marketplace", subcommand, "--help"]);
             assert!(help.contains(usage), "{help}");
         }
     }
@@ -3125,7 +3125,7 @@ enabled = true
     #[test]
     fn plugin_marketplace_add_parses_under_plugin() {
         let cli =
-            MultitoolCli::try_parse_from(["baicode", "plugin", "marketplace", "add", "owner/repo"])
+            MultitoolCli::try_parse_from(["baic", "plugin", "marketplace", "add", "owner/repo"])
                 .expect("parse");
 
         assert!(matches!(cli.subcommand, Some(Subcommand::Plugin(_))));
@@ -3134,7 +3134,7 @@ enabled = true
     #[test]
     fn plugin_marketplace_upgrade_parses_under_plugin() {
         let cli =
-            MultitoolCli::try_parse_from(["baicode", "plugin", "marketplace", "upgrade", "debug"])
+            MultitoolCli::try_parse_from(["baic", "plugin", "marketplace", "upgrade", "debug"])
                 .expect("parse");
 
         assert!(matches!(cli.subcommand, Some(Subcommand::Plugin(_))));
@@ -3143,7 +3143,7 @@ enabled = true
     #[test]
     fn plugin_add_parses_under_plugin() {
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "plugin",
             "add",
             "sample",
@@ -3158,7 +3158,7 @@ enabled = true
     #[test]
     fn plugin_list_parses_under_plugin() {
         let cli =
-            MultitoolCli::try_parse_from(["baicode", "plugin", "list", "--marketplace", "debug"])
+            MultitoolCli::try_parse_from(["baic", "plugin", "list", "--marketplace", "debug"])
                 .expect("parse");
 
         assert!(matches!(cli.subcommand, Some(Subcommand::Plugin(_))));
@@ -3167,7 +3167,7 @@ enabled = true
     #[test]
     fn plugin_remove_parses_under_plugin() {
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "plugin",
             "remove",
             "sample",
@@ -3183,7 +3183,7 @@ enabled = true
     fn archive_merges_scoped_tui_flags() {
         let (target, interactive, remote) = finalize_archive_from_args(
             [
-                "baicode",
+                "baic",
                 "-C",
                 "/root",
                 "archive",
@@ -3228,7 +3228,7 @@ enabled = true
 
     #[test]
     fn sandbox_runs_launcher_executable() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "sandbox", "launcher", "--help"])
+        let cli = MultitoolCli::try_parse_from(["baic", "sandbox", "launcher", "--help"])
             .expect("parse sandbox executable");
         let Some(Subcommand::Sandbox(command)) = cli.subcommand else {
             panic!("expected sandbox command");
@@ -3239,7 +3239,7 @@ enabled = true
 
     #[test]
     fn sandbox_uninstall_respects_command_separator() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "sandbox", "uninstall"]).expect("parse");
+        let cli = MultitoolCli::try_parse_from(["baic", "sandbox", "uninstall"]).expect("parse");
         assert!(matches!(
             cli.subcommand,
             Some(Subcommand::Sandbox(SandboxCommand {
@@ -3249,9 +3249,9 @@ enabled = true
         ));
 
         for args in [
-            vec!["baicode", "sandbox", "--", "uninstall", "--help"],
+            vec!["baic", "sandbox", "--", "uninstall", "--help"],
             vec![
-                "baicode",
+                "baic",
                 "sandbox",
                 "--profile",
                 "uninstall",
@@ -3273,7 +3273,7 @@ enabled = true
     #[test]
     fn sandbox_parses_permission_profile() {
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "sandbox",
             "--permission-profile",
             ":workspace",
@@ -3294,7 +3294,7 @@ enabled = true
     #[test]
     fn sandbox_parses_legacy_permissions_profile_alias() {
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "sandbox",
             "--permissions-profile",
             ":workspace",
@@ -3314,7 +3314,7 @@ enabled = true
     #[cfg(any(target_os = "macos", target_os = "linux", target_os = "windows"))]
     #[test]
     fn sandbox_help_only_shows_singular_permission_profile() {
-        let help = help_from_args(&["baicode", "sandbox", "--help"]);
+        let help = help_from_args(&["baic", "sandbox", "--help"]);
         assert!(help.contains("--permission-profile"), "{help}");
         assert!(!help.contains("--permissions-profile"), "{help}");
     }
@@ -3323,7 +3323,7 @@ enabled = true
     #[test]
     fn sandbox_parses_permissions_profile_short_alias() {
         let cli =
-            MultitoolCli::try_parse_from(["baicode", "sandbox", "-P", ":workspace", "--", "echo"])
+            MultitoolCli::try_parse_from(["baic", "sandbox", "-P", ":workspace", "--", "echo"])
                 .expect("parse");
 
         let Some(Subcommand::Sandbox(SandboxCommand { host: command, .. })) = cli.subcommand else {
@@ -3338,7 +3338,7 @@ enabled = true
     #[test]
     fn sandbox_parses_config_profile() {
         let cli =
-            MultitoolCli::try_parse_from(["baicode", "sandbox", "--profile", "work", "--", "echo"])
+            MultitoolCli::try_parse_from(["baic", "sandbox", "--profile", "work", "--", "echo"])
                 .expect("parse");
 
         let Some(Subcommand::Sandbox(SandboxCommand { host: command, .. })) = cli.subcommand else {
@@ -3352,7 +3352,7 @@ enabled = true
     #[cfg(any(target_os = "macos", target_os = "linux", target_os = "windows"))]
     #[test]
     fn sandbox_rejects_explicit_profile_controls_without_profile() {
-        let err = MultitoolCli::try_parse_from(["baicode", "sandbox", "-C", "/tmp"])
+        let err = MultitoolCli::try_parse_from(["baic", "sandbox", "-C", "/tmp"])
             .expect_err("parse should fail");
 
         assert_eq!(err.kind(), clap::error::ErrorKind::MissingRequiredArgument);
@@ -3361,7 +3361,7 @@ enabled = true
     #[test]
     fn plugin_marketplace_remove_parses_under_plugin() {
         let cli =
-            MultitoolCli::try_parse_from(["baicode", "plugin", "marketplace", "remove", "debug"])
+            MultitoolCli::try_parse_from(["baic", "plugin", "marketplace", "remove", "debug"])
                 .expect("parse");
 
         assert!(matches!(cli.subcommand, Some(Subcommand::Plugin(_))));
@@ -3370,15 +3370,15 @@ enabled = true
     #[test]
     fn marketplace_no_longer_parses_at_top_level() {
         let add_result =
-            MultitoolCli::try_parse_from(["baicode", "marketplace", "add", "owner/repo"]);
+            MultitoolCli::try_parse_from(["baic", "marketplace", "add", "owner/repo"]);
         assert!(add_result.is_err());
 
         let upgrade_result =
-            MultitoolCli::try_parse_from(["baicode", "marketplace", "upgrade", "debug"]);
+            MultitoolCli::try_parse_from(["baic", "marketplace", "upgrade", "debug"]);
         assert!(upgrade_result.is_err());
 
         let remove_result =
-            MultitoolCli::try_parse_from(["baicode", "marketplace", "remove", "debug"]);
+            MultitoolCli::try_parse_from(["baic", "marketplace", "remove", "debug"]);
         assert!(remove_result.is_err());
     }
 
@@ -3430,7 +3430,7 @@ enabled = true
                 );
                 exit_info.disconnect_info = Some(codex_tui::DisconnectInfo {
                     command: vec![
-                        "baicode".to_string(),
+                        "baic".to_string(),
                         "--remote".to_string(),
                         "wss://example.com:443/".to_string(),
                     ],
@@ -3447,8 +3447,8 @@ enabled = true
             vec![
                 "Disconnected from this task. Any running work continues.",
                 "To reconnect, run:",
-                "  baicode --remote wss://example.com:443/ --remote-auth-token-env CODEX_REMOTE_TOKEN resume 123e4567-e89b-12d3-a456-426614174000",
-                "Stop the current turn: run baicode --remote wss://example.com:443/ --remote-auth-token-env CODEX_REMOTE_TOKEN agents, select this task, and press ctrl + x.",
+                "  baic --remote wss://example.com:443/ --remote-auth-token-env CODEX_REMOTE_TOKEN resume 123e4567-e89b-12d3-a456-426614174000",
+                "Stop the current turn: run baic --remote wss://example.com:443/ --remote-auth-token-env CODEX_REMOTE_TOKEN agents, select this task, and press ctrl + x.",
                 "Token usage so far: total=2 input=0 output=2",
             ]
         );
@@ -3497,7 +3497,7 @@ enabled = true
             vec![
                 "Token usage: total=2 input=0 output=2".to_string(),
                 "To continue this session, run:".to_string(),
-                "  baicode resume 123e4567-e89b-12d3-a456-426614174000".to_string(),
+                "  baic resume 123e4567-e89b-12d3-a456-426614174000".to_string(),
             ]
         );
     }
@@ -3512,7 +3512,7 @@ enabled = true
                 insta::assert_snapshot!(lines.join("\n"), @"
                 Token usage: total=2 input=0 output=2
                 To continue this session, run:
-                  baicode resume 123e4567-e89b-12d3-a456-426614174000
+                  baic resume 123e4567-e89b-12d3-a456-426614174000
                 ");
             }
         }
@@ -3530,7 +3530,7 @@ enabled = true
             vec![
                 "Token usage: total=2 input=0 output=2",
                 "To continue this session, run:",
-                "  \u{1b}[36mbaicode resume 123e4567-e89b-12d3-a456-426614174000\u{1b}[39m",
+                "  \u{1b}[36mbaic resume 123e4567-e89b-12d3-a456-426614174000\u{1b}[39m",
             ]
         );
     }
@@ -3545,8 +3545,8 @@ enabled = true
         insta::assert_snapshot!(lines.join("\n"), @"
         Token usage: total=2 input=0 output=2
         To continue this session, run:
-          baicode resume 123e4567-e89b-12d3-a456-426614174000
-        Or run baicode resume and select my-thread.
+          baic resume 123e4567-e89b-12d3-a456-426614174000
+        Or run baic resume and select my-thread.
         ");
     }
 
@@ -3562,8 +3562,8 @@ enabled = true
             vec![
                 "Token usage: total=2 input=0 output=2",
                 "To continue this session, run:",
-                "  \u{1b}[36mbaicode resume 123e4567-e89b-12d3-a456-426614174000\u{1b}[39m",
-                "Or run \u{1b}[36mbaicode resume\u{1b}[39m and select \u{1b}[36mmy-thread\u{1b}[39m.",
+                "  \u{1b}[36mbaic resume 123e4567-e89b-12d3-a456-426614174000\u{1b}[39m",
+                "Or run \u{1b}[36mbaic resume\u{1b}[39m and select \u{1b}[36mmy-thread\u{1b}[39m.",
             ]
         );
     }
@@ -3571,7 +3571,7 @@ enabled = true
     #[test]
     fn resume_model_flag_applies_when_no_root_flags() {
         let interactive =
-            finalize_resume_from_args(["baicode", "resume", "-m", "gpt-5.1-test"].as_ref());
+            finalize_resume_from_args(["baic", "resume", "-m", "gpt-5.1-test"].as_ref());
 
         assert_eq!(interactive.model.as_deref(), Some("gpt-5.1-test"));
         assert!(interactive.resume_picker);
@@ -3586,8 +3586,8 @@ enabled = true
             ("fork", finalize_fork_from_args as fn(&[&str]) -> TuiCli),
         ] {
             for args in [
-                ["baicode", "--no-daemon", command, "--last"],
-                ["baicode", command, "--last", "--no-daemon"],
+                ["baic", "--no-daemon", command, "--last"],
+                ["baic", command, "--last", "--no-daemon"],
             ] {
                 assert!(finalize(&args).no_daemon);
             }
@@ -3600,15 +3600,15 @@ enabled = true
             ("resume", finalize_resume_from_args as fn(&[&str]) -> TuiCli),
             ("fork", finalize_fork_from_args as fn(&[&str]) -> TuiCli),
         ] {
-            assert!(finalize(&["baicode", command, "--no-alt-screen"]).no_alt_screen);
-            assert!(finalize(&["baicode", "--no-alt-screen", command]).no_alt_screen);
-            assert!(!finalize(&["baicode", command]).no_alt_screen);
+            assert!(finalize(&["baic", command, "--no-alt-screen"]).no_alt_screen);
+            assert!(finalize(&["baic", "--no-alt-screen", command]).no_alt_screen);
+            assert!(!finalize(&["baic", command]).no_alt_screen);
         }
     }
 
     #[test]
     fn resume_picker_logic_none_and_not_last() {
-        let interactive = finalize_resume_from_args(["baicode", "resume"].as_ref());
+        let interactive = finalize_resume_from_args(["baic", "resume"].as_ref());
         assert!(interactive.resume_picker);
         assert!(!interactive.resume_last);
         assert_eq!(interactive.resume_session_id, None);
@@ -3617,7 +3617,7 @@ enabled = true
 
     #[test]
     fn resume_picker_logic_last() {
-        let interactive = finalize_resume_from_args(["baicode", "resume", "--last"].as_ref());
+        let interactive = finalize_resume_from_args(["baic", "resume", "--last"].as_ref());
         assert!(!interactive.resume_picker);
         assert!(interactive.resume_last);
         assert_eq!(interactive.resume_session_id, None);
@@ -3627,7 +3627,7 @@ enabled = true
     #[test]
     fn resume_last_accepts_prompt_positional() {
         let interactive = finalize_resume_from_args(
-            ["baicode", "resume", "--last", "/compact focus on auth"].as_ref(),
+            ["baic", "resume", "--last", "/compact focus on auth"].as_ref(),
         );
 
         assert!(!interactive.resume_picker);
@@ -3642,7 +3642,7 @@ enabled = true
     #[test]
     fn resume_last_rejects_explicit_session_and_prompt() {
         let err =
-            MultitoolCli::try_parse_from(["baicode", "resume", "--last", "1234", "continue here"])
+            MultitoolCli::try_parse_from(["baic", "resume", "--last", "1234", "continue here"])
                 .expect_err("--last with an explicit session and prompt should be rejected");
 
         assert_eq!(err.kind(), clap::error::ErrorKind::ArgumentConflict);
@@ -3650,7 +3650,7 @@ enabled = true
 
     #[test]
     fn resume_picker_logic_with_session_id() {
-        let interactive = finalize_resume_from_args(["baicode", "resume", "1234"].as_ref());
+        let interactive = finalize_resume_from_args(["baic", "resume", "1234"].as_ref());
         assert!(!interactive.resume_picker);
         assert!(!interactive.resume_last);
         assert_eq!(interactive.resume_session_id.as_deref(), Some("1234"));
@@ -3660,7 +3660,7 @@ enabled = true
     #[test]
     fn resume_with_session_id_accepts_prompt_positional() {
         let interactive =
-            finalize_resume_from_args(["baicode", "resume", "1234", "continue here"].as_ref());
+            finalize_resume_from_args(["baic", "resume", "1234", "continue here"].as_ref());
 
         assert!(!interactive.resume_picker);
         assert!(!interactive.resume_last);
@@ -3670,7 +3670,7 @@ enabled = true
 
     #[test]
     fn resume_all_flag_sets_show_all() {
-        let interactive = finalize_resume_from_args(["baicode", "resume", "--all"].as_ref());
+        let interactive = finalize_resume_from_args(["baic", "resume", "--all"].as_ref());
         assert!(interactive.resume_picker);
         assert!(interactive.resume_show_all);
     }
@@ -3678,7 +3678,7 @@ enabled = true
     #[test]
     fn resume_include_non_interactive_flag_sets_source_filter_override() {
         let interactive =
-            finalize_resume_from_args(["baicode", "resume", "--include-non-interactive"].as_ref());
+            finalize_resume_from_args(["baic", "resume", "--include-non-interactive"].as_ref());
 
         assert!(interactive.resume_picker);
         assert!(interactive.resume_include_non_interactive);
@@ -3688,7 +3688,7 @@ enabled = true
     fn resume_merges_option_flags() {
         let interactive = finalize_resume_from_args(
             [
-                "baicode",
+                "baic",
                 "resume",
                 "sid",
                 "--oss",
@@ -3745,7 +3745,7 @@ enabled = true
     fn resume_merges_dangerously_bypass_flag() {
         let interactive = finalize_resume_from_args(
             [
-                "baicode",
+                "baic",
                 "resume",
                 "--dangerously-bypass-approvals-and-sandbox",
             ]
@@ -3760,7 +3760,7 @@ enabled = true
     #[test]
     fn resume_merges_bypass_hook_trust_flag() {
         let interactive = finalize_resume_from_args(
-            ["baicode", "resume", "--dangerously-bypass-hook-trust"].as_ref(),
+            ["baic", "resume", "--dangerously-bypass-hook-trust"].as_ref(),
         );
 
         assert!(interactive.bypass_hook_trust);
@@ -3771,7 +3771,7 @@ enabled = true
 
     #[test]
     fn fork_picker_logic_none_and_not_last() {
-        let interactive = finalize_fork_from_args(["baicode", "fork"].as_ref());
+        let interactive = finalize_fork_from_args(["baic", "fork"].as_ref());
         assert!(interactive.fork_picker);
         assert!(!interactive.fork_last);
         assert_eq!(interactive.fork_session_id, None);
@@ -3780,7 +3780,7 @@ enabled = true
 
     #[test]
     fn fork_picker_logic_last() {
-        let interactive = finalize_fork_from_args(["baicode", "fork", "--last"].as_ref());
+        let interactive = finalize_fork_from_args(["baic", "fork", "--last"].as_ref());
         assert!(!interactive.fork_picker);
         assert!(interactive.fork_last);
         assert_eq!(interactive.fork_session_id, None);
@@ -3790,7 +3790,7 @@ enabled = true
     #[test]
     fn fork_last_accepts_prompt_positional() {
         let interactive = finalize_fork_from_args(
-            ["baicode", "fork", "--last", "/compact focus on auth"].as_ref(),
+            ["baic", "fork", "--last", "/compact focus on auth"].as_ref(),
         );
 
         assert!(!interactive.fork_picker);
@@ -3805,7 +3805,7 @@ enabled = true
     #[test]
     fn fork_last_rejects_explicit_session_and_prompt() {
         let err =
-            MultitoolCli::try_parse_from(["baicode", "fork", "--last", "1234", "continue here"])
+            MultitoolCli::try_parse_from(["baic", "fork", "--last", "1234", "continue here"])
                 .expect_err("--last with an explicit session and prompt should be rejected");
 
         assert_eq!(err.kind(), clap::error::ErrorKind::ArgumentConflict);
@@ -3813,7 +3813,7 @@ enabled = true
 
     #[test]
     fn fork_picker_logic_with_session_id() {
-        let interactive = finalize_fork_from_args(["baicode", "fork", "1234"].as_ref());
+        let interactive = finalize_fork_from_args(["baic", "fork", "1234"].as_ref());
         assert!(!interactive.fork_picker);
         assert!(!interactive.fork_last);
         assert_eq!(interactive.fork_session_id.as_deref(), Some("1234"));
@@ -3823,7 +3823,7 @@ enabled = true
     #[test]
     fn fork_with_session_id_accepts_prompt_positional() {
         let interactive =
-            finalize_fork_from_args(["baicode", "fork", "1234", "continue here"].as_ref());
+            finalize_fork_from_args(["baic", "fork", "1234", "continue here"].as_ref());
 
         assert!(!interactive.fork_picker);
         assert!(!interactive.fork_last);
@@ -3833,14 +3833,14 @@ enabled = true
 
     #[test]
     fn fork_all_flag_sets_show_all() {
-        let interactive = finalize_fork_from_args(["baicode", "fork", "--all"].as_ref());
+        let interactive = finalize_fork_from_args(["baic", "fork", "--all"].as_ref());
         assert!(interactive.fork_picker);
         assert!(interactive.fork_show_all);
     }
 
     #[test]
     fn app_server_analytics_default_disabled_without_flag() {
-        let app_server = app_server_from_args(["baicode", "app-server"].as_ref());
+        let app_server = app_server_from_args(["baic", "app-server"].as_ref());
         assert!(!app_server.analytics_default_enabled);
         assert!(!app_server.remote_control);
         assert_eq!(
@@ -3851,24 +3851,24 @@ enabled = true
 
     #[test]
     fn app_server_remote_control_startup_flag_enables_remote_control() {
-        let enabled = app_server_from_args(["baicode", "app-server", "--remote-control"].as_ref());
+        let enabled = app_server_from_args(["baic", "app-server", "--remote-control"].as_ref());
         assert!(enabled.remote_control);
     }
 
     #[test]
     fn app_server_analytics_default_enabled_with_flag() {
         let app_server =
-            app_server_from_args(["baicode", "app-server", "--analytics-default-enabled"].as_ref());
+            app_server_from_args(["baic", "app-server", "--analytics-default-enabled"].as_ref());
         assert!(app_server.analytics_default_enabled);
     }
 
     #[test]
     fn strict_config_parses_for_supported_commands() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "--strict-config"]).expect("parse");
+        let cli = MultitoolCli::try_parse_from(["baic", "--strict-config"]).expect("parse");
         assert!(cli.interactive.strict_config);
 
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "review",
             "--strict-config",
             "--trust",
@@ -3884,7 +3884,7 @@ enabled = true
             }))
         );
 
-        let cli = MultitoolCli::try_parse_from(["baicode", "exec-server", "--strict-config"])
+        let cli = MultitoolCli::try_parse_from(["baic", "exec-server", "--strict-config"])
             .expect("parse");
         assert_matches!(
             cli.subcommand,
@@ -3898,7 +3898,7 @@ enabled = true
     #[test]
     fn exec_server_forward_parses_shared_remote_options() {
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "exec-server",
             "forward",
             "--connect",
@@ -3944,7 +3944,7 @@ enabled = true
             ],
         ] {
             assert!(
-                MultitoolCli::try_parse_from(["baicode", "exec-server"].into_iter().chain(args))
+                MultitoolCli::try_parse_from(["baic", "exec-server"].into_iter().chain(args))
                     .is_err()
             );
         }
@@ -3952,7 +3952,7 @@ enabled = true
 
     #[test]
     fn root_strict_config_is_supported_for_exec_server() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "--strict-config", "exec-server"])
+        let cli = MultitoolCli::try_parse_from(["baic", "--strict-config", "exec-server"])
             .expect("parse");
 
         reject_root_strict_config_for_subcommand(cli.interactive.strict_config, &cli.subcommand)
@@ -3961,7 +3961,7 @@ enabled = true
 
     #[test]
     fn root_strict_config_is_rejected_for_unsupported_subcommands() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "--strict-config", "mcp", "list"])
+        let cli = MultitoolCli::try_parse_from(["baic", "--strict-config", "mcp", "list"])
             .expect("parse");
         let err = reject_root_strict_config_for_subcommand(
             cli.interactive.strict_config,
@@ -3971,10 +3971,10 @@ enabled = true
 
         assert_eq!(
             err.to_string(),
-            "`--strict-config` is not supported for `baicode mcp`"
+            "`--strict-config` is not supported for `baic mcp`"
         );
 
-        let cli = MultitoolCli::try_parse_from(["baicode", "--strict-config", "remote-control"])
+        let cli = MultitoolCli::try_parse_from(["baic", "--strict-config", "remote-control"])
             .expect("parse");
         let err = reject_root_strict_config_for_subcommand(
             cli.interactive.strict_config,
@@ -3984,14 +3984,14 @@ enabled = true
 
         assert_eq!(
             err.to_string(),
-            "`--strict-config` is not supported for `baicode remote-control`"
+            "`--strict-config` is not supported for `baic remote-control`"
         );
     }
 
     #[test]
     fn app_server_subcommands_reject_strict_config() {
         let app_server =
-            app_server_from_args(["baicode", "app-server", "--strict-config", "proxy"].as_ref());
+            app_server_from_args(["baic", "app-server", "--strict-config", "proxy"].as_ref());
         let err = reject_strict_config_for_app_server_subcommand(
             app_server.strict_config,
             app_server.subcommand.as_ref(),
@@ -4000,13 +4000,13 @@ enabled = true
 
         assert_eq!(
             err.to_string(),
-            "`--strict-config` is not supported for `baicode app-server proxy`"
+            "`--strict-config` is not supported for `baic app-server proxy`"
         );
     }
 
     #[test]
     fn remote_flag_parses_for_interactive_root() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "--remote", "unix://codex.sock"])
+        let cli = MultitoolCli::try_parse_from(["baic", "--remote", "unix://codex.sock"])
             .expect("parse");
         assert_eq!(cli.remote.remote.as_deref(), Some("unix://codex.sock"));
     }
@@ -4014,7 +4014,7 @@ enabled = true
     #[test]
     fn remote_auth_token_env_flag_parses_for_interactive_root() {
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "--remote-auth-token-env",
             "CODEX_REMOTE_AUTH_TOKEN",
             "--remote",
@@ -4030,7 +4030,7 @@ enabled = true
     #[test]
     fn remote_flag_parses_for_resume_subcommand() {
         let cli =
-            MultitoolCli::try_parse_from(["baicode", "resume", "--remote", "unix://codex.sock"])
+            MultitoolCli::try_parse_from(["baic", "resume", "--remote", "unix://codex.sock"])
                 .expect("parse");
         let Subcommand::Resume(ResumeCommand { remote, .. }) =
             cli.subcommand.expect("resume present")
@@ -4043,7 +4043,7 @@ enabled = true
     #[test]
     fn agents_subcommand_accepts_remote_session_options() {
         let cli = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "agents",
             "--remote",
             "ws://127.0.0.1:4500",
@@ -4120,7 +4120,7 @@ enabled = true
     fn app_server_grpc_code_mode_host_url_parses_independently_of_listen_transport() {
         let app_server = app_server_from_args(
             [
-                "baicode",
+                "baic",
                 "app-server",
                 "--code-mode-host",
                 "https://example.test",
@@ -4154,7 +4154,7 @@ enabled = true
             "http://example.test/?token=secret",
         ] {
             let error = MultitoolCli::try_parse_from([
-                "baicode",
+                "baic",
                 "app-server",
                 "--code-mode-host",
                 endpoint,
@@ -4171,7 +4171,7 @@ enabled = true
     #[test]
     fn app_server_listen_websocket_url_parses() {
         let app_server = app_server_from_args(
-            ["baicode", "app-server", "--listen", "ws://127.0.0.1:4500"].as_ref(),
+            ["baic", "app-server", "--listen", "ws://127.0.0.1:4500"].as_ref(),
         );
         assert_eq!(
             app_server.listen,
@@ -4184,7 +4184,7 @@ enabled = true
     #[test]
     fn app_server_listen_stdio_url_parses() {
         let app_server =
-            app_server_from_args(["baicode", "app-server", "--listen", "stdio://"].as_ref());
+            app_server_from_args(["baic", "app-server", "--listen", "stdio://"].as_ref());
         assert_eq!(
             app_server.listen,
             codex_app_server::AppServerTransport::Stdio
@@ -4193,14 +4193,14 @@ enabled = true
 
     #[test]
     fn app_server_stdio_flag_parses() {
-        let app_server = app_server_from_args(["baicode", "app-server", "--stdio"].as_ref());
+        let app_server = app_server_from_args(["baic", "app-server", "--stdio"].as_ref());
         assert!(app_server.stdio);
     }
 
     #[test]
     fn app_server_stdio_flag_conflicts_with_listen() {
         let err = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "app-server",
             "--stdio",
             "--listen",
@@ -4213,7 +4213,7 @@ enabled = true
     #[test]
     fn app_server_listen_unix_socket_url_parses() {
         let app_server =
-            app_server_from_args(["baicode", "app-server", "--listen", "unix://"].as_ref());
+            app_server_from_args(["baic", "app-server", "--listen", "unix://"].as_ref());
         assert_eq!(
             app_server.listen,
             codex_app_server::AppServerTransport::UnixSocket {
@@ -4226,7 +4226,7 @@ enabled = true
     fn app_server_listen_unix_socket_path_parses() {
         let app_server = app_server_from_args(
             [
-                "baicode",
+                "baic",
                 "app-server",
                 "--listen",
                 "unix:///tmp/codex.sock",
@@ -4245,20 +4245,20 @@ enabled = true
     #[test]
     fn app_server_listen_off_parses() {
         let app_server =
-            app_server_from_args(["baicode", "app-server", "--listen", "off"].as_ref());
+            app_server_from_args(["baic", "app-server", "--listen", "off"].as_ref());
         assert_eq!(app_server.listen, codex_app_server::AppServerTransport::Off);
     }
 
     #[test]
     fn app_server_listen_invalid_url_fails_to_parse() {
         let parse_result =
-            MultitoolCli::try_parse_from(["baicode", "app-server", "--listen", "http://foo"]);
+            MultitoolCli::try_parse_from(["baic", "app-server", "--listen", "http://foo"]);
         assert!(parse_result.is_err());
     }
 
     #[test]
     fn app_server_proxy_subcommand_parses() {
-        let app_server = app_server_from_args(["baicode", "app-server", "proxy"].as_ref());
+        let app_server = app_server_from_args(["baic", "app-server", "proxy"].as_ref());
         assert!(matches!(
             app_server.subcommand,
             Some(AppServerSubcommand::Proxy(AppServerProxyCommand {
@@ -4272,7 +4272,7 @@ enabled = true
         assert!(matches!(
             app_server_from_args(
                 [
-                    "baicode",
+                    "baic",
                     "app-server",
                     "daemon",
                     "bootstrap",
@@ -4288,13 +4288,13 @@ enabled = true
             }))
         ));
         assert!(matches!(
-            app_server_from_args(["baicode", "app-server", "daemon", "start"].as_ref()).subcommand,
+            app_server_from_args(["baic", "app-server", "daemon", "start"].as_ref()).subcommand,
             Some(AppServerSubcommand::Daemon(AppServerDaemonCommand {
                 subcommand: AppServerDaemonSubcommand::Start
             }))
         ));
         assert!(matches!(
-            app_server_from_args(["baicode", "app-server", "daemon", "restart"].as_ref())
+            app_server_from_args(["baic", "app-server", "daemon", "restart"].as_ref())
                 .subcommand,
             Some(AppServerSubcommand::Daemon(AppServerDaemonCommand {
                 subcommand: AppServerDaemonSubcommand::Restart
@@ -4302,7 +4302,7 @@ enabled = true
         ));
         assert!(matches!(
             app_server_from_args(
-                ["baicode", "app-server", "daemon", "enable-remote-control"].as_ref()
+                ["baic", "app-server", "daemon", "enable-remote-control"].as_ref()
             )
             .subcommand,
             Some(AppServerSubcommand::Daemon(AppServerDaemonCommand {
@@ -4311,7 +4311,7 @@ enabled = true
         ));
         assert!(matches!(
             app_server_from_args(
-                ["baicode", "app-server", "daemon", "disable-remote-control"].as_ref()
+                ["baic", "app-server", "daemon", "disable-remote-control"].as_ref()
             )
             .subcommand,
             Some(AppServerSubcommand::Daemon(AppServerDaemonCommand {
@@ -4319,13 +4319,13 @@ enabled = true
             }))
         ));
         assert!(matches!(
-            app_server_from_args(["baicode", "app-server", "daemon", "stop"].as_ref()).subcommand,
+            app_server_from_args(["baic", "app-server", "daemon", "stop"].as_ref()).subcommand,
             Some(AppServerSubcommand::Daemon(AppServerDaemonCommand {
                 subcommand: AppServerDaemonSubcommand::Stop
             }))
         ));
         assert!(matches!(
-            app_server_from_args(["baicode", "app-server", "daemon", "version"].as_ref())
+            app_server_from_args(["baic", "app-server", "daemon", "version"].as_ref())
                 .subcommand,
             Some(AppServerSubcommand::Daemon(AppServerDaemonCommand {
                 subcommand: AppServerDaemonSubcommand::Version
@@ -4336,7 +4336,7 @@ enabled = true
     #[test]
     fn app_server_proxy_sock_path_parses() {
         let app_server = app_server_from_args(
-            ["baicode", "app-server", "proxy", "--sock", "codex.sock"].as_ref(),
+            ["baic", "app-server", "proxy", "--sock", "codex.sock"].as_ref(),
         );
         let Some(AppServerSubcommand::Proxy(proxy)) = app_server.subcommand else {
             panic!("expected proxy subcommand");
@@ -4380,7 +4380,7 @@ enabled = true
     fn app_server_capability_token_flags_parse() {
         let app_server = app_server_from_args(
             [
-                "baicode",
+                "baic",
                 "app-server",
                 "--ws-auth",
                 "capability-token",
@@ -4403,7 +4403,7 @@ enabled = true
     fn app_server_signed_bearer_flags_parse() {
         let app_server = app_server_from_args(
             [
-                "baicode",
+                "baic",
                 "app-server",
                 "--ws-auth",
                 "signed-bearer-token",
@@ -4434,7 +4434,7 @@ enabled = true
     #[test]
     fn app_server_rejects_removed_insecure_non_loopback_flag() {
         let parse_result = MultitoolCli::try_parse_from([
-            "baicode",
+            "baic",
             "app-server",
             "--allow-unauthenticated-non-loopback-ws",
         ]);
@@ -4443,7 +4443,7 @@ enabled = true
 
     #[test]
     fn features_enable_parses_feature_name() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "features", "enable", "unified_exec"])
+        let cli = MultitoolCli::try_parse_from(["baic", "features", "enable", "unified_exec"])
             .expect("parse should succeed");
         let Some(Subcommand::Features(FeaturesCli { sub })) = cli.subcommand else {
             panic!("expected features subcommand");
@@ -4456,7 +4456,7 @@ enabled = true
 
     #[test]
     fn features_disable_parses_feature_name() {
-        let cli = MultitoolCli::try_parse_from(["baicode", "features", "disable", "shell_tool"])
+        let cli = MultitoolCli::try_parse_from(["baic", "features", "disable", "shell_tool"])
             .expect("parse should succeed");
         let Some(Subcommand::Features(FeaturesCli { sub })) = cli.subcommand else {
             panic!("expected features subcommand");
@@ -4565,7 +4565,7 @@ enabled = true
     }
 
     fn strict_config_feature_toggle_error(args: &[&str]) -> anyhow::Error {
-        let cli_args = std::iter::once("baicode")
+        let cli_args = std::iter::once("baic")
             .chain(std::iter::once("--strict-config"))
             .chain(args.iter().copied());
         let cli = MultitoolCli::try_parse_from(cli_args).expect("parse should succeed");

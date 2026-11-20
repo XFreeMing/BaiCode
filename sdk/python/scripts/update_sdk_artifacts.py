@@ -52,7 +52,7 @@ def _is_windows() -> bool:
 
 
 def runtime_binary_name() -> str:
-    return "baicode.exe" if _is_windows() else "baicode"
+    return "baic.exe" if _is_windows() else "baic"
 
 
 def runtime_code_mode_host_name() -> str:

@@ -162,7 +162,7 @@ pub async fn read_connector_metadata(
     );
     anyhow::ensure!(
         auth.get_account_id().is_some(),
-        "ChatGPT account ID not available, please re-run baicode login"
+        "ChatGPT account ID not available, please re-run baic login"
     );
 
     let runtime = codex_model_provider::runtime_auth_for_url(runtime, &config.chatgpt_base_url)?;

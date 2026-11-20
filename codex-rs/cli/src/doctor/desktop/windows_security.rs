@@ -151,7 +151,7 @@ fn event_target(value: &str) -> Option<&'static str> {
     match name {
         "codex-windows-sandbox-setup.exe" => Some("sandbox_setup"),
         "codex-command-runner.exe" => Some("command_runner"),
-        "baicode.exe" => Some("baicode"),
+        "baic.exe" => Some("baic"),
         "codex.exe" => Some("codex"),
         "codex-desktop.exe" => Some("codex_desktop"),
         "chatgpt.exe" | "electron.exe" if trusted => Some("codex_desktop"),

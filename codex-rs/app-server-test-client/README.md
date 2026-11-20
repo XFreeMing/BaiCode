@@ -1,6 +1,6 @@
 # App Server Test Client
 
-Quickstart for running and hitting `baicode app-server`.
+Quickstart for running and hitting `baic app-server`.
 
 ## Quickstart
 
@@ -8,11 +8,11 @@ Run from `<reporoot>/codex-rs`.
 
 ```bash
 # 1) Build debug codex binary
-cargo build -p codex-cli --bin baicode
+cargo build -p codex-cli --bin baic
 
 # 2) Start websocket app-server in background
 cargo run -p codex-app-server-test-client -- \
-  --codex-bin ./target/debug/baicode \
+  --codex-bin ./target/debug/baic \
   serve --listen ws://127.0.0.1:4222 --kill
 
 # 3) Call app-server (defaults to ws://127.0.0.1:4222)
@@ -35,9 +35,9 @@ testing.
 export CODEX_HOME="$(mktemp -d)"
 printf 'cli_auth_credentials_store = "file"\n' > "$CODEX_HOME/config.toml"
 
-cargo build -p codex-cli --bin baicode
+cargo build -p codex-cli --bin baic
 cargo run -p codex-app-server-test-client -- \
-  --codex-bin ./target/debug/baicode \
+  --codex-bin ./target/debug/baic \
   test-login \
   --amazon-bedrock \
   --api-key "<BEDROCK_API_KEY>" \
@@ -55,7 +55,7 @@ isolated directory when testing credential cleanup.
 
 ```bash
 cargo run -p codex-app-server-test-client -- \
-  --codex-bin ./target/debug/baicode \
+  --codex-bin ./target/debug/baic \
   test-logout
 ```
 
@@ -73,10 +73,10 @@ retries ephemeral turns while the installed remote bundle finishes syncing.
 
 ```bash
 # Build a debug Codex binary; analytics capture is unavailable in release builds.
-cargo build -p codex-cli --bin baicode
+cargo build -p codex-cli --bin baic
 
 cargo run -p codex-app-server-test-client -- \
-  --codex-bin ./target/debug/baicode \
+  --codex-bin ./target/debug/baic \
   plugin-analytics-smoke \
   --plugin-id linear@openai-curated-remote
 ```
@@ -112,7 +112,7 @@ local `<plugin>@<marketplace>` ID.
 
 ```bash
 cargo run -p codex-app-server-test-client -- \
-  --codex-bin ./target/debug/baicode \
+  --codex-bin ./target/debug/baic \
   plugin-analytics-mutation-smoke \
   --remote-plugin-id <REMOTE_PLUGIN_ID> \
   --confirm-account-mutation \
@@ -135,7 +135,7 @@ For a dirty or uncertain result, retry cleanup with:
 
 ```bash
 cargo run -p codex-app-server-test-client -- \
-  --codex-bin ./target/debug/baicode \
+  --codex-bin ./target/debug/baic \
   plugin-remote-uninstall \
   --remote-plugin-id <REMOTE_PLUGIN_ID> \
   --confirm-account-mutation

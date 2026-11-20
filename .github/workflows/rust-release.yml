@@ -102,7 +102,7 @@ jobs:
             target: aarch64-apple-darwin
             bundle: primary
             artifact_name: aarch64-apple-darwin
-            binaries: "baicode codex-code-mode-host codex-exec-server"
+            binaries: "baic codex-code-mode-host codex-exec-server"
             build_dmg: "true"
           - runner: macos-15-xlarge
             target: aarch64-apple-darwin
@@ -114,7 +114,7 @@ jobs:
             target: x86_64-apple-darwin
             bundle: primary
             artifact_name: x86_64-apple-darwin
-            binaries: "baicode codex-code-mode-host codex-exec-server"
+            binaries: "baic codex-code-mode-host codex-exec-server"
             build_dmg: "true"
           - runner: macos-15-xlarge
             target: x86_64-apple-darwin
@@ -127,7 +127,7 @@ jobs:
             target: x86_64-unknown-linux-musl
             bundle: primary
             artifact_name: x86_64-unknown-linux-musl
-            binaries: "baicode codex-code-mode-host codex-exec-server bwrap"
+            binaries: "baic codex-code-mode-host codex-exec-server bwrap"
             build_dmg: "false"
           - runner: ${{ github.event.repository.name }}-linux-x64-xl
             target: x86_64-unknown-linux-musl
@@ -139,7 +139,7 @@ jobs:
             target: aarch64-unknown-linux-musl
             bundle: primary
             artifact_name: aarch64-unknown-linux-musl
-            binaries: "baicode codex-code-mode-host codex-exec-server bwrap"
+            binaries: "baic codex-code-mode-host codex-exec-server bwrap"
             build_dmg: "false"
           - runner: ${{ github.event.repository.name }}-linux-arm64
             target: aarch64-unknown-linux-musl
@@ -665,7 +665,7 @@ jobs:
           - target: aarch64-apple-darwin
             bundle: primary
             artifact_name: aarch64-apple-darwin
-            binaries: "baicode codex-code-mode-host codex-exec-server"
+            binaries: "baic codex-code-mode-host codex-exec-server"
           - target: aarch64-apple-darwin
             bundle: app-server
             artifact_name: aarch64-apple-darwin-app-server
@@ -673,7 +673,7 @@ jobs:
           - target: x86_64-apple-darwin
             bundle: primary
             artifact_name: x86_64-apple-darwin
-            binaries: "baicode codex-code-mode-host codex-exec-server"
+            binaries: "baic codex-code-mode-host codex-exec-server"
           - target: x86_64-apple-darwin
             bundle: app-server
             artifact_name: x86_64-apple-darwin-app-server
@@ -913,7 +913,7 @@ jobs:
           - target: aarch64-apple-darwin
             bundle: primary
             artifact_name: aarch64-apple-darwin
-            binaries: "baicode codex-code-mode-host codex-exec-server"
+            binaries: "baic codex-code-mode-host codex-exec-server"
             build_dmg: "true"
           - target: aarch64-apple-darwin
             bundle: app-server
@@ -923,7 +923,7 @@ jobs:
           - target: x86_64-apple-darwin
             bundle: primary
             artifact_name: x86_64-apple-darwin
-            binaries: "baicode codex-code-mode-host codex-exec-server"
+            binaries: "baic codex-code-mode-host codex-exec-server"
             build_dmg: "true"
           - target: x86_64-apple-darwin
             bundle: app-server
@@ -1064,8 +1064,8 @@ jobs:
             # package layout so InstallContext finds its adjacent voice runtime.
             package="${RUNNER_TEMP}/codex-package-voice-${target}"
             ditto "$package" "$dmg_root"
-            rm "${dmg_root}/baicode"
-            ln -s bin/baicode "${dmg_root}/baicode"
+            rm "${dmg_root}/baic"
+            ln -s bin/baic "${dmg_root}/baic"
           fi
 
           rm -f "$dmg_path"
@@ -1309,7 +1309,7 @@ jobs:
           - target: aarch64-apple-darwin
             bundle: primary
             artifact_name: aarch64-apple-darwin
-            binaries: "baicode codex-code-mode-host codex-exec-server"
+            binaries: "baic codex-code-mode-host codex-exec-server"
             verify_dmg: "true"
           - target: aarch64-apple-darwin
             bundle: app-server
@@ -1319,7 +1319,7 @@ jobs:
           - target: x86_64-apple-darwin
             bundle: primary
             artifact_name: x86_64-apple-darwin
-            binaries: "baicode codex-code-mode-host codex-exec-server"
+            binaries: "baic codex-code-mode-host codex-exec-server"
             verify_dmg: "true"
           - target: x86_64-apple-darwin
             bundle: app-server
@@ -1424,7 +1424,7 @@ jobs:
           case "${{ matrix.bundle }}" in
             primary)
               package_stem="codex-package"
-              package_entrypoint="baicode"
+              package_entrypoint="baic"
               ;;
             app-server)
               package_stem="codex-app-server-package"
@@ -1515,7 +1515,7 @@ jobs:
           done
 
           if [[ "${{ matrix.bundle }}" == "primary" ]]; then
-            [[ "$(readlink "${mount_dir}/baicode")" == "bin/baicode" ]]
+            [[ "$(readlink "${mount_dir}/baic")" == "bin/baic" ]]
             cmp "${mount_dir}/codex-package.json" "${package_dir}/codex-package.json"
             cmp "${mount_dir}/codex-resources/voice/manifest.json" \
               "${package_dir}/codex-resources/voice/manifest.json"

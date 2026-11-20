@@ -28,10 +28,10 @@ cargo install --locked dotslash
 cargo install --locked cargo-nextest
 
 # Build BaiCode.
-cargo build --locked -p codex-cli --bin baicode
+cargo build --locked -p codex-cli --bin baic
 
 # Launch the TUI with a sample prompt.
-cargo run --bin baicode -- "explain this codebase to me"
+cargo run --bin baic -- "explain this codebase to me"
 
 # After making changes, use the root justfile helpers (they default to codex-rs):
 just fmt
@@ -52,10 +52,10 @@ Codex is written in Rust, so it honors the `RUST_LOG` environment variable to co
 The TUI records diagnostics in bounded local stores by default. Set `log_dir` explicitly to enable a plaintext TUI log for a run:
 
 ```bash
-baicode -c log_dir=./.codex-log
+baic -c log_dir=./.codex-log
 tail -F ./.codex-log/codex-tui.log
 ```
 
-The non-interactive mode (`baicode exec`) defaults to `RUST_LOG=error`, but messages are printed inline, so there is no need to monitor a separate file.
+The non-interactive mode (`baic exec`) defaults to `RUST_LOG=error`, but messages are printed inline, so there is no need to monitor a separate file.
 
 See the Rust documentation on [`RUST_LOG`](https://docs.rs/env_logger/latest/env_logger/#enabling-logging) for more information on the configuration options.

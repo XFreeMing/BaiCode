@@ -13,14 +13,14 @@ fn main() {
 /// benchmark binaries without making the shared harness depend on them.
 #[divan::bench(sample_count = 20, sample_size = 1)]
 fn codex_help(bencher: Bencher) {
-    let codex = codex_utils_cargo_bin::cargo_bin("baicode")
+    let codex = codex_utils_cargo_bin::cargo_bin("baic")
         .expect("codex binary should be available through Bazel runfiles");
 
     bencher.bench_local(move || {
         let output = Command::new(&codex)
             .arg("--help")
             .output()
-            .expect("baicode --help should run");
-        assert!(output.status.success(), "baicode --help should succeed");
+            .expect("baic --help should run");
+        assert!(output.status.success(), "baic --help should succeed");
     });
 }

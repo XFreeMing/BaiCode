@@ -123,18 +123,18 @@ def prepare(package, reports, configuration: ProfileConfiguration):
         metadata["variant"] != "codex"
         or metadata["layoutVersion"] != 1
         or metadata["target"] not in ("aarch64-apple-darwin", "x86_64-apple-darwin")
-        or metadata["entrypoint"] != "bin/baicode"
+        or metadata["entrypoint"] != "bin/baic"
     ):
         raise ValueError("Expected a canonical macOS CLI package")
-    for relative in ("bin/baicode", *HELPERS):
+    for relative in ("bin/baic", *HELPERS):
         path = package / relative
         if path.is_symlink() or not path.is_file() or not os.access(path, os.X_OK):
             raise ValueError(f"Expected a regular executable: {relative}")
     # Refuse to overwrite a previously prepared or signed bundle.
     (package / EXECUTABLE).parent.mkdir(parents=True, exist_ok=False)
-    (package / "bin/baicode").rename(package / EXECUTABLE)
-    (package / "bin/baicode").write_text(LAUNCHER)
-    (package / "bin/baicode").chmod(0o755)
+    (package / "bin/baic").rename(package / EXECUTABLE)
+    (package / "bin/baic").write_text(LAUNCHER)
+    (package / "bin/baic").chmod(0o755)
     contents = package / APP / "Contents"
     shutil.copyfile(configuration.profile, contents / "embedded.provisionprofile")
     (contents / "Info.plist").write_bytes(
@@ -171,7 +171,7 @@ def verify(package, reports, expected_target, configuration: ProfileConfiguratio
         package / APP / "Contents/embedded.provisionprofile"
     ).read_bytes() != configuration.profile.read_bytes():
         raise ValueError("Embedded profile differs from the reviewed profile")
-    if (package / "bin/baicode").read_text() != LAUNCHER:
+    if (package / "bin/baic").read_text() != LAUNCHER:
         raise ValueError("Unexpected CLI launcher")
     metadata = json.loads((package / "codex-package.json").read_text())
     if metadata["target"] != expected_target:

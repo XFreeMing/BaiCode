@@ -53,9 +53,9 @@ async fn relocated_runtime_initializes_closes_and_rejects_duplicate_initializati
     codex_utils_cargo_bin::copy_executable(&helper_source, &runtime.join("bin").join(name))?;
     fs::create_dir(root.join("bin"))?;
     let app_name = if cfg!(windows) {
-        "baicode.exe"
+        "baic.exe"
     } else {
-        "baicode"
+        "baic"
     };
     fs::write(root.join("bin").join(app_name), [])?;
     fs::write(root.join("codex-package.json"), "{}")?;

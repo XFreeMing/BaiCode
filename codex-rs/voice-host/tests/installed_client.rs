@@ -95,9 +95,9 @@ fn install_helper(root: &Path) -> Result<CodexPackageLayout> {
     fs::create_dir_all(&helper_dir)?;
     fs::write(root.join("codex-package.json"), "{}")?;
     let app = bin.join(if cfg!(windows) {
-        "baicode.exe"
+        "baic.exe"
     } else {
-        "baicode"
+        "baic"
     });
     fs::write(&app, [])?;
     let source = cargo_bin("codex-voice-host")?;
@@ -168,7 +168,7 @@ async fn installed_client_accepts_non_utf8_package_path() -> Result<()> {
     fs::create_dir_all(&bin)?;
     fs::create_dir_all(&helper_dir)?;
     fs::write(root.join("codex-package.json"), "{}")?;
-    let app = bin.join("baicode");
+    let app = bin.join("baic");
     fs::write(&app, [])?;
     let source = cargo_bin("codex-voice-host")?;
     codex_utils_cargo_bin::copy_executable(&source, &helper_dir.join(source.file_name().unwrap()))?;

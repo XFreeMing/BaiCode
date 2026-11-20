@@ -2,7 +2,7 @@
 
 ROOT_OF_EXTRACTED_PACKAGE
 ├── bin
-│   ├── baicode[.exe]                       # CLI package only
+│   ├── baic[.exe]                       # CLI package only
 │   ├── codex-app-server[.exe]            # app-server package only
 │   ├── codex-code-mode-host[.exe]
 │   └── codex-exec-server[.exe]
@@ -15,7 +15,7 @@ ROOT_OF_EXTRACTED_PACKAGE
     ├── codex-windows-sandbox-setup.exe   # Windows only
 
 Debug symbols for all shipped binaries arrive in a separate companion archive.
-Each package contains one entrypoint, not both baicode and codex-app-server.
+Each package contains one entrypoint, not both baic and codex-app-server.
 """
 
 import json
@@ -44,9 +44,9 @@ from fixtures import SmokePackage
 @pytest.mark.parametrize(
     ("arguments", "expected"),
     [
-        pytest.param(("--help",), "Usage: baicode ", id="help"),
+        pytest.param(("--help",), "Usage: baic ", id="help"),
         pytest.param(("features", "list"), "code_mode", id="features"),
-        pytest.param(("completion", "bash"), "baicode", id="completion"),
+        pytest.param(("completion", "bash"), "baic", id="completion"),
     ],
 )
 def test_cli_public_commands(
@@ -68,7 +68,7 @@ def test_cli_version_matches_release_sources(package: SmokePackage) -> None:
     )
     manifest = tomllib.loads((root / "codex-rs/Cargo.toml").read_text())
     version = manifest["workspace"]["package"]["version"]
-    assert package.run("--version").stdout == f"baicode {version}\n"
+    assert package.run("--version").stdout == f"baic {version}\n"
 
 
 @pytest.mark.parametrize("variant", ["cli_root", "app_server_root"])
@@ -360,13 +360,13 @@ def test_packaged_executor_matches_subcommand_startup(
                 (
                     result.returncode,
                     result.stdout,
-                    result.stderr.replace("baicode exec-server", "codex-exec-server"),
+                    result.stderr.replace("baic exec-server", "codex-exec-server"),
                 )
             )
         assert outputs[0] == outputs[1], arguments
 
 
-@pytest.mark.parametrize("entrypoint", ["baicode", "codex-app-server"])
+@pytest.mark.parametrize("entrypoint", ["baic", "codex-app-server"])
 def test_app_server_runs_code_mode_through_python_sdk(
     package: SmokePackage,
     responses_server: MockResponsesServer,
@@ -375,7 +375,7 @@ def test_app_server_runs_code_mode_through_python_sdk(
     """Both packages run their own ripgrep through sandboxed SDK code mode."""
     windows = "windows" in package.target
     sandbox_config = ("--config", 'windows.sandbox="unelevated"') if windows else ()
-    if entrypoint == "baicode":
+    if entrypoint == "baic":
         executable = package.cli
         package_root = package.cli_root
         package_path_dir = package.cli_path_dir

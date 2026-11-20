@@ -1,4 +1,4 @@
-//! Shared formatting for user-facing `baicode resume` command hints.
+//! Shared formatting for user-facing `baic resume` command hints.
 
 use codex_protocol::ThreadId;
 use codex_shell_command::parse_command::shlex_join;
@@ -12,9 +12,9 @@ pub fn resume_command(thread_name: Option<&str>, thread_id: Option<ThreadId>) ->
         let needs_double_dash = target.starts_with('-');
         let escaped = shlex_join(&[target]);
         if needs_double_dash {
-            format!("baicode resume -- {escaped}")
+            format!("baic resume -- {escaped}")
         } else {
-            format!("baicode resume {escaped}")
+            format!("baic resume {escaped}")
         }
     })
 }
@@ -23,7 +23,7 @@ pub fn resume_hint(thread_name: Option<&str>, thread_id: Option<ThreadId>) -> Op
     let thread_id = thread_id?;
     match thread_name.filter(|name| !name.is_empty()) {
         Some(thread_name) => Some(format!(
-            "baicode resume, then select {thread_name} ({thread_id})"
+            "baic resume, then select {thread_name} ({thread_id})"
         )),
         None => resume_command(/*thread_name*/ None, Some(thread_id)),
     }
@@ -38,7 +38,7 @@ mod tests {
     fn prefers_name_over_id() {
         let thread_id = ThreadId::from_string("123e4567-e89b-12d3-a456-426614174000").unwrap();
         let command = resume_command(Some("my-thread"), Some(thread_id));
-        assert_eq!(command, Some("baicode resume my-thread".to_string()));
+        assert_eq!(command, Some("baic resume my-thread".to_string()));
     }
 
     #[test]
@@ -47,7 +47,7 @@ mod tests {
         let command = resume_command(/*thread_name*/ None, Some(thread_id));
         assert_eq!(
             command,
-            Some("baicode resume 123e4567-e89b-12d3-a456-426614174000".to_string())
+            Some("baic resume 123e4567-e89b-12d3-a456-426614174000".to_string())
         );
     }
 
@@ -62,14 +62,14 @@ mod tests {
         let command = resume_command(Some("-starts-with-dash"), /*thread_id*/ None);
         assert_eq!(
             command,
-            Some("baicode resume -- -starts-with-dash".to_string())
+            Some("baic resume -- -starts-with-dash".to_string())
         );
 
         let command = resume_command(Some("two words"), /*thread_id*/ None);
-        assert_eq!(command, Some("baicode resume 'two words'".to_string()));
+        assert_eq!(command, Some("baic resume 'two words'".to_string()));
 
         let command = resume_command(Some("quote'case"), /*thread_id*/ None);
-        assert_eq!(command, Some("baicode resume \"quote'case\"".to_string()));
+        assert_eq!(command, Some("baic resume \"quote'case\"".to_string()));
     }
 
     #[test]
@@ -79,7 +79,7 @@ mod tests {
         assert_eq!(
             hint,
             Some(
-                "baicode resume, then select my-thread (123e4567-e89b-12d3-a456-426614174000)"
+                "baic resume, then select my-thread (123e4567-e89b-12d3-a456-426614174000)"
                     .to_string()
             )
         );
@@ -91,7 +91,7 @@ mod tests {
         let hint = resume_hint(/*thread_name*/ None, Some(thread_id));
         assert_eq!(
             hint,
-            Some("baicode resume 123e4567-e89b-12d3-a456-426614174000".to_string())
+            Some("baic resume 123e4567-e89b-12d3-a456-426614174000".to_string())
         );
     }
 

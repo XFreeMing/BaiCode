@@ -695,7 +695,7 @@ async fn reconnect_allows_slow_hydration_but_bounds_a_stalled_server() -> Result
                         if archived {
                             return Some(json!({"error": {
                                 "code": -32600,
-                                "message": format!("session {id} is archived. Run `baicode unarchive {id}` to unarchive it first."),
+                                "message": format!("session {id} is archived. Run `baic unarchive {id}` to unarchive it first."),
                             }}));
                         }
                     } else {

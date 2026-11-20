@@ -54,7 +54,7 @@ pub(super) async fn prepare_database(
             // Do not expose a SQLite corruption error to automatic backup-and-rebuild recovery:
             // an interrupted cutover must be resumed by the migration implementation itself.
             anyhow::anyhow!(
-                "required NFS database migration failed for {}: {error:#}. Stop Codex instances on all hosts and rerun baicode migrate-nfs-db",
+                "required NFS database migration failed for {}: {error:#}. Stop Codex instances on all hosts and rerun baic migrate-nfs-db",
                 path.display()
             )
         })?;

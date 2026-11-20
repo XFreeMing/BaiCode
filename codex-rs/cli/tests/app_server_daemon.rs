@@ -579,7 +579,7 @@ fn manual_update_rejects_an_unowned_installation() -> Result<()> {
         daemon
             .home
             .path()
-            .join("packages/standalone/current/bin/baicode"),
+            .join("packages/standalone/current/bin/baic"),
     )?;
 
     assert_eq!(daemon.lifecycle("update")?["status"], "unsupported");

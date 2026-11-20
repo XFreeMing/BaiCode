@@ -90,7 +90,7 @@ function findCodexExecutable() {
     vendorRoot,
     targetTriple,
     "bin",
-    process.platform === "win32" ? "baicode.exe" : "baicode",
+    process.platform === "win32" ? "baic.exe" : "baic",
   );
   if (existsSync(codexExecutable)) {
     return codexExecutable;

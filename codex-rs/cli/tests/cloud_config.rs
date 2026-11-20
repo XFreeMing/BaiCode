@@ -130,7 +130,7 @@ impl CloudManagedConfigFixture {
     }
 
     fn command(&self, args: &[&str]) -> Result<Command> {
-        let mut command = Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?);
+        let mut command = Command::new(codex_utils_cargo_bin::cargo_bin("baic")?);
         command
             .kill_on_drop(true)
             .current_dir(self.codex_home.path())

@@ -31,8 +31,8 @@ codex_rust_crate(
 
 exec_server_compat_test(
     name = "exec-server-current-version-test",
-    comparison_binary = "//codex-rs/cli:baicode",
-    current_binary = "//codex-rs/cli:baicode",
+    comparison_binary = "//codex-rs/cli:baic",
+    current_binary = "//codex-rs/cli:baic",
 )
 
 # Preparation selects both releases; the normal Bazel test invocation runs them.

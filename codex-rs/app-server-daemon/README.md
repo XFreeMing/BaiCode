@@ -3,7 +3,7 @@
 > `codex-app-server-daemon` is experimental and its lifecycle contract may
 > change while the remote-management flow is still being developed.
 
-`codex-app-server-daemon` backs the machine-readable `baicode app-server`
+`codex-app-server-daemon` backs the machine-readable `baic app-server`
 lifecycle commands used by remote clients such as the desktop and mobile apps.
 It is intended for Codex instances launched over SSH, including fresh developer
 machines that should expose app-server with `remote_control` enabled.
@@ -30,14 +30,14 @@ initialize the connection, the TUI starts an embedded server instead. Explicit
 ## Commands
 
 ```sh
-baicode app-server daemon start
-baicode app-server daemon restart
-baicode app-server daemon update
-baicode app-server daemon enable-remote-control
-baicode app-server daemon disable-remote-control
-baicode app-server daemon stop
-baicode app-server daemon version
-baicode app-server daemon bootstrap --remote-control
+baic app-server daemon start
+baic app-server daemon restart
+baic app-server daemon update
+baic app-server daemon enable-remote-control
+baic app-server daemon disable-remote-control
+baic app-server daemon stop
+baic app-server daemon version
+baic app-server daemon bootstrap --remote-control
 ```
 
 On success, every command writes exactly one JSON object to stdout. Consumers
@@ -58,7 +58,7 @@ default. Edit `CODEX_HOME/app-server-daemon/settings.json` to change this:
 
 Positive minute intervals have no configured cap. `daemon restart` applies the
 enabled state; the next updater wait reads a new interval. The preference does
-not affect an explicit `baicode update` command or `daemon update`.
+not affect an explicit `baic update` command or `daemon update`.
 
 `daemon update` selects the latest stable release, even with automatic updates
 disabled. It also returns pinned or local managed packages to production update
@@ -156,7 +156,7 @@ other tool updates the managed binary path:
   once that replacement starts successfully
 - if the updater was absent during a same-version binary replacement, a later
   managed start recovers it but cannot infer the running server's previous
-  executable identity; use `baicode app-server daemon restart` to refresh the server
+  executable identity; use `baic app-server daemon restart` to refresh the server
 
 ## Lifecycle semantics
 
@@ -169,11 +169,11 @@ JSON-RPC initialize handshake on the Unix control socket.
 for future starts. If a managed app-server is already running, they restart it
 so the new setting takes effect immediately.
 
-Top-level `baicode remote-control start` enables and persists remote control for
+Top-level `baic remote-control start` enables and persists remote control for
 the managed daemon, overriding a saved disabled value. It starts or bootstraps
-the daemon as needed. Plain `baicode remote-control` uses the managed daemon when
-eligible; `baicode remote-control --no-daemon` runs a separate foreground server.
-`baicode remote-control stop` stops the managed daemon without clearing its saved
+the daemon as needed. Plain `baic remote-control` uses the managed daemon when
+eligible; `baic remote-control --no-daemon` runs a separate foreground server.
+`baic remote-control stop` stops the managed daemon without clearing its saved
 remote-control preference.
 `daemon start` and `daemon restart` use that saved preference. `daemon bootstrap`
 sets it according to `--remote-control` (disabled when omitted).

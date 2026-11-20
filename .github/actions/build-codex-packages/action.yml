@@ -23,7 +23,7 @@ runs:
       shell: bash
       working-directory: codex-rs
       env:
-        BASE_BINARIES: "baicode codex-app-server codex-code-mode-host codex-exec-server"
+        BASE_BINARIES: "baic codex-app-server codex-code-mode-host codex-exec-server"
         WINDOWS_ONLY_BINARIES: "codex-command-runner codex-windows-sandbox-setup codex-windows-sandbox-service"
         BUILD_MODE: ${{ inputs.build-mode }}
         BUILD_SYSTEM: ${{ inputs.build-system }}
@@ -156,7 +156,7 @@ runs:
         python3 "${PACKAGE_SOURCE_ROOT}/scripts/build_codex_package.py" \
           "${package_args[@]}" \
           --variant codex \
-          --entrypoint-bin "${release_dir}/baicode${exe_suffix}" \
+          --entrypoint-bin "${release_dir}/baic${exe_suffix}" \
           --package-dir "${RUNNER_TEMP}/codex-package-${target}" \
           --archive-output "${archive_dir}/codex-package-${target}.tar.gz" \
           --archive-output "${archive_dir}/codex-package-${target}.tar.zst"

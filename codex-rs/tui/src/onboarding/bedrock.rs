@@ -449,7 +449,7 @@ impl BedrockState {
             }
             BedrockView::EnvironmentInstructions => {
                 lines.push(
-                    "  Export AWS credentials, then run `baicode --no-daemon` in that shell."
+                    "  Export AWS credentials, then run `baic --no-daemon` in that shell."
                         .into(),
                 );
                 lines.push("".into());

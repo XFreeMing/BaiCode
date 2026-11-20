@@ -16,11 +16,11 @@ def bundled_package_dir() -> Path:
 
 
 def bundled_codex_path() -> Path:
-    exe = "baicode.exe" if os.name == "nt" else "baicode"
+    exe = "baic.exe" if os.name == "nt" else "baic"
     path = bundled_package_dir() / "bin" / exe
     if not path.is_file():
         raise FileNotFoundError(
-            f"{PACKAGE_NAME} is installed but missing its packaged baicode binary at {path}"
+            f"{PACKAGE_NAME} is installed but missing its packaged baic binary at {path}"
         )
     return path
 

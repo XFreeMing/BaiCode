@@ -33,7 +33,7 @@ class NpmPackageTest(unittest.TestCase):
                     "variant": "codex",
                     "version": "1.2.3",
                     "target": target,
-                    "entrypoint": f"bin/baicode{suffix}",
+                    "entrypoint": f"bin/baic{suffix}",
                     "execServer": f"bin/codex-exec-server{suffix}",
                     "resourcesDir": "codex-resources",
                     "pathDir": "codex-path",

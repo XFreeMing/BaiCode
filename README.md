@@ -1,6 +1,6 @@
 # BaiCode
 
-BaiCode 是基于 Codex CLI 的个人本地编程工具，支持交互式终端和 `baicode exec`。默认使用本机 Ollama，也支持 BaiInf、LM Studio 和显式配置的远端 Responses API。
+BaiCode 是基于 Codex CLI 的个人本地编程工具，支持交互式终端和 `baic exec`。默认使用本机 Ollama，也支持 BaiInf、LM Studio 和显式配置的远端 Responses API。
 
 ## 从源码构建
 
@@ -8,15 +8,15 @@ BaiCode 是基于 Codex CLI 的个人本地编程工具，支持交互式终端�
 
 ```sh
 cd codex-rs
-cargo build --locked -p codex-cli --bin baicode
+cargo build --locked -p codex-cli --bin baic
 ```
 
-在 Linux 上，可将构建产物装到用户的命令目录，之后直接运行 `baicode`。
+在 Linux 上，可将构建产物装到用户的命令目录，之后直接运行 `baic`。
 
 ```sh
-install -Dm755 target/debug/baicode "$HOME/.local/bin/baicode"
+install -Dm755 target/debug/baic "$HOME/.local/bin/baic"
 export PATH="$HOME/.local/bin:$PATH"
-baicode --version
+baic --version
 ```
 
 ## 使用本机模型
@@ -32,7 +32,7 @@ model = "gpt-oss:20b"
 
 使用 LM Studio 时，把 `model_provider` 改成 `lmstudio`。将 `model` 设为本机服务实际返回的模型 ID。BaiCode 不会自动下载模型。
 
-从要操作的项目目录启动构建产物 `codex-rs/target/debug/baicode`。交互模式直接执行该文件，单次执行可追加 `exec "说明这份仓库的入口和测试方式"`。
+从要操作的项目目录启动构建产物 `codex-rs/target/debug/baic`。交互模式直接执行该文件，单次执行可追加 `exec "说明这份仓库的入口和测试方式"`。
 
 ### 使用 BaiInf
 
@@ -59,7 +59,7 @@ wire_api = "responses"
 安装后，在目标 Git 仓库中运行以下命令。
 
 ```sh
-baicode exec --sandbox workspace-write "运行这个项目的测试，修复失败用例，再运行测试验证。"
+baic exec --sandbox workspace-write "运行这个项目的测试，修复失败用例，再运行测试验证。"
 ```
 
 ## 使用远端模型

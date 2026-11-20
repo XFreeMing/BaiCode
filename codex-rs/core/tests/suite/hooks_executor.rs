@@ -287,7 +287,7 @@ async fn mcp_hooks_preserve_ownership_with_same_named_servers() -> Result<()> {
             ),
         )?;
         let mut executor = Command::from(codex_utils_process::background_command(
-            codex_utils_cargo_bin::cargo_bin("baicode")?,
+            codex_utils_cargo_bin::cargo_bin("baic")?,
         ))
         .args(["exec-server", "--listen", "ws://127.0.0.1:0"])
         .env("CODEX_HOME", home.path())

@@ -4,10 +4,10 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 build = "build.rs"
-default-run = "baicode"
+default-run = "baic"
 
 [[bin]]
-name = "baicode"
+name = "baic"
 path = "src/main.rs"
 
 [[bin]]

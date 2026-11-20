@@ -2612,7 +2612,7 @@ async fn stdio_mcp_tool_call_includes_sandbox_state_meta(
             // The real CLI is explicitly provided; the test harness is not a CLI.
             config.codex_self_exe = Some(
                 AbsolutePathBuf::from_absolute_path_checked(
-                    cargo_bin("baicode").expect("codex binary"),
+                    cargo_bin("baic").expect("codex binary"),
                 )
                 .expect("absolute codex binary path")
                 .into_path_buf(),
@@ -4723,7 +4723,7 @@ async fn streamable_http_with_oauth_round_trip_impl() -> anyhow::Result<()> {
         .await?;
     // Phase 5: replace rejected credentials as an external OAuth login would.
     let recovery_hint = if credential_config.is_local_environment() {
-        format!("Run `baicode mcp login {server_name}`.")
+        format!("Run `baic mcp login {server_name}`.")
     } else {
         "Use your client's MCP OAuth sign-in flow.".to_string()
     };

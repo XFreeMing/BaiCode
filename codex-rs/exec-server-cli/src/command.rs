@@ -1,4 +1,4 @@
-//! Command-line startup shared by `baicode exec-server` and `codex-exec-server`.
+//! Command-line startup shared by `baic exec-server` and `codex-exec-server`.
 //!
 //! Transport, configuration, authentication, and shutdown are kept together.
 

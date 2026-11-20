@@ -312,7 +312,7 @@ impl PtyCodex {
         extra_args: &[&str],
     ) -> Result<Self> {
         let codex = codex_utils_cargo_bin::cargo_bin("codex-tui")
-            .or_else(|_| codex_utils_cargo_bin::cargo_bin("baicode"))?;
+            .or_else(|_| codex_utils_cargo_bin::cargo_bin("baic"))?;
         Self::start_binary(
             &codex, repo_root, codex_home, extra_args, /*editor*/ None,
         )
@@ -324,8 +324,8 @@ impl PtyCodex {
         codex_home: TempDir,
         extra_args: &[&str],
     ) -> Result<Self> {
-        let codex = codex_utils_cargo_bin::cargo_bin("baicode")
-            .context("build codex-cli and set CARGO_BIN_EXE_baicode to its executable")?;
+        let codex = codex_utils_cargo_bin::cargo_bin("baic")
+            .context("build codex-cli and set CARGO_BIN_EXE_baic to its executable")?;
         Self::start_binary(
             &codex, repo_root, codex_home, extra_args, /*editor*/ None,
         )

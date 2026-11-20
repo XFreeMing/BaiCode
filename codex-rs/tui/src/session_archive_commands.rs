@@ -1,4 +1,4 @@
-//! Shared implementation for `baicode archive`, `baicode delete`, and `baicode unarchive`.
+//! Shared implementation for `baic archive`, `baic delete`, and `baic unarchive`.
 //!
 //! The CLI commands are thin app-server clients: resolve a user-provided UUID or exact session
 //! name, then call the corresponding app-server RPC.

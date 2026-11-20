@@ -53,7 +53,7 @@ impl SandboxSetupCommand {
         if self.elevated_sandbox_level {
             Ok(SandboxSetupLevel::Elevated)
         } else {
-            anyhow::bail!("`baicode sandbox setup` currently requires --elevated");
+            anyhow::bail!("`baic sandbox setup` currently requires --elevated");
         }
     }
 }

@@ -115,7 +115,7 @@ fi
 case "$bundle" in
   primary)
     variant="codex"
-    entrypoint="baicode"
+    entrypoint="baic"
     archive_stem="codex-package"
     ;;
   app-server)

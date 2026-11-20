@@ -36,7 +36,7 @@ Seatbelt also keeps the legacy default preferences read access
 
 ### Linux
 
-Expects the binary containing `codex-core` to run the equivalent of `baicode sandbox` when `arg0` is `codex-linux-sandbox`. See the `codex-arg0` crate for details.
+Expects the binary containing `codex-core` to run the equivalent of `baic sandbox` when `arg0` is `codex-linux-sandbox`. See the `codex-arg0` crate for details.
 
 The Linux sandbox accepts both legacy `sandbox_mode` configs and permission
 profiles. Bubblewrap enforces filesystem restrictions and provides the network

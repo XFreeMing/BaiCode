@@ -19,7 +19,7 @@ that are later published under platform-specific dist-tags.
 
 The npm variants omit the standalone `codex-exec-server` executable and its
 `execServer` manifest entry to keep uploads within npm's package size limit.
-They retain `baicode exec-server` through the CLI, the code-mode host, and the
+They retain `baic exec-server` through the CLI, the code-mode host, and the
 platform sandbox helpers. Canonical release archives retain the standalone
 executor; npm staging changes only the package copy.
 
