@@ -1,6 +1,6 @@
 # BaiCode
 
-BaiCode 是基于 Codex CLI 的个人本地编程工具，支持交互式终端和 `codex exec`。默认使用本机 Ollama，也支持 LM Studio 和显式配置的远端 Responses API。
+BaiCode 是基于 Codex CLI 的个人本地编程工具，支持交互式终端和 `codex exec`。默认使用本机 Ollama，也支持 BaiInf、LM Studio 和显式配置的远端 Responses API。
 
 ## 从源码构建
 
@@ -30,6 +30,34 @@ model = "gpt-oss:20b"
 使用 LM Studio 时，把 `model_provider` 改成 `lmstudio`。将 `model` 设为本机服务实际返回的模型 ID。BaiCode 不会自动下载模型。
 
 从要操作的项目目录启动构建产物 `codex-rs/target/debug/codex`。交互模式直接执行该文件，单次执行可追加 `exec "说明这份仓库的入口和测试方式"`。
+
+### 使用 BaiInf
+
+以下配置在本机 BaiInf 0.1.10 和 Qwen3.6-35B-A3B Q4_K_M 上验证过。安装对应运行时并准备好模型权重后，在 ai-infra 仓库的 `modules/baiinf` 目录启动服务，保留这个终端。
+
+```sh
+./qwen-q4.sh --runtime "$HOME/.BaiInfra/BaiInf/versions/0.1.10/installation" \
+  --port 18367 --ctx-size 32768
+```
+
+在运行 BaiCode 的终端设置 `CODEX_HOME="$HOME/.baicode"` 并导出，把该目录下 `config.toml` 的模型配置设为以下值。
+
+```toml
+model_provider = "baiinf"
+model = "qwen3.6-35b-a3b-q4_k_m"
+model_context_window = 32768
+
+[model_providers.baiinf]
+name = "BaiInf"
+base_url = "http://127.0.0.1:18367/v1"
+wire_api = "responses"
+```
+
+在目标 Git 仓库中运行 BaiCode。例如，将下列命令中的 `/path/to/codex` 换成构建产物的绝对路径。
+
+```sh
+/path/to/codex exec --sandbox workspace-write "运行这个项目的测试，修复失败用例，再运行测试验证。"
+```
 
 ## 使用远端模型
 
