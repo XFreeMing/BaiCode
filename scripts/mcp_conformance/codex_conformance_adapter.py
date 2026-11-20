@@ -806,7 +806,7 @@ def run_adapter(server_url: str) -> dict[str, object]:
             registered = add.returncode == 0
             steps.append(Step("mcp_add", registered, _command_detail(add)))
             if not registered:
-                raise AdapterFailure("codex mcp add failed")
+                raise AdapterFailure("baicode mcp add failed")
 
         get = _run_command(
             [

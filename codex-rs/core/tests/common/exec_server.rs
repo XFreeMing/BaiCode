@@ -30,7 +30,7 @@ impl ExecServerProcess {
 
     pub async fn start_with_env(env: &[(&str, &str)]) -> Result<Self> {
         let codex_home = TempDir::new()?;
-        let mut command = Command::new(codex_utils_cargo_bin::cargo_bin("codex")?);
+        let mut command = Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?);
         command.envs(env.iter().copied());
         Self::start_command(command, codex_home).await
     }
@@ -43,9 +43,9 @@ impl ExecServerProcess {
         let package = codex_home.path().join("package");
         let bin = package.join("bin");
         std::fs::create_dir_all(&bin)?;
-        let executable = bin.join(format!("codex{}", std::env::consts::EXE_SUFFIX));
+        let executable = bin.join(format!("baicode{}", std::env::consts::EXE_SUFFIX));
         codex_utils_cargo_bin::copy_executable(
-            &codex_utils_cargo_bin::cargo_bin("codex")?,
+            &codex_utils_cargo_bin::cargo_bin("baicode")?,
             &executable,
         )?;
         std::fs::write(

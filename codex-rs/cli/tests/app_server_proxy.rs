@@ -48,7 +48,7 @@ async fn pipes_stdin_and_stdout_through_socket() -> anyhow::Result<()> {
         let stdin =
             std::fs::File::open(&request_path).context("failed to open child stdin fixture")?;
         let command =
-            codex_utils_process::background_command(codex_utils_cargo_bin::cargo_bin("codex")?);
+            codex_utils_process::background_command(codex_utils_cargo_bin::cargo_bin("baicode")?);
         let output = Command::from(command)
             .args(["app-server", "proxy", "--sock"])
             .arg(&socket_path)
@@ -57,10 +57,10 @@ async fn pipes_stdin_and_stdout_through_socket() -> anyhow::Result<()> {
             .kill_on_drop(true)
             .output()
             .await
-            .context("failed to run codex app-server proxy")?;
+            .context("failed to run baicode app-server proxy")?;
         anyhow::ensure!(
             output.status.success(),
-            "codex app-server proxy exited with {}: {}",
+            "baicode app-server proxy exited with {}: {}",
             output.status,
             String::from_utf8_lossy(&output.stderr).trim_end()
         );

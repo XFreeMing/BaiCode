@@ -103,7 +103,7 @@ impl EventProcessorWithHumanOutput {
             ThreadItemPayload::AgentMessage { text, .. } => {
                 eprintln!(
                     "{}\n{}",
-                    "codex".style(self.italic).style(self.magenta),
+                    "baicode".style(self.italic).style(self.magenta),
                     text
                 );
                 self.final_message = Some(text);
@@ -220,7 +220,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
         workspace_roots: &[PathUri],
     ) {
         const VERSION: &str = env!("CARGO_PKG_VERSION");
-        eprintln!("OpenAI Codex v{VERSION}\n--------");
+        eprintln!("BaiCode v{VERSION}\n--------");
         for (key, value) in
             config_summary_entries(config, session_configured_event, workspace_roots)
         {
@@ -437,7 +437,7 @@ impl EventProcessor for EventProcessorWithHumanOutput {
         {
             eprintln!(
                 "{}\n{}",
-                "codex".style(self.italic).style(self.magenta),
+                "baicode".style(self.italic).style(self.magenta),
                 message
             );
         }

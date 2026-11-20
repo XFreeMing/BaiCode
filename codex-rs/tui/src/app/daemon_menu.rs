@@ -63,7 +63,7 @@ impl App {
                 "Manage this server on its host. Local daemon updates are unavailable for remote connections.",
             )
         } else if self.daemon_cli_executable.is_none() {
-            Some("Run the Codex CLI to manage the daemon from this menu.")
+            Some("Run the BaiCode CLI to manage the daemon from this menu.")
         } else {
             None
         };

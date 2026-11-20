@@ -51,7 +51,7 @@ def assemble(
     if targets.get(app_target) != voice_target:
         raise ValueError("incompatible app and helper targets")
     suffix = ".exe" if app_target.endswith("windows-msvc") else ""
-    entrypoint = f"bin/codex{suffix}"
+    entrypoint = f"bin/baicode{suffix}"
     expected = {
         "layoutVersion": 1,
         "variant": "codex",

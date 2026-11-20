@@ -9,7 +9,7 @@ use tokio::process::Child;
 
 pub(super) async fn start(home: &Path, extra_args: &[&str]) -> Result<(Child, String)> {
     let socket = codex_app_server_client::app_server_control_socket_path(home)?;
-    let mut daemon = tokio::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+    let mut daemon = tokio::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
         .args(["app-server", "--listen", "unix://"])
         .args(extra_args)
         .env("CODEX_HOME", home)

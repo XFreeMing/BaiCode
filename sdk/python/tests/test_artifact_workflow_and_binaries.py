@@ -1293,7 +1293,7 @@ def test_default_runtime_is_resolved_from_installed_runtime_package(
 ) -> None:
     from openai_codex import client as client_module
 
-    fake_binary = tmp_path / ("codex.exe" if client_module.os.name == "nt" else "codex")
+    fake_binary = tmp_path / ("baicode.exe" if client_module.os.name == "nt" else "baicode")
     fake_binary.write_text("")
     ops = client_module.CodexBinResolverOps(
         installed_codex_path=lambda: fake_binary,

@@ -449,7 +449,8 @@ impl BedrockState {
             }
             BedrockView::EnvironmentInstructions => {
                 lines.push(
-                    "  Export AWS credentials, then run `codex --no-daemon` in that shell.".into(),
+                    "  Export AWS credentials, then run `baicode --no-daemon` in that shell."
+                        .into(),
                 );
                 lines.push("".into());
                 lines.push(Line::from(vec![

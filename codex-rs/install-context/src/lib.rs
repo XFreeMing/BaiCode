@@ -64,13 +64,13 @@ pub enum InstallMethod {
         /// The platform of the standalone release, either `Unix` or `Windows`.
         platform: StandalonePlatform,
     },
-    /// A Codex binary launched through the npm-managed `codex.js` shim.
+    /// A Codex binary launched through the npm-managed `baicode.js` shim.
     Npm,
-    /// A Codex binary launched through the bun-managed `codex.js` shim.
+    /// A Codex binary launched through the bun-managed `baicode.js` shim.
     Bun,
-    /// A Codex binary launched through the pnpm-managed `codex.js` shim.
+    /// A Codex binary launched through the pnpm-managed `baicode.js` shim.
     Pnpm,
-    /// A Codex binary launched through the Vite+-managed `codex.js` shim.
+    /// A Codex binary launched through the Vite+-managed `baicode.js` shim.
     VitePlus,
     /// A Codex binary that appears to come from a Homebrew install prefix.
     Brew,
@@ -256,7 +256,7 @@ impl CodexPackageLayout {
             }
             Some(name) if name == OsStr::new("MacOS") => {
                 // A provisioned CLI keeps helpers and metadata in the outer
-                // package. current_exe points inside the bundle, not at bin/codex.
+                // package. current_exe points inside the bundle, not at bin/baicode.
                 let contents = exe_dir.parent()?;
                 let bundle = contents.parent()?;
                 if contents.file_name()? != OsStr::new("Contents")

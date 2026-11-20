@@ -21,7 +21,11 @@ use std::time::UNIX_EPOCH;
 
 pub const BUILD_COMMIT: &str = "0123456789abcdef0123456789abcdef01234567";
 pub const WAIT: Duration = Duration::from_secs(/*secs*/ 10);
-const APP: &str = if cfg!(windows) { "codex.exe" } else { "codex" };
+const APP: &str = if cfg!(windows) {
+    "baicode.exe"
+} else {
+    "baicode"
+};
 const HELPER: &str = if cfg!(windows) {
     "codex-voice-host.exe"
 } else {

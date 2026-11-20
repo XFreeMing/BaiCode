@@ -174,7 +174,7 @@ async fn queue_does_not_fallback_from_unsupported_explicit_remote() -> Result<()
 
 #[test]
 fn queue_rejects_empty_message() -> Result<()> {
-    let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+    let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
         .args(["queue", "--thread", THREAD_ID, "--message", ""])
         .output()?;
     assert!(!output.status.success());
@@ -203,7 +203,7 @@ fn queue_rejects_unsupported_options() -> Result<()> {
         ("-C . queue --remote unix://", "`--cd` with `--remote`"),
         ("--remote unix:// queue -C .", "`--cd` with `--remote`"),
     ] {
-        let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+        let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
             .env("CODEX_HOME", codex_home.path())
             .args(args.split_whitespace())
             .args(["--thread", THREAD_ID, "--message", "do the thing"])
@@ -211,7 +211,7 @@ fn queue_rejects_unsupported_options() -> Result<()> {
         assert!(!output.status.success());
         let stderr = String::from_utf8(output.stderr)?;
         assert!(
-            stderr.contains("`codex queue`") && stderr.contains(expected),
+            stderr.contains("`baicode queue`") && stderr.contains(expected),
             "{args:?}: {stderr}"
         );
     }
@@ -247,7 +247,7 @@ async fn run_remote_queue_command(response: QueueResponse) -> Result<(Output, Va
             "CODEX_REMOTE_TOKEN",
         ]
     };
-    let output = tokio::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+    let output = tokio::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
         .env("CODEX_HOME", codex_home.path())
         .env("CODEX_REMOTE_TOKEN", "test-token")
         .args(remote_args)
@@ -296,7 +296,7 @@ async fn remote_session_commands_with_workload_identity_use_server_auth() -> Res
     use wiremock::matchers::path;
 
     let codex_home = socket_test_home()?;
-    let codex = codex_utils_cargo_bin::cargo_bin("codex")?;
+    let codex = codex_utils_cargo_bin::cargo_bin("baicode")?;
     let model = responses::start_mock_server().await;
     let model_requests = Mock::given(method("POST"))
         .and(path("/v1/responses"))
@@ -635,7 +635,7 @@ async fn remote_session_commands_with_workload_identity_use_server_auth() -> Res
 #[test]
 fn remote_exec_rejects_conflicting_endpoints() -> Result<()> {
     for command in [vec!["exec"], vec!["exec", "resume"]] {
-        let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+        let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
             .env_remove("CODEX_TEST_REMOTE_TOKEN")
             .args([
                 "--remote",
@@ -656,7 +656,7 @@ fn remote_exec_rejects_conflicting_endpoints() -> Result<()> {
 fn tui_session_commands_reject_conflicting_remotes_before_token_lookup() -> Result<()> {
     const MISSING_TOKEN: &str = "CODEX_TEST_MISSING_TUI_REMOTE_TOKEN";
     for command in ["resume", "fork"] {
-        let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+        let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
             .env_remove(MISSING_TOKEN)
             .args([
                 "--remote",
@@ -673,7 +673,7 @@ fn tui_session_commands_reject_conflicting_remotes_before_token_lookup() -> Resu
         assert!(!output.status.success());
         assert!(
             stderr.contains(&format!(
-                "`codex {command}` received conflicting remote server endpoints"
+                "`baicode {command}` received conflicting remote server endpoints"
             )),
             "{command}: {stderr}"
         );
@@ -707,7 +707,7 @@ fn remote_session_commands_validate_config() -> Result<()> {
         for &(args, config_file, config) in cases {
             let codex_home = TempDir::new()?;
             std::fs::write(codex_home.path().join(config_file), config)?;
-            let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+            let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
                 .env("CODEX_HOME", codex_home.path())
                 .current_dir(codex_home.path())
                 .args(args)
@@ -750,7 +750,7 @@ async fn queue_rejects_local_daemon_that_does_not_support_queueing() -> Result<(
         .await
     });
 
-    let output = tokio::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+    let output = tokio::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
         .env("CODEX_HOME", codex_home.path())
         .args(["queue", "--thread", THREAD_ID, "--message", "do the thing"])
         .output()
@@ -784,7 +784,7 @@ async fn queue_rejects_overrides_that_bypass_local_daemon() -> Result<()> {
         Ok::<_, std::io::Error>(())
     });
 
-    let output = tokio::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+    let output = tokio::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
         .env("CODEX_HOME", codex_home.path())
         .args([
             "queue",

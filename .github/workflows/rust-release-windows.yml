@@ -11,7 +11,7 @@ on:
 env:
   CODEX_BAZEL_GCS_BUCKET: ${{ secrets.CODEX_BAZEL_GCS_BUCKET }}
   CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
-  WINDOWS_BINARIES: "codex codex-code-mode-host codex-exec-server codex-windows-sandbox-setup codex-windows-sandbox-service codex-command-runner codex-app-server"
+  WINDOWS_BINARIES: "baicode codex-code-mode-host codex-exec-server codex-windows-sandbox-setup codex-windows-sandbox-service codex-command-runner codex-app-server"
 
 jobs:
   build-windows-binaries:
@@ -45,14 +45,14 @@ jobs:
           - runner: windows-x64
             target: x86_64-pc-windows-msvc
             bundle: primary
-            binaries: "codex codex-code-mode-host codex-exec-server"
+            binaries: "baicode codex-code-mode-host codex-exec-server"
             runs_on:
               group: ${{ github.event.repository.name }}-runners
               labels: ${{ github.event.repository.name }}-windows-x64
           - runner: windows-arm64
             target: aarch64-pc-windows-msvc
             bundle: primary
-            binaries: "codex codex-code-mode-host codex-exec-server"
+            binaries: "baicode codex-code-mode-host codex-exec-server"
             runs_on:
               group: ${{ github.event.repository.name }}-runners
               labels: ${{ github.event.repository.name }}-windows-arm64
@@ -690,7 +690,7 @@ jobs:
             # Create zip archive for Windows binaries.
             # Must run from inside the dest dir so 7z does not embed the
             # directory path inside the zip.
-            if [[ "$base" == "codex-${target}.exe" ]]; then
+            if [[ "$base" == "baicode-${target}.exe" ]]; then
               # Preserve WinGet executable paths while including the signed
               # runtime, resources, and package metadata from the canonical tar.
               bundle_dir="$(mktemp -d)"

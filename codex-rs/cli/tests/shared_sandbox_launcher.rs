@@ -49,7 +49,7 @@ fn sandbox_available() -> Result<bool> {
         home.path().join("config.toml"),
         "default_permissions = \"p\"\n[permissions.p.filesystem]\n\"/\" = \"read\"\n[permissions.p.network]\nenabled = false\n",
     )?;
-    let probe = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+    let probe = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
         .args(["sandbox", "--", "/usr/bin/true"])
         .env("CODEX_HOME", home.path())
         .output()?;
@@ -75,7 +75,7 @@ fn spawn_launcher(home: &TempDir, stdin: Stdio, stdout: Stdio) -> Result<Child> 
         home.path().join("config.toml"),
         "default_permissions = \"p\"\n[permissions.p.filesystem]\n\"/\" = \"read\"\n[permissions.p.network]\nenabled = false\n",
     )?;
-    Ok(Command::new(codex_utils_cargo_bin::cargo_bin("codex")?)
+    Ok(Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?)
         .arg("--codex-run-as-sandbox-launcher")
         .env("CODEX_HOME", home.path())
         .stdin(stdin)

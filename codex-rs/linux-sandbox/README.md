@@ -16,7 +16,7 @@ End-to-end coverage lives in `tests/suite/sandbox.rs` and the other suite module
 ### Transparent TCP
 
 ```sh
-codex sandbox --transparent-tcp --permission-profile db -- psql -h pg.example
+baicode sandbox --transparent-tcp --permission-profile db -- psql -h pg.example
 ```
 
 The Rust sandbox helper includes the TCP stack. Codex starts it automatically.
@@ -148,7 +148,7 @@ commands that would enter the bubblewrap path.
   inside the sandbox can differ from those exposed by `/proc`. Default invocations
   send no new helper flags and remain compatible with older helpers.
 - Trusted provisioning of a dedicated environment can start
-  `codex exec-server --linux-sandbox-pid-namespace=inherit`. This startup-only
+  `baicode exec-server --linux-sandbox-pid-namespace=inherit`. This startup-only
   setting applies to both process and filesystem helpers; repository config and
   command environment variables cannot enable it. The helper receives the new
   `--inherit-pid-namespace` option, which requires an updated helper; deploy the
@@ -163,4 +163,4 @@ commands that would enter the bubblewrap path.
 
 **Notes**
 
-- The CLI surface is `codex sandbox`; the host OS selects the sandbox backend.
+- The CLI surface is `baicode sandbox`; the host OS selects the sandbox backend.

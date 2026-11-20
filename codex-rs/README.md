@@ -1,3 +1,3 @@
-# Codex CLI
+# BaiCode CLI
 
-[**Codex CLI Documentation**](https://developers.openai.com/codex/cli)
+[Build and run BaiCode](../README.md)

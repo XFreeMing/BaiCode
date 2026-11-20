@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Unified entry point for the Codex CLI.
+// Unified entry point for the BaiCode CLI.
 
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync, realpathSync } from "fs";
@@ -90,23 +90,14 @@ function findCodexExecutable() {
     vendorRoot,
     targetTriple,
     "bin",
-    process.platform === "win32" ? "codex.exe" : "codex",
+    process.platform === "win32" ? "baicode.exe" : "baicode",
   );
   if (existsSync(codexExecutable)) {
     return codexExecutable;
   }
 
-  const packageManager = detectPackageManager();
-  const updateCommand =
-    packageManager === "bun"
-      ? "bun install -g @openai/codex@latest"
-      : packageManager === "pnpm"
-        ? "pnpm add -g @openai/codex@latest"
-        : packageManager === "vite-plus"
-          ? "vp install -g @openai/codex@latest"
-          : "npm install -g @openai/codex@latest";
   throw new Error(
-    `Missing optional dependency ${platformPackage}. Reinstall Codex: ${updateCommand}`,
+    `BaiCode executable missing at ${codexExecutable}. Install the BaiCode build for ${targetTriple}.`,
   );
 }
 

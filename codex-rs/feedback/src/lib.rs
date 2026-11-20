@@ -37,7 +37,7 @@ pub use guardian::GuardianReviewRecord;
 pub use guardian::guardian_review_failures;
 pub use guardian::record_guardian_review_failure;
 
-/// Filename used for the redacted `codex doctor --json` feedback attachment.
+/// Filename used for the redacted `baicode doctor --json` feedback attachment.
 pub const DOCTOR_REPORT_ATTACHMENT_FILENAME: &str = "codex-doctor-report.json";
 /// Filename used for the raw Codex Apps MCP tools cache feedback attachment.
 pub const CODEX_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME: &str = "codex-apps-tools-cache.json";

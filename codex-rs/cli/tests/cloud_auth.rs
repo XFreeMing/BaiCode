@@ -33,7 +33,7 @@ async fn cloud_list_respects_the_credential_store_and_trusted_destinations() -> 
     )?;
 
     let command = || -> Result<assert_cmd::Command> {
-        let mut command = assert_cmd::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?);
+        let mut command = assert_cmd::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?);
         command
             .current_dir(codex_home.path())
             .env("CODEX_HOME", codex_home.path())
@@ -85,7 +85,7 @@ async fn cloud_list_respects_the_credential_store_and_trusted_destinations() -> 
         ])
         .assert()
         .failure()
-        .stderr(contains("Not signed in. Please run 'codex login'"));
+        .stderr(contains("Not signed in. Please run 'baicode login'"));
     assert!(server.received_requests().await.unwrap().is_empty());
 
     // Staging must reach explicit PAT authentication. Reject the synthetic PAT locally so
@@ -107,7 +107,7 @@ async fn cloud_list_respects_the_credential_store_and_trusted_destinations() -> 
         .args(["cloud", "list", "--limit", "1", "--json"])
         .assert()
         .failure()
-        .stderr(contains("Not signed in. Please run 'codex login'"));
+        .stderr(contains("Not signed in. Please run 'baicode login'"));
     auth_server.verify().await;
     Ok(())
 }

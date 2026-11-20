@@ -48,6 +48,7 @@ fn defender_distinguishes_detection_and_remediation() {
 #[test]
 fn only_trusted_codex_executables_are_reported() {
     for (path, expected) in [
+        ("baicode.exe", true),
         ("codex.exe", true),
         (r"OpenAI.Codex_2p2nqsd0c76g0\ChatGPT.exe", true),
         ("evil-codex.exe", false),

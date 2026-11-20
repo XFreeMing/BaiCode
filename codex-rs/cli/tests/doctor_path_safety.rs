@@ -41,8 +41,8 @@ impl Fixture {
         // target/ so this fixture also exercises the packaged-install checks.
         let program = root
             .path()
-            .join(format!("codex{}", std::env::consts::EXE_SUFFIX));
-        let source = codex_utils_cargo_bin::cargo_bin("codex")?;
+            .join(format!("baicode{}", std::env::consts::EXE_SUFFIX));
+        let source = codex_utils_cargo_bin::cargo_bin("baicode")?;
         // Hard-link setup and teardown invalidate other tests' Rosetta translations.
         #[cfg(all(target_os = "macos", target_arch = "x86_64"))]
         {

@@ -20,11 +20,11 @@ async function installWrapper(directory, executable) {
   const target = `${arch}-${process.platform === "darwin" ? "apple-darwin" : "unknown-linux-musl"}`;
   const bin = path.join(directory, "vendor", target, "bin");
   await mkdir(bin, { recursive: true });
-  await symlink(executable, path.join(bin, "codex"));
+  await symlink(executable, path.join(bin, "baicode"));
   await mkdir(path.join(directory, "bin"));
   await writeFile(path.join(directory, "package.json"), '{"type":"module"}');
-  const wrapper = path.join(directory, "bin", "codex.js");
-  await copyFile(new URL("../bin/codex.js", import.meta.url), wrapper);
+  const wrapper = path.join(directory, "bin", "baicode.js");
+  await copyFile(new URL("../bin/baicode.js", import.meta.url), wrapper);
   return wrapper;
 }
 

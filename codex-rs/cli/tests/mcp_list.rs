@@ -30,7 +30,7 @@ use wiremock::matchers::method;
 use wiremock::matchers::path;
 
 fn codex_command(codex_home: &Path) -> Result<assert_cmd::Command> {
-    let mut cmd = assert_cmd::Command::new(codex_utils_cargo_bin::cargo_bin("codex")?);
+    let mut cmd = assert_cmd::Command::new(codex_utils_cargo_bin::cargo_bin("baicode")?);
     cmd.env("CODEX_HOME", codex_home);
     Ok(cmd)
 }
@@ -409,7 +409,7 @@ async fn list_and_get_render_expected_output() -> Result<()> {
     assert!(stdout.contains("APP_TOKEN=*****"));
     assert!(stdout.contains("WORKSPACE_ID=*****"));
     assert!(stdout.contains("enabled: true"));
-    assert!(stdout.contains("remove: codex mcp remove docs"));
+    assert!(stdout.contains("remove: baicode mcp remove docs"));
 
     let mut get_json_cmd = codex_command(codex_home.path())?;
     get_json_cmd
@@ -456,7 +456,7 @@ fn get_reports_removal_scope_for_profile_servers() -> Result<()> {
               cwd: -
               env: -
               profile settings: <profile file>
-              removal scope: `codex mcp remove` only edits the global config.
+              removal scope: `baicode mcp remove` only edits the global config.
             ");
         }
     }
@@ -466,7 +466,7 @@ fn get_reports_removal_scope_for_profile_servers() -> Result<()> {
         .args(["-p", "work", "mcp", "get", "inherited"])
         .assert()
         .success()
-        .stdout(contains("remove: codex mcp remove inherited"));
+        .stdout(contains("remove: baicode mcp remove inherited"));
 
     Ok(())
 }

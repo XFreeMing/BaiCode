@@ -17,7 +17,7 @@ CODEX_SDK_ROOT = REPO_ROOT / "sdk" / "typescript"
 CODEX_NPM_NAME = "@openai/codex"
 CODEX_PACKAGE_COMPONENT = "codex-package"
 
-# `npm_name` is the local optional-dependency alias consumed by `bin/codex.js`.
+# `npm_name` is the local optional-dependency alias consumed by `bin/baicode.js`.
 # The underlying package published to npm is always `@openai/codex`.
 CODEX_PLATFORM_PACKAGES: dict[str, dict[str, str]] = {
     "codex-linux-x64": {
@@ -179,8 +179,8 @@ def main() -> int:
                 print(
                     f"Staged version {version} for release in {staging_dir_str}\n\n"
                     "Verify the CLI:\n"
-                    f"    node {staging_dir_str}/bin/codex.js --version\n"
-                    f"    node {staging_dir_str}/bin/codex.js --help\n\n"
+                    f"    node {staging_dir_str}/bin/baicode.js --version\n"
+                    f"    node {staging_dir_str}/bin/baicode.js --help\n\n"
                 )
             elif package in CODEX_PLATFORM_PACKAGES:
                 print(
@@ -228,7 +228,7 @@ def stage_sources(staging_dir: Path, version: str, package: str) -> None:
     if package == "codex":
         bin_dir = staging_dir / "bin"
         bin_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(CODEX_CLI_ROOT / "bin" / "codex.js", bin_dir / "codex.js")
+        shutil.copy2(CODEX_CLI_ROOT / "bin" / "baicode.js", bin_dir / "baicode.js")
 
         readme_src = REPO_ROOT / "README.md"
         if readme_src.exists():
@@ -276,7 +276,7 @@ def stage_sources(staging_dir: Path, version: str, package: str) -> None:
         package_json["version"] = version
 
     if package == "codex":
-        package_json["files"] = ["bin/codex.js"]
+        package_json["files"] = ["bin/baicode.js"]
         package_json["optionalDependencies"] = {
             CODEX_PLATFORM_PACKAGES[platform_package]["npm_name"]: (
                 f"npm:{CODEX_NPM_NAME}@"
@@ -370,7 +370,7 @@ def copy_native_binaries(
             if dest_target_dir.exists():
                 shutil.rmtree(dest_target_dir)
             shutil.copytree(target_dir, dest_target_dir)
-            # standalone exec-server is a binary that is equal to codex exec-server, do not publish it to npm
+            # standalone exec-server is a binary that is equal to baicode exec-server, do not publish it to npm
             for name in ("codex-exec-server", "codex-exec-server.exe"):
                 (dest_target_dir / "bin" / name).unlink(missing_ok=True)
             metadata_path = dest_target_dir / "codex-package.json"

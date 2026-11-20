@@ -418,7 +418,7 @@ async fn reconnect_restores_history_permissions_and_resumes_unsent_input() -> Re
             .join("\n");
         if deferred_notice {
             assert_snapshot!(notices, @r###"
-⚠ A background Codex service is running v2.0.0, older than your Codex CLI
+⚠ A background Codex service is running v2.0.0, older than your BaiCode CLI
 "###);
         } else if edit_offline {
             assert!(notices.contains("unacknowledged prompt"));
@@ -695,7 +695,7 @@ async fn reconnect_allows_slow_hydration_but_bounds_a_stalled_server() -> Result
                         if archived {
                             return Some(json!({"error": {
                                 "code": -32600,
-                                "message": format!("session {id} is archived. Run `codex unarchive {id}` to unarchive it first."),
+                                "message": format!("session {id} is archived. Run `baicode unarchive {id}` to unarchive it first."),
                             }}));
                         }
                     } else {

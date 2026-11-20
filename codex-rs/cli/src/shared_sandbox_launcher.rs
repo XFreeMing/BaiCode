@@ -1,7 +1,7 @@
-//! Private stdio supervisor for helpers that would otherwise each retain a `codex sandbox` process.
+//! Private stdio supervisor for helpers that would otherwise each retain a `baicode sandbox` process.
 //!
 //! Each launch goes through the ordinary host sandbox configuration and gets its own proxy. The caller
-//! must start the supervisor with the same environment that it would give `codex sandbox`.
+//! must start the supervisor with the same environment that it would give `baicode sandbox`.
 
 use std::collections::HashMap;
 use std::ops::ControlFlow;
@@ -248,7 +248,7 @@ fn controller_stdout() -> std::io::Result<Box<dyn AsyncWrite + Unpin + Send>> {
     }
 }
 
-/// Launch one helper with the same config, sandbox transform and proxy as `codex sandbox`.
+/// Launch one helper with the same config, sandbox transform and proxy as `baicode sandbox`.
 async fn start_process(
     start: Start,
     output: &mpsc::Sender<Value>,

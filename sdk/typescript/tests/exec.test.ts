@@ -51,7 +51,7 @@ describe("CodexExec", () => {
     const child = createEarlyExitChild();
     spawnMock.mockReturnValue(child as unknown as child_process.ChildProcess);
 
-    const exec = new CodexExec("codex");
+    const exec = new CodexExec("baicode");
     const runPromise = (async () => {
       for await (const _ of exec.run({ input: "hi" })) {
         // no-op
@@ -85,7 +85,7 @@ describe("CodexExec", () => {
       child.emit("exit", 0, null);
     });
 
-    const exec = new CodexExec("codex");
+    const exec = new CodexExec("baicode");
     for await (const _ of exec.run({ input: "hi", images: ["img.png"], threadId: "thread-id" })) {
       // no-op
     }
@@ -171,7 +171,7 @@ describe("CodexExec", () => {
         child.emit("exit", 0, null);
       });
 
-      const exec = new CodexExec("codex", undefined, config, configOverrides);
+      const exec = new CodexExec("baicode", undefined, config, configOverrides);
       for await (const _ of exec.run({ input: "hi" })) {
         // no-op
       }
@@ -197,7 +197,7 @@ describe("CodexExec", () => {
       child.emit("exit", 0, null);
     });
 
-    const exec = new CodexExec("codex");
+    const exec = new CodexExec("baicode");
     for await (const _ of exec.run({ input: "hi", threadSource: "automated_review" })) {
       // no-op
     }
@@ -222,7 +222,7 @@ describe("CodexExec", () => {
       child.emit("exit", 0, null);
     });
 
-    const exec = new CodexExec("codex", undefined, { approval_policy: "never" }, [
+    const exec = new CodexExec("baicode", undefined, { approval_policy: "never" }, [
       'approval_policy="on-failure"',
       'openai_base_url="https://raw.example.test"',
       "sandbox_workspace_write={network_access=true}",
@@ -276,7 +276,7 @@ describe("CodexExec", () => {
     process.env.CODEX_ENV_SHOULD_NOT_LEAK = "leak";
 
     try {
-      const exec = new CodexExec("codex", {
+      const exec = new CodexExec("baicode", {
         CODEX_HOME: "/tmp/codex-home",
         CUSTOM_ENV: "custom",
       });

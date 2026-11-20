@@ -420,7 +420,7 @@ function findCodexPath(): CodexPathResolution {
     );
   }
 
-  const codexBinaryName = process.platform === "win32" ? "codex.exe" : "codex";
+  const codexBinaryName = process.platform === "win32" ? "baicode.exe" : "baicode";
   const nativePackage = resolveNativePackage(vendorRoot, targetTriple, codexBinaryName);
   if (!nativePackage) {
     throw new Error(

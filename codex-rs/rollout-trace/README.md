@@ -121,7 +121,7 @@ A trace bundle contains:
 - `trace.jsonl`: append-only raw events ordered by writer-assigned `seq`.
 - `payloads/*.zst`: raw requests, responses, tool inputs/results, runtime
   events, terminal output, compaction data, and protocol snapshots.
-- `state.json`: reduced trace for consumers, written by `codex debug trace-reduce`.
+- `state.json`: reduced trace for consumers, written by `baicode debug trace-reduce`.
 
 Schema v3 indexes numbered Zstandard shards in `state.json` under `raw_payloads`.
 Prepared prompts share exact input items. In tool results and tool runtime events, the writer
@@ -199,7 +199,7 @@ the stored trace without confusing it with the product-level session identity.
 Run the recording executable to reduce its bundle:
 
 ```bash
-codex debug trace-reduce <trace-bundle>
+baicode debug trace-reduce <trace-bundle>
 ```
 
 By default this writes `<trace-bundle>/state.json`. Within the recording binary,

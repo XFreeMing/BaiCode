@@ -42,7 +42,7 @@ use super::DoctorIssue;
 use super::push_path_detail;
 
 #[cfg(target_os = "windows")]
-const WINDOWS_SETUP_REMEDIATION: &str = "run codex sandbox setup --elevated --user <end-user> --codex-home <authoritative-home> from an elevated shell";
+const WINDOWS_SETUP_REMEDIATION: &str = "run baicode sandbox setup --elevated --user <end-user> --codex-home <authoritative-home> from an elevated shell";
 
 pub(super) fn sandbox_check(config: &Config, arg0_paths: &Arg0DispatchPaths) -> DoctorCheck {
     let mut details = Vec::new();
@@ -312,7 +312,7 @@ pub(super) fn sandbox_check(config: &Config, arg0_paths: &Arg0DispatchPaths) -> 
                         SetupErrorCode::OrchestratorPayloadSerializeFailed
                         | SetupErrorCode::HelperRequestArgsFailed
                         | SetupErrorCode::HelperUnknownError => {
-                            "repair or reinstall the Codex CLI from an approved distribution"
+                            "repair or reinstall the BaiCode CLI from an approved distribution"
                         }
                     };
                     check
