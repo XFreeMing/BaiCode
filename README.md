@@ -21,7 +21,7 @@ baic --version
 
 ## 使用本机模型
 
-启动具备 Responses API 的本机推理服务，准备已安装且支持工具调用的模型。BaiCode 首次启动时会在当前用户的主目录创建 `~/.BaiCode`，用于保存配置、会话和运行数据。若需指定其他已有目录，可设置环境变量 `CODEX_HOME`。
+启动具备 Responses API 的本机推理服务，准备已安装且支持工具调用的模型。BaiCode 首次启动时会在当前用户的主目录创建 `~/.BaiCode`，用于保存配置、会话和运行数据。若需指定其他已有目录，可设置环境变量 `BAICODE_HOME`。
 
 使用 Ollama 时，在 `~/.BaiCode/config.toml` 中写入：
 

@@ -894,6 +894,7 @@ pub(super) fn redact_detail(detail: &str) -> String {
 
     let secret_keys = [
         "openai_api_key",
+        "baicode_api_key",
         "codex_api_key",
         "codex_access_token",
         "authorization",
@@ -1878,10 +1879,20 @@ Run baic doctor without --summary for detailed diagnostics.
     }
 
     #[test]
+    fn redact_detail_hides_baicode_credentials() {
+        for key in ["BAICODE_API_KEY", "BAICODE_ACCESS_TOKEN"] {
+            assert_eq!(
+                redact_detail(&format!("authentication: {key}=sample")),
+                "authentication: <redacted>"
+            );
+        }
+    }
+
+    #[test]
     fn redact_detail_preserves_env_var_names() {
         assert_eq!(
-            redact_detail("auth env vars present: OPENAI_API_KEY, CODEX_API_KEY"),
-            "auth env vars present: OPENAI_API_KEY, CODEX_API_KEY"
+            redact_detail("auth env vars present: OPENAI_API_KEY, BAICODE_API_KEY"),
+            "auth env vars present: OPENAI_API_KEY, BAICODE_API_KEY"
         );
     }
 

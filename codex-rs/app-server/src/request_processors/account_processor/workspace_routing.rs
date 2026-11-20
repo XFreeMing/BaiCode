@@ -556,7 +556,7 @@ impl AccountRequestProcessor {
                     routing.routing.backend_origin == origin.ascii_serialization()
                 });
                 let workspace_bound = request.previously_routed
-                    || request.provider_base_url == codex_model_provider::CHATGPT_CODEX_BASE_URL
+                    || request.provider_base_url == codex_model_provider::CHATGPT_BAICODE_BASE_URL
                     || origin == session_bootstrap_origin
                     || (session_bootstrap_origin == bootstrap_origin && selected_backend);
                 if !workspace_bound {

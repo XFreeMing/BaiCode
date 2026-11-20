@@ -5,7 +5,7 @@ use pretty_assertions::assert_eq;
 
 use super::*;
 
-const CHILD_MODE_ENV_VAR: &str = "CODEX_SHELL_ENVIRONMENT_SCRUBBER_TEST_MODE";
+const CHILD_MODE_ENV_VAR: &str = "BAICODE_SHELL_ENVIRONMENT_SCRUBBER_TEST_MODE";
 const TEST_NAME: &str =
     "shell_environment::tests::command_scrubber_removes_names_from_real_child_environment";
 
@@ -20,13 +20,13 @@ fn tool_call_id_replaces_platform_equivalent_names() {
         (Some(representable.as_str()), Some(representable.as_str())),
     ] {
         let mut env = HashMap::from([
-            ("CODEX_TOOL_CALL_ID".to_string(), "stale-call".to_string()),
+            ("BAICODE_TOOL_CALL_ID".to_string(), "stale-call".to_string()),
             (
-                "Codex_Tool_Call_Id".to_string(),
+                "BaiCode_Tool_Call_Id".to_string(),
                 "mixed-case-call".to_string(),
             ),
             (
-                "codex_tool_call_id".to_string(),
+                "baicode_tool_call_id".to_string(),
                 "lowercase-call".to_string(),
             ),
             ("OTHER".to_string(), "unchanged".to_string()),
@@ -38,16 +38,16 @@ fn tool_call_id_replaces_platform_equivalent_names() {
         #[cfg(not(windows))]
         expected.extend([
             (
-                "Codex_Tool_Call_Id".to_string(),
+                "BaiCode_Tool_Call_Id".to_string(),
                 "mixed-case-call".to_string(),
             ),
             (
-                "codex_tool_call_id".to_string(),
+                "baicode_tool_call_id".to_string(),
                 "lowercase-call".to_string(),
             ),
         ]);
         if let Some(expected_call) = expected_call {
-            expected.insert("CODEX_TOOL_CALL_ID".to_string(), expected_call.to_string());
+            expected.insert("BAICODE_TOOL_CALL_ID".to_string(), expected_call.to_string());
         }
         assert_eq!(env, expected, "call_id: {call_id:?}");
     }
@@ -58,7 +58,7 @@ fn non_inheritable_environment_is_removed_after_policy_overrides() {
     let vars = [
         ("SAFE".to_string(), "inherited".to_string()),
         (
-            "codex_guardian_decisions_api_key".into(),
+            "baicode_guardian_decisions_api_key".into(),
             "synthetic-inherited-key".into(),
         ),
         ("node_repl_auth_token".into(), "inherited-token".into()),
@@ -77,7 +77,7 @@ fn non_inheritable_environment_is_removed_after_policy_overrides() {
             r#"{"instance_id":"box-one"}"#.to_string(),
         ),
         (
-            "codex_exec_server_noise_auth_token".to_string(),
+            "baicode_exec_server_noise_auth_token".to_string(),
             "inherited-noise-token".to_string(),
         ),
     ];
@@ -87,7 +87,7 @@ fn non_inheritable_environment_is_removed_after_policy_overrides() {
         r#set: HashMap::from([
             ("SAFE".to_string(), "override".to_string()),
             (
-                "CODEX_GUARDIAN_DECISIONS_API_KEY".into(),
+                "BAICODE_GUARDIAN_DECISIONS_API_KEY".into(),
                 "synthetic-override-key".into(),
             ),
             ("Node_Repl_Auth_Token".into(), "configured-token".into()),
@@ -96,7 +96,7 @@ fn non_inheritable_environment_is_removed_after_policy_overrides() {
                 "/run/identity-token".to_string(),
             ),
             (
-                "Codex_Exec_Server_Noise_Auth_Token".to_string(),
+                "BaiCode_Exec_Server_Noise_Auth_Token".to_string(),
                 "configured-noise-token".to_string(),
             ),
         ]),
@@ -116,7 +116,7 @@ fn command_scrubber_removes_names_from_real_child_environment() {
             .args([TEST_NAME, "--exact", "--nocapture"])
             .env(CHILD_MODE_ENV_VAR, "1")
             .env(
-                "Codex_Guardian_Decisions_Api_Key",
+                "BaiCode_Guardian_Decisions_Api_Key",
                 "synthetic-inherited-key",
             )
             .env("Node_Repl_Auth_Token", "inherited-token")
@@ -126,7 +126,7 @@ fn command_scrubber_removes_names_from_real_child_environment() {
                 r#"{"instance_id":"box-one"}"#,
             )
             .env(
-                "Codex_Exec_Server_Noise_Auth_Token",
+                "BaiCode_Exec_Server_Noise_Auth_Token",
                 "inherited-noise-token",
             )
             .output()
@@ -145,10 +145,10 @@ fn command_scrubber_removes_names_from_real_child_environment() {
         .env("NODE_REPL_AUTH_TOKEN", "configured-token")
         .env("openai_identity_token_file", "/run/identity-token")
         .env(
-            CODEX_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR,
+            BAICODE_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR,
             "configured-noise-token",
         )
-        .env("CODEX_GUARDIAN_DECISIONS_API_KEY", "synthetic-override-key")
+        .env("BAICODE_GUARDIAN_DECISIONS_API_KEY", "synthetic-override-key")
         .env("SAFE", "value");
     scrub_non_inheritable_env_vars(&mut command);
     let output = command.output().expect("read child environment");

@@ -1,6 +1,6 @@
 """Materialize the stable release packages selected before running Bazel."""
 
-_CODEX_RELEASE_BUILD_FILE = """\
+_BAICODE_RELEASE_BUILD_FILE = """\
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
@@ -20,9 +20,9 @@ filegroup(
 """
 
 def _codex_release_repository_impl(repository_ctx):
-    releases = repository_ctx.getenv("CODEX_COMPAT_RELEASES")
+    releases = repository_ctx.getenv("BAICODE_COMPAT_RELEASES")
     if not releases:
-        fail("Set CODEX_COMPAT_RELEASES to the JSON from resolve_exec_server_releases.py before building release compatibility targets.")
+        fail("Set BAICODE_COMPAT_RELEASES to the JSON from resolve_exec_server_releases.py before building release compatibility targets.")
     release = json.decode(releases)[repository_ctx.attr.release]
     asset = "codex-package-x86_64-unknown-linux-musl.tar.gz"
     version = release["version"]
@@ -38,7 +38,7 @@ def _codex_release_repository_impl(repository_ctx):
     binaries = entrypoint.rpartition("/")[0] + "/**"
     repository_ctx.file(
         "BUILD.bazel",
-        _CODEX_RELEASE_BUILD_FILE.format(
+        _BAICODE_RELEASE_BUILD_FILE.format(
             binaries = json.encode(binaries),
             entrypoint = json.encode(entrypoint),
             path = json.encode(manifest["pathDir"] + "/**"),

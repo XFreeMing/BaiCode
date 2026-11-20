@@ -870,7 +870,7 @@ async fn effective_mcp_servers_preserve_runtime_servers() {
         },
     ));
     catalog.register(McpServerRegistration::from_config(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         codex_apps_mcp_server_config(
             &config.client.chatgpt_base_url,
             config.apps_mcp_product_sku.as_deref(),
@@ -888,7 +888,7 @@ async fn effective_mcp_servers_preserve_runtime_servers() {
         .get(&McpServerKey::unscoped("docs"))
         .expect("configured server should exist");
     let codex_apps = effective
-        .get(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+        .get(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
         .expect("codex apps server should exist");
 
     let sample = sample.config();
@@ -917,7 +917,7 @@ async fn effective_mcp_servers_preserve_runtime_servers() {
     // The reserved Apps name stays auth-gated even when a plugin supplied it.
     let mut catalog = ResolvedMcpCatalog::builder();
     catalog.register(McpServerRegistration::from_selected_plugin(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         McpPluginAttribution::agent_plugin("plugin@test".into(), "Plugin".into()),
         /*selection_order*/ 0,
         "remote",

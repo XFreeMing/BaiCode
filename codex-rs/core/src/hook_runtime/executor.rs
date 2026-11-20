@@ -7,7 +7,7 @@ use codex_core_plugins::executor_plugin_hook_sources_v2;
 use codex_exec_server::ExecutorCapabilityDiscoverySnapshot;
 use codex_exec_server::ExecutorCapabilityDiscoveryV2Snapshot;
 use codex_extension_api::SelectedPluginSnapshot;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::McpBinding;
 use codex_plugin::ExecutorPluginHookSource;
 
@@ -22,7 +22,7 @@ pub(crate) fn prepare_executor_hook_sources(
     let lookup_enabled_tool = |server: &str, tool: &str| {
         let key = config.mcp_server_catalog.resolve_server_name(server)?;
         mcp.tool_info(key, tool).filter(|tool_info| {
-            if server != CODEX_APPS_MCP_SERVER_NAME {
+            if server != BAICODE_APPS_MCP_SERVER_NAME {
                 return true;
             }
             let annotations = tool_info.tool.annotations.as_ref();

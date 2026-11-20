@@ -47,7 +47,7 @@ fn local_command(home: &TempDir) -> Result<Command> {
     let mut command = Command::new(codex_utils_cargo_bin::cargo_bin("baic")?);
     command
         .current_dir(home.path())
-        .env("CODEX_HOME", home.path())
+        .env("BAICODE_HOME", home.path())
         .env("NO_PROXY", "127.0.0.1,localhost")
         .env("no_proxy", "127.0.0.1,localhost")
         .stdin(Stdio::null());
@@ -58,10 +58,10 @@ fn local_command(home: &TempDir) -> Result<Command> {
         "http_proxy",
         "https_proxy",
         "all_proxy",
-        "CODEX_ACCESS_TOKEN",
-        "CODEX_API_KEY",
+        "BAICODE_ACCESS_TOKEN",
+        "BAICODE_API_KEY",
         "OPENAI_API_KEY",
-        "CODEX_CA_CERTIFICATE",
+        "BAICODE_CA_CERTIFICATE",
         "SSL_CERT_FILE",
         "OPENAI_WORKLOAD_IDENTITY_CONTEXT",
         "OPENAI_IDENTITY_TOKEN_FILE",
@@ -242,7 +242,7 @@ async fn network_only_config_failure_human_output() -> Result<()> {
     // Normalize the rendered config-file row while retaining its label and filename.
     let file_row = Regex::new(r"(?m)^(      file +).+[\\/]config\.toml$")?;
     assert!(file_row.is_match(&stdout), "{stdout}");
-    let stdout = file_row.replace_all(&stdout, "${1}<CODEX_HOME>/config.toml");
+    let stdout = file_row.replace_all(&stdout, "${1}<BAICODE_HOME>/config.toml");
     insta::assert_snapshot!("network_only_config_failure_human_output", stdout);
     Ok(())
 }
@@ -313,11 +313,11 @@ trust_level = "trusted"
 
         let output = Command::new(codex_utils_cargo_bin::cargo_bin("baic")?)
             .current_dir(codex_home.path())
-            .env("CODEX_HOME", codex_home.path())
+            .env("BAICODE_HOME", codex_home.path())
             .env("NO_PROXY", "127.0.0.1,localhost")
             .env("no_proxy", "127.0.0.1,localhost")
-            .env_remove("CODEX_ACCESS_TOKEN")
-            .env_remove("CODEX_API_KEY")
+            .env_remove("BAICODE_ACCESS_TOKEN")
+            .env_remove("BAICODE_API_KEY")
             .env_remove("OPENAI_API_KEY")
             .arg("--cd")
             .arg(workspace.path())
@@ -391,12 +391,12 @@ async fn invalid_custom_ca_falls_back_to_system_roots() -> Result<()> {
         let mut command = Command::new(codex_utils_cargo_bin::cargo_bin("baic")?);
         command
             .args(["doctor", "--json"])
-            .env("CODEX_HOME", codex_home.path())
-            .env("CODEX_CA_CERTIFICATE", &certificate)
+            .env("BAICODE_HOME", codex_home.path())
+            .env("BAICODE_CA_CERTIFICATE", &certificate)
             .stdin(Stdio::null());
         if let Some(sandbox) = sandbox {
             command
-                .env("CODEX_SANDBOX", sandbox)
+                .env("BAICODE_SANDBOX", sandbox)
                 .env("HTTP_PROXY", "http://127.0.0.1:1")
                 .env("http_proxy", "http://127.0.0.1:1")
                 .env("HTTPS_PROXY", "http://127.0.0.1:1")
@@ -454,7 +454,7 @@ fn doctor_reports_macos_system_proxy_configuration_and_policy() -> Result<()> {
 fn doctor_report(codex_home: &Path) -> Result<Value> {
     let output = Command::new(codex_utils_cargo_bin::cargo_bin("baic")?)
         .args(["doctor", "--json"])
-        .env("CODEX_HOME", codex_home)
+        .env("BAICODE_HOME", codex_home)
         .stdin(Stdio::null())
         .output()
         .context("failed to run the doctor")?;

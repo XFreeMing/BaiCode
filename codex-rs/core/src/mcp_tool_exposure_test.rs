@@ -2,7 +2,7 @@ use codex_mcp::McpServerKey;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::McpPluginAttribution;
 use codex_mcp::McpServerRegistration;
 use codex_mcp::ResolvedMcpCatalog;
@@ -245,7 +245,7 @@ async fn cached_app_handlers_still_obey_current_apps_enablement_and_tool_policy(
         .await
         .expect("build restrictive app policy");
     let tools = [make_mcp_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "events/create",
         "mcp__codex_apps__calendar",
         "create",
@@ -352,7 +352,7 @@ async fn excludes_tools_hidden_from_model_exposure() {
     );
     let visible_app_tool = with_visibility(
         make_mcp_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "calendar_read",
             "mcp__codex_apps__calendar",
             "read",
@@ -363,7 +363,7 @@ async fn excludes_tools_hidden_from_model_exposure() {
     );
     let hidden_app_tool = with_visibility(
         make_mcp_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "calendar_open",
             "mcp__codex_apps__calendar",
             "open",
@@ -393,7 +393,7 @@ async fn excludes_tools_hidden_from_model_exposure() {
 async fn app_tool_registration_uses_trusted_catalog_metadata_and_preserves_source_order() {
     let config = test_config().await;
     let app_tool = make_mcp_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "calendar_list_events",
         "mcp__codex_apps__calendar",
         "list_events",
@@ -401,7 +401,7 @@ async fn app_tool_registration_uses_trusted_catalog_metadata_and_preserves_sourc
         Some("Calendar"),
     );
     let missing_connector_id = make_mcp_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "unknown_tool",
         "mcp__codex_apps__unknown",
         "unknown",
@@ -409,7 +409,7 @@ async fn app_tool_registration_uses_trusted_catalog_metadata_and_preserves_sourc
         /*connector_name*/ None,
     );
     let mut synthetic_app_tool = make_mcp_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "gmail_batch_read_email",
         "mcp__codex_apps__gmail",
         "batch_read_email",
@@ -490,7 +490,7 @@ enabled = true
         .await
         .expect("config should build");
     let enabled_tool = make_mcp_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "events/create",
         "mcp__codex_apps__calendar",
         "create",
@@ -498,7 +498,7 @@ enabled = true
         Some("Calendar"),
     );
     let disabled_tool = make_mcp_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "events/list",
         "mcp__codex_apps__calendar",
         "list",
@@ -544,7 +544,7 @@ async fn defers_apps_and_non_app_mcp_tools() {
             /*connector_name*/ None,
         ),
         make_mcp_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "calendar_create_event",
             "mcp__codex_apps__calendar",
             "_create_event",

@@ -45,7 +45,7 @@ async fn start_overlapping_apps_clients(
     let start = |tool_name: &str| {
         let (publish, mut initialized) = watch::channel(None);
         let params = StartServerTaskParams {
-            server_key: McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            server_key: McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             publish_apps: Some(publish),
             sharing_declined: None,
             server_capabilities: Arc::default(),
@@ -59,9 +59,9 @@ async fn start_overlapping_apps_clients(
             client_elicitation_capability: ElicitationCapability::default(),
             client_mcp_extensions: ClientMcpExtensions::default(),
             auth_changes: None,
-            catalog_item_limit: crate::pagination::MAX_CODEX_APPS_TOOL_CATALOG_ITEMS,
+            catalog_item_limit: crate::pagination::MAX_BAICODE_APPS_TOOL_CATALOG_ITEMS,
         };
-        let tool = create_test_tool(CODEX_APPS_MCP_SERVER_NAME, tool_name).tool;
+        let tool = create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, tool_name).tool;
         async move {
             let list_started = Arc::new(Notify::new());
             let release_list = Arc::new(Notify::new());
@@ -74,7 +74,7 @@ async fn start_overlapping_apps_clients(
             )
             .await?;
             let mut startup = Box::pin(start_server_task(
-                CODEX_APPS_MCP_SERVER_NAME.into(),
+                BAICODE_APPS_MCP_SERVER_NAME.into(),
                 client,
                 params,
             ));

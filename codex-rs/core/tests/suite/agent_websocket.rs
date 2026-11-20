@@ -12,7 +12,7 @@ use codex_core::ThreadManager;
 use codex_core::TurnInputRequest;
 use codex_core::TurnInputSubmission;
 use codex_core::TurnStartOptions;
-use codex_core::X_CODEX_ROUTING_HINT_HEADER;
+use codex_core::X_BAICODE_ROUTING_HINT_HEADER;
 use codex_features::Feature;
 use codex_login::CodexAuth;
 use codex_protocol::ThreadId;
@@ -167,7 +167,7 @@ async fn spawned_agent_prewarm_handshake_inherits_effective_root_service_tier(
         "model=gpt-5.4".to_string()
     };
     assert_eq!(
-        handshakes[1].header(X_CODEX_ROUTING_HINT_HEADER),
+        handshakes[1].header(X_BAICODE_ROUTING_HINT_HEADER),
         Some(expected_hint)
     );
     let child_warmup = tokio::time::timeout(
@@ -584,7 +584,7 @@ async fn detached_host_child_inherits_root_service_tier_at_prewarm_and_each_step
     .await?
     .body_json();
     assert_eq!(
-        server.handshakes()[1].header(X_CODEX_ROUTING_HINT_HEADER),
+        server.handshakes()[1].header(X_BAICODE_ROUTING_HINT_HEADER),
         Some("model=gpt-5.4;tier=priority".into())
     );
     assert_eq!(warmup["generate"], false);
@@ -1262,7 +1262,7 @@ async fn websocket_v2_first_turn_sends_full_create_when_tier_changes_after_start
     assert_eq!(
         server
             .single_handshake()
-            .header(X_CODEX_ROUTING_HINT_HEADER),
+            .header(X_BAICODE_ROUTING_HINT_HEADER),
         Some(match startup_tier {
             Some(tier) => format!("model={model};tier={tier}"),
             None => format!("model={model}"),

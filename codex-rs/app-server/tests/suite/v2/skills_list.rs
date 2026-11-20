@@ -31,7 +31,7 @@ use codex_app_server_protocol::ThreadStartResponse;
 use codex_config::types::AuthCredentialsStoreMode;
 use codex_core::config::set_project_trust_level;
 use codex_core_plugins::store::PluginStore;
-use codex_exec_server::CODEX_EXEC_SERVER_URL_ENV_VAR;
+use codex_exec_server::BAICODE_EXEC_SERVER_URL_ENV_VAR;
 use codex_exec_server::CreateDirectoryOptions;
 use codex_plugin::PluginId;
 use codex_protocol::config_types::TrustLevel;
@@ -742,7 +742,7 @@ async fn skills_list_skips_cwd_roots_when_environment_disabled() -> Result<()> {
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
         .without_auto_env()
-        .with_env_overrides(&[(CODEX_EXEC_SERVER_URL_ENV_VAR, Some("none"))])
+        .with_env_overrides(&[(BAICODE_EXEC_SERVER_URL_ENV_VAR, Some("none"))])
         .build_initialized_with_timeout(DEFAULT_TIMEOUT)
         .await?;
 

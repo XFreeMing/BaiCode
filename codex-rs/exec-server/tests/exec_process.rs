@@ -135,7 +135,7 @@ async fn codex_home_symlink_opt_out_respects_host_config_and_scope() -> Result<(
                 format!("allow_symlinked_codex_home = {enabled}\n")
             }),
         )?;
-        let mut server = exec_server_with_env([("CODEX_HOME", home.path())], &[]).await?;
+        let mut server = exec_server_with_env([("BAICODE_HOME", home.path())], &[]).await?;
         let environment = Environment::create_for_tests(Some(server.websocket_url().to_string()))?;
         for root in [alias.as_path(), other_alias.as_path(), workspace.path()] {
             let mut policy = FileSystemSandboxPolicy::read_only();
@@ -319,7 +319,7 @@ async fn shell_snapshot_v2_filters_profile_exports_and_stays_in_memory(
         ""
     };
     let command = format!(
-        "case $- in *u*) ;; *) exit 42 ;; esac; {entry_check}export PATH='{}':\"$PATH\"; {command_prefix}printf '|%s|%s|%s|%s|%s|%s' \"$PROFILE_ALLOWED\" \"${{PROFILE_SECRET-missing}}\" \"${{PROFILE_DENIED-missing}}\" \"$PATH\" \"${{__CODEX_SHELL_SNAPSHOT_STATE_0-missing}}\" \"${{__CODEX_SHELL_SNAPSHOT_STATE_1-missing}}\"",
+        "case $- in *u*) ;; *) exit 42 ;; esac; {entry_check}export PATH='{}':\"$PATH\"; {command_prefix}printf '|%s|%s|%s|%s|%s|%s' \"$PROFILE_ALLOWED\" \"${{PROFILE_SECRET-missing}}\" \"${{PROFILE_DENIED-missing}}\" \"$PATH\" \"${{__BAICODE_SHELL_SNAPSHOT_STATE_0-missing}}\" \"${{__BAICODE_SHELL_SNAPSHOT_STATE_1-missing}}\"",
         runtime_path_entry.display(),
     );
     let expected_stdout = format!(
@@ -402,7 +402,7 @@ async fn exec_metadata_overrides_policy_and_cached_snapshot(
     let cwd = PathUri::from_host_native_path(home.path())?;
     std::fs::write(
         home.path().join(".bashrc"),
-        "printf '%s|%s\n' \"${CODEX_THREAD_ID-unset}\" \"${CODEX_TOOL_CALL_ID-unset}\" >> \"$HOME/capture-env\"\nexport CODEX_THREAD_ID=snapshot-thread\nexport CODEX_TOOL_CALL_ID=snapshot-call\n",
+        "printf '%s|%s\n' \"${BAICODE_THREAD_ID-unset}\" \"${BAICODE_TOOL_CALL_ID-unset}\" >> \"$HOME/capture-env\"\nexport BAICODE_THREAD_ID=snapshot-thread\nexport BAICODE_TOOL_CALL_ID=snapshot-call\n",
     )?;
     let policy = ExecEnvPolicy {
         inherit: ShellEnvironmentPolicyInherit::None,
@@ -411,8 +411,8 @@ async fn exec_metadata_overrides_policy_and_cached_snapshot(
         r#set: HashMap::from([
             ("HOME".into(), home.path().to_string_lossy().into_owned()),
             ("PATH".into(), "/usr/bin:/bin".into()),
-            ("CODEX_THREAD_ID".into(), "policy-thread".into()),
-            ("CODEX_TOOL_CALL_ID".into(), "policy-call".into()),
+            ("BAICODE_THREAD_ID".into(), "policy-thread".into()),
+            ("BAICODE_TOOL_CALL_ID".into(), "policy-call".into()),
         ]),
         include_only: Vec::new(),
     };
@@ -442,7 +442,7 @@ async fn exec_metadata_overrides_policy_and_cached_snapshot(
                 argv: vec![
                     "/bin/bash".into(),
                     "-lc".into(),
-                    "printf '%s|%s' \"$CODEX_THREAD_ID\" \"${CODEX_TOOL_CALL_ID-unset}\""
+                    "printf '%s|%s' \"$BAICODE_THREAD_ID\" \"${BAICODE_TOOL_CALL_ID-unset}\""
                         .to_string(),
                 ],
                 cwd: cwd.clone(),
@@ -455,8 +455,8 @@ async fn exec_metadata_overrides_policy_and_cached_snapshot(
                     },
                 }),
                 env: HashMap::from([
-                    ("CODEX_THREAD_ID".into(), "overlay-thread".into()),
-                    ("CODEX_TOOL_CALL_ID".into(), "overlay-call".into()),
+                    ("BAICODE_THREAD_ID".into(), "overlay-thread".into()),
+                    ("BAICODE_TOOL_CALL_ID".into(), "overlay-call".into()),
                 ]),
                 tty,
                 pipe_stdin: false,
@@ -587,7 +587,7 @@ async fn shell_snapshot_v2_remote_managed_proxy_uses_prepared_execution_context(
                 "executor-unbound-enterprise-token".to_string(),
             ),
             (
-                "CODEX_CA_CERTIFICATE",
+                "BAICODE_CA_CERTIFICATE",
                 ca_path.to_string_lossy().into_owned(),
             ),
             ("CURL_CA_BUNDLE", ca_path.to_string_lossy().into_owned()),
@@ -628,7 +628,7 @@ async fn shell_snapshot_v2_remote_managed_proxy_uses_prepared_execution_context(
     } else {
         shell_path
     };
-    let profile = "printf '%s\\n' \"$HTTP_PROXY\" >> \"$HOME/captures\"\ntest \"$CODEX_NETWORK_PROXY_ACTIVE\" = 1 || exit 41\nexport PROFILE_ALLOWED=profile\nprofile_helper() { profile_command; }\n";
+    let profile = "printf '%s\\n' \"$HTTP_PROXY\" >> \"$HOME/captures\"\ntest \"$BAICODE_NETWORK_PROXY_ACTIVE\" = 1 || exit 41\nexport PROFILE_ALLOWED=profile\nprofile_helper() { profile_command; }\n";
     std::fs::write(home.path().join(".bashrc"), profile)?;
     std::fs::write(
         home.path().join(".bash_profile"),
@@ -750,9 +750,9 @@ async fn shell_snapshot_v2_remote_managed_proxy_uses_prepared_execution_context(
             env.insert(key.to_string(), value.to_string());
         }
         let command = if expect_profile {
-            "profile_helper; printf '|%s|%s|%s' \"$PROFILE_ALLOWED\" \"$CODEX_NETWORK_PROXY_ACTIVE\" \"$HTTP_PROXY\""
+            "profile_helper; printf '|%s|%s|%s' \"$PROFILE_ALLOWED\" \"$BAICODE_NETWORK_PROXY_ACTIVE\" \"$HTTP_PROXY\""
         } else {
-            "printf 'masked|%s|%s' \"$CODEX_NETWORK_PROXY_ACTIVE\" \"$HTTP_PROXY\""
+            "printf 'masked|%s|%s' \"$BAICODE_NETWORK_PROXY_ACTIVE\" \"$HTTP_PROXY\""
         };
         let command = if shell_name == "zsh" && expect_masking {
             format!(
@@ -1175,7 +1175,7 @@ async fn remote_sandboxed_process_preserves_custom_arg0() -> Result<()> {
             argv: vec![
                 "/bin/sh".to_string(),
                 "-c".to_string(),
-                "printf '%s' \"$0\"; if /bin/cat \"$CODEX_TEST_DENIED_FILE\" >/dev/null 2>&1; then exit 42; fi"
+                "printf '%s' \"$0\"; if /bin/cat \"$BAICODE_TEST_DENIED_FILE\" >/dev/null 2>&1; then exit 42; fi"
                     .to_string(),
             ],
             cwd,
@@ -1184,7 +1184,7 @@ async fn remote_sandboxed_process_preserves_custom_arg0() -> Result<()> {
             env: HashMap::from([
                 ("PATH".to_string(), std::env::var("PATH")?),
                 (
-                    "CODEX_TEST_DENIED_FILE".to_string(),
+                    "BAICODE_TEST_DENIED_FILE".to_string(),
                     denied_file.to_string_lossy().into_owned(),
                 ),
             ]),
@@ -1214,7 +1214,7 @@ async fn assert_exec_process_starts_and_exits(use_remote: bool) -> Result<()> {
     let argv = vec![
         "/bin/sh".into(),
         "-c".into(),
-        "printf '%s|%s|%s' \"$CODEX_THREAD_ID\" \"$CODEX_TOOL_CALL_ID\" \"$CUSTOM_ENV_VAR\""
+        "printf '%s|%s|%s' \"$BAICODE_THREAD_ID\" \"$BAICODE_TOOL_CALL_ID\" \"$CUSTOM_ENV_VAR\""
             .to_string(),
     ];
     #[cfg(windows)]
@@ -1222,14 +1222,14 @@ async fn assert_exec_process_starts_and_exits(use_remote: bool) -> Result<()> {
         "powershell.exe".into(),
         "-NoProfile".into(),
         "-Command".into(),
-        "[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false); [Console]::Write($env:CODEX_THREAD_ID + '|' + $env:CODEX_TOOL_CALL_ID + '|' + $env:CUSTOM_ENV_VAR)".into(),
+        "[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false); [Console]::Write($env:BAICODE_THREAD_ID + '|' + $env:BAICODE_TOOL_CALL_ID + '|' + $env:CUSTOM_ENV_VAR)".into(),
     ];
     let mut env = std::env::vars().collect::<HashMap<_, _>>();
     env.extend([
-        ("CODEX_THREAD_ID".into(), "stale-thread".into()),
-        ("Codex_Thread_Id".into(), "mixed-case-thread".into()),
-        ("CODEX_TOOL_CALL_ID".into(), "stale-call".into()),
-        ("Codex_Tool_Call_Id".into(), "mixed-case-call".into()),
+        ("BAICODE_THREAD_ID".into(), "stale-thread".into()),
+        ("BaiCode_Thread_Id".into(), "mixed-case-thread".into()),
+        ("BAICODE_TOOL_CALL_ID".into(), "stale-call".into()),
+        ("BaiCode_Tool_Call_Id".into(), "mixed-case-call".into()),
         ("CUSTOM_ENV_VAR".into(), "caller-owned".into()),
     ]);
     let session = context

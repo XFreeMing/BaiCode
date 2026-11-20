@@ -6,8 +6,8 @@ use codex_app_server_protocol::FeedbackSaveResponse;
 use codex_connectors::ConnectorDirectoryCacheContext;
 use codex_connectors::ConnectorDirectoryCacheKey;
 use codex_connectors::connector_runtime_cache_path;
-use codex_feedback::CODEX_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME;
-use codex_feedback::CODEX_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME;
+use codex_feedback::BAICODE_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME;
+use codex_feedback::BAICODE_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME;
 use codex_feedback::FeedbackAttachment;
 use codex_feedback::FeedbackSnapshot;
 #[cfg(target_os = "windows")]
@@ -477,7 +477,7 @@ fn tool_cache_feedback_attachments(
         attachments.push(FeedbackAttachmentPath {
             path: tools_cache_path,
             attachment_filename_override: Some(
-                CODEX_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME.to_string(),
+                BAICODE_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME.to_string(),
             ),
         });
     }
@@ -499,7 +499,7 @@ fn tool_cache_feedback_attachments(
         attachments.push(FeedbackAttachmentPath {
             path: directory_cache_path,
             attachment_filename_override: Some(
-                CODEX_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME.to_string(),
+                BAICODE_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME.to_string(),
             ),
         });
     }
@@ -890,11 +890,11 @@ mod tests {
             vec![
                 (
                     tools_cache_path,
-                    Some(CODEX_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME.to_string()),
+                    Some(BAICODE_APPS_TOOLS_CACHE_ATTACHMENT_FILENAME.to_string()),
                 ),
                 (
                     directory_cache_path,
-                    Some(CODEX_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME.to_string()),
+                    Some(BAICODE_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME.to_string()),
                 ),
             ]
         );
@@ -935,7 +935,7 @@ mod tests {
             attachments,
             vec![(
                 directory_cache_path,
-                Some(CODEX_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME.to_string()),
+                Some(BAICODE_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME.to_string()),
             )]
         );
     }

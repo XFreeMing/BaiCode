@@ -104,7 +104,7 @@ async fn catalog_metadata_updates_preserve_live_mcp_and_plugin_skills() -> Resul
         .with_codex_home(codex_home.path())
         .without_managed_config()
         .with_env_overrides(&[(
-            "CODEX_TEST_ALLOW_HTTP_REMOTE_PLUGIN_BUNDLE_DOWNLOADS",
+            "BAICODE_TEST_ALLOW_HTTP_REMOTE_PLUGIN_BUNDLE_DOWNLOADS",
             Some("1"),
         )])
         .build_initialized()

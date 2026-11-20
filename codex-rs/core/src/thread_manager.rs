@@ -77,7 +77,7 @@ use codex_history::RolloutItem;
 use codex_install_context::InstallContext;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
-use codex_login::default_client::CODEX_INTERNAL_ORIGINATOR_OVERRIDE_ENV_VAR;
+use codex_login::default_client::BAICODE_INTERNAL_ORIGINATOR_OVERRIDE_ENV_VAR;
 use codex_login::default_client::originator;
 use codex_model_provider::ModelCatalogFactory;
 use codex_model_provider::ProviderAuthContext;
@@ -2423,7 +2423,7 @@ impl ThreadManagerState {
             InitialHistory::Resumed(_) | InitialHistory::Forked(_) => None,
         };
 
-        let env_originator = std::env::var(CODEX_INTERNAL_ORIGINATOR_OVERRIDE_ENV_VAR)
+        let env_originator = std::env::var(BAICODE_INTERNAL_ORIGINATOR_OVERRIDE_ENV_VAR)
             .is_ok()
             .then(|| originator().value);
         effective_originator_value(

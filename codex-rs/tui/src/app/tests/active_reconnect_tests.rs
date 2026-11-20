@@ -582,7 +582,7 @@ async fn reconnect_reconciles_offscreen_pending_profile_before_restoring_permiss
         &mut session,
         &mut events,
         connected,
-        CODEX_CLI_VERSION,
+        BAICODE_CLI_VERSION,
     )
     .await?;
     assert!(app.pending_server_profiles.contains_key(&primary));
@@ -741,7 +741,7 @@ async fn reconnect_allows_slow_hydration_but_bounds_a_stalled_server() -> Result
                 &mut session,
                 &mut events,
                 result?,
-                CODEX_CLI_VERSION,
+                BAICODE_CLI_VERSION,
             )
             .await?;
             assert!(app.thread_unavailable(id));

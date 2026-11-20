@@ -2,9 +2,9 @@
 //! Keep the projected declaration and invocation pin private to its sampling step.
 
 use super::McpBinding;
-use crate::CODEX_APPS_MCP_SERVER_NAME;
-use crate::MCP_TOOL_CODEX_APPS_META_KEY;
-use crate::pagination::MAX_CODEX_APPS_TOOL_CATALOG_ITEMS;
+use crate::BAICODE_APPS_MCP_SERVER_NAME;
+use crate::MCP_TOOL_BAICODE_APPS_META_KEY;
+use crate::pagination::MAX_BAICODE_APPS_TOOL_CATALOG_ITEMS;
 use crate::pagination::collect_paginated_with_limit;
 use rmcp::model::RequestMetaObject;
 use serde_json::Value as JsonValue;
@@ -14,7 +14,7 @@ use std::time::Duration;
 pub const SEARCH_CONNECTOR: &str = "connector_openai_search_service";
 
 pub fn is_model_search_tool(tool: &crate::ToolInfo) -> bool {
-    tool.server_name() == CODEX_APPS_MCP_SERVER_NAME
+    tool.server_name() == BAICODE_APPS_MCP_SERVER_NAME
         && tool.connector_id.as_deref() == Some(SEARCH_CONNECTOR)
         && tool.tool.name.rsplit('.').next() == Some("web_run")
 }
@@ -72,7 +72,7 @@ impl McpBinding {
         let listed = collect_paginated_with_limit(
             "tools/list",
             /*overall_timeout*/ None,
-            MAX_CODEX_APPS_TOOL_CATALOG_ITEMS,
+            MAX_BAICODE_APPS_TOOL_CATALOG_ITEMS,
             |params| {
                 let mut params = params.unwrap_or_default();
                 params.meta = Some(meta.clone());
@@ -136,7 +136,7 @@ impl McpBinding {
 fn invocation_context(tool: &rmcp::model::Tool) -> Option<&JsonValue> {
     tool.meta
         .as_ref()?
-        .get(MCP_TOOL_CODEX_APPS_META_KEY)?
+        .get(MCP_TOOL_BAICODE_APPS_META_KEY)?
         .get("invocation_context")
         .filter(|context| context.is_object())
 }

@@ -985,10 +985,10 @@ pub(super) fn spawn_server(home: &Path, socket_path: &Path) -> Result<Child> {
     Ok(Command::new(binary)
         .args(["--listen", &format!("unix://{}", socket_path.display())])
         .args(DEFAULT_APP_SERVER_TEST_ARGS)
-        .env("CODEX_HOME", home)
+        .env("BAICODE_HOME", home)
         // Match TestAppServer's isolation from the host's managed configuration.
         .env(
-            "CODEX_APP_SERVER_MANAGED_CONFIG_PATH",
+            "BAICODE_APP_SERVER_MANAGED_CONFIG_PATH",
             home.join("managed_config.toml"),
         )
         .current_dir(home)

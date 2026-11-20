@@ -1143,7 +1143,7 @@ model_provider = "custom-openai"
 [model_providers.custom-openai]
 name = "OpenAI"
 http_headers = { "X-OpenAI-Internal-Codex-Residency" = "request-override", "x-provider-header" = "preserved" }
-env_http_headers = { "x-openai-internal-codex-residency" = "CODEX_TEST_UNSET_RESIDENCY_HEADER", "x-provider-env-header" = "CODEX_TEST_UNSET_PROVIDER_HEADER" }
+env_http_headers = { "x-openai-internal-codex-residency" = "BAICODE_TEST_UNSET_RESIDENCY_HEADER", "x-provider-env-header" = "BAICODE_TEST_UNSET_PROVIDER_HEADER" }
 "#,
         )
         .expect("existing provider configuration should remain loadable");
@@ -1187,7 +1187,7 @@ env_http_headers = { "x-openai-internal-codex-residency" = "CODEX_TEST_UNSET_RES
             environment_headers
                 .get(RESIDENCY_HEADER_NAME)
                 .map(String::as_str),
-            Some("CODEX_TEST_UNSET_RESIDENCY_HEADER")
+            Some("BAICODE_TEST_UNSET_RESIDENCY_HEADER")
         );
         assert_eq!(
             static_headers.get("x-provider-header"),
@@ -1197,7 +1197,7 @@ env_http_headers = { "x-openai-internal-codex-residency" = "CODEX_TEST_UNSET_RES
             environment_headers
                 .get("x-provider-env-header")
                 .map(String::as_str),
-            Some("CODEX_TEST_UNSET_PROVIDER_HEADER")
+            Some("BAICODE_TEST_UNSET_PROVIDER_HEADER")
         );
 
         let expected_warning = format!(
@@ -14428,7 +14428,7 @@ fn sqlite_home_env_conflict_reports_an_override() -> std::io::Result<()> {
     assert_eq!(
         warnings,
         vec![format!(
-            "Environment value for `$CODEX_SQLITE_HOME` is overridden by the required `sqlite_home` value {required:?} from {}.",
+            "Environment value for `$BAICODE_SQLITE_HOME` is overridden by the required `sqlite_home` value {required:?} from {}.",
             RequirementSource::Unknown
         )]
     );

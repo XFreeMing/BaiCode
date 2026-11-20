@@ -15,9 +15,9 @@ on:
       - "rust-v*.*.*"
 
 env:
-  CODEX_BAZEL_GCS_BUCKET: ${{ secrets.CODEX_BAZEL_GCS_BUCKET }}
-  CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
-  CODEX_REPO_ROOT: ${{ github.workspace }}
+  BAICODE_BAZEL_GCS_BUCKET: ${{ secrets.BAICODE_BAZEL_GCS_BUCKET }}
+  BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
+  BAICODE_REPO_ROOT: ${{ github.workspace }}
 
 # The launcher uses this per-tag group as the migration boundary. Keep shared
 # publication jobs on the original queued group below when changing this.
@@ -30,8 +30,8 @@ jobs:
     outputs:
       build-systems: >-
         ${{ github.repository == 'openai/codex' && github.ref_protected &&
-            vars.CODEX_BAZEL_RELEASES == 'true' &&
-            secrets.CODEX_BAZEL_GCS_BUCKET != '' && secrets.CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER != '' &&
+            vars.BAICODE_BAZEL_RELEASES == 'true' &&
+            secrets.BAICODE_BAZEL_GCS_BUCKET != '' && secrets.BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER != '' &&
             '["cargo","bazel"]' || '["cargo"]' }}
     runs-on: ubuntu-latest
     steps:
@@ -215,7 +215,7 @@ jobs:
         name: Install musl build tools
         env:
           TARGET: ${{ matrix.target }}
-          CODEX_MUSL_RELEASE_LINK_FLAGS: "1"
+          BAICODE_MUSL_RELEASE_LINK_FLAGS: "1"
         run: bash "${GITHUB_WORKSPACE}/.github/scripts/install-musl-build-tools.sh"
 
       - if: ${{ matrix.build-system == 'cargo' && contains(matrix.target, 'linux') }}
@@ -254,7 +254,7 @@ jobs:
           # covers the exact bytes that the release packages.
           strip --strip-debug --strip-unneeded "$bwrap_path"
           digest="$(sha256sum "$bwrap_path" | awk '{print $1}')"
-          echo "CODEX_BWRAP_SHA256=${digest}" >> "$GITHUB_ENV"
+          echo "BAICODE_BWRAP_SHA256=${digest}" >> "$GITHUB_ENV"
           echo "Built bwrap ${bwrap_path} with sha256:${digest}"
 
       - name: Cargo build
@@ -711,10 +711,10 @@ jobs:
           key-name: ${{ secrets.AKV_CODESIGN_KEY_NAME }}
           key-version: ${{ secrets.AKV_CODESIGN_KEY_VERSION || '' }}
           certificate-sha256: ${{ secrets.AKV_CODESIGN_CERTIFICATE_SHA256 || '' }}
-          signer-service-enabled: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_ENABLED || 'false' }}
-          signer-service-endpoint: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_ENDPOINT }}
-          signer-service-purpose: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_PURPOSE }}
-          signer-service-key-id: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_KEY_ID }}
+          signer-service-enabled: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_ENABLED || 'false' }}
+          signer-service-endpoint: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_ENDPOINT }}
+          signer-service-purpose: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_PURPOSE }}
+          signer-service-key-id: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_KEY_ID }}
 
       - name: Sign and notarize macOS binaries
         shell: bash
@@ -1227,10 +1227,10 @@ jobs:
           key-name: ${{ secrets.AKV_CODESIGN_KEY_NAME }}
           key-version: ${{ secrets.AKV_CODESIGN_KEY_VERSION || '' }}
           certificate-sha256: ${{ secrets.AKV_CODESIGN_CERTIFICATE_SHA256 || '' }}
-          signer-service-enabled: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_ENABLED || 'false' }}
-          signer-service-endpoint: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_ENDPOINT }}
-          signer-service-purpose: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_PURPOSE }}
-          signer-service-key-id: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_KEY_ID }}
+          signer-service-enabled: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_ENABLED || 'false' }}
+          signer-service-endpoint: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_ENDPOINT }}
+          signer-service-purpose: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_PURPOSE }}
+          signer-service-key-id: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_KEY_ID }}
 
       - name: Sign, notarize, and staple macOS DMG
         shell: bash
@@ -1549,7 +1549,7 @@ jobs:
   # Desktop consumes the versioned codex-provisioned manifest from this release.
   provisioned-macos-candidate:
     needs: [tag-check, finalize-macos]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/rust-v') && vars.CODEX_PROVISIONED_MACOS_CANDIDATE == 'true'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/rust-v') && vars.BAICODE_PROVISIONED_MACOS_CANDIDATE == 'true'
     permissions:
       contents: read
       id-token: write
@@ -1697,7 +1697,7 @@ jobs:
         needs.argument-comment-lint-release-assets.result == 'success' &&
         needs.stage-npm-packages.result == 'success' &&
         (needs.provisioned-macos-candidate.result == 'success' ||
-          (vars.CODEX_PROVISIONED_MACOS_CANDIDATE != 'true' &&
+          (vars.BAICODE_PROVISIONED_MACOS_CANDIDATE != 'true' &&
             needs.provisioned-macos-candidate.result == 'skipped'))
       }}
     name: release
@@ -1745,14 +1745,14 @@ jobs:
           pattern: "{{aarch64,x86_64}-{apple-darwin{,-app-server},unknown-linux-musl{,-app-server},pc-windows-msvc}{,-bazel},*-symbols{,-bazel},argument-comment-lint-*,python-runtime-wheel-*,npm-packages}"
 
       - name: Download verified provisioned macOS packages
-        if: vars.CODEX_PROVISIONED_MACOS_CANDIDATE == 'true'
+        if: vars.BAICODE_PROVISIONED_MACOS_CANDIDATE == 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: dist
           pattern: "provisioned-macos-verified-candidate-*"
 
       - name: Remove per-architecture checksum filenames before release upload
-        if: vars.CODEX_PROVISIONED_MACOS_CANDIDATE == 'true'
+        if: vars.BAICODE_PROVISIONED_MACOS_CANDIDATE == 'true'
         run: rm dist/provisioned-macos-verified-candidate-*/SHA256SUMS
 
       - name: List
@@ -1896,7 +1896,7 @@ jobs:
             .github/dotslash-argument-comment-lint-config.json
 
       - name: Publish the provisioned macOS package manifest
-        if: vars.CODEX_PROVISIONED_MACOS_CANDIDATE == 'true'
+        if: vars.BAICODE_PROVISIONED_MACOS_CANDIDATE == 'true'
         uses: facebook/dotslash-publish-release@9c9ec027515c34db9282a09a25a9cab5880b2c52 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1978,7 +1978,7 @@ jobs:
 
           root_tarball="dist/npm/codex-npm-${VERSION}.tgz"
           sdk_tarball="dist/npm/codex-sdk-npm-${VERSION}.tgz"
-          # Keep this list in sync with CODEX_PLATFORM_PACKAGES in
+          # Keep this list in sync with BAICODE_PLATFORM_PACKAGES in
           # codex-cli/scripts/build_npm_package.py. The root wrapper advances
           # @openai/codex@latest as soon as it publishes, so every platform
           # package it aliases must already exist in the registry first.

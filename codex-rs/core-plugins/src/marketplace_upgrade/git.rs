@@ -150,10 +150,10 @@ fn clone_git_source(
         // Seed negotiation from the installed commit. The shell builtin `:` consumes the
         // repository path that Git appends to the command.
         command
-            .env("CODEX_MARKETPLACE_HAVE", reference.installed_revision)
+            .env("BAICODE_MARKETPLACE_HAVE", reference.installed_revision)
             .args([
                 "-c",
-                r#"core.alternateRefsCommand=echo "$CODEX_MARKETPLACE_HAVE" && :"#,
+                r#"core.alternateRefsCommand=echo "$BAICODE_MARKETPLACE_HAVE" && :"#,
                 "clone",
                 "--reference",
             ])

@@ -19,7 +19,7 @@ use codex_extension_api::McpServerContribution;
 use codex_extension_api::ThreadLifecycleContributor;
 use codex_extension_api::ThreadStartInput;
 use codex_extension_api::TurnLifecycleContributor;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::McpResourceClient;
 use std::collections::HashSet;
 
@@ -65,7 +65,7 @@ impl PluginContributor {
             let resource_cache_key = query
                 .mcp_resources
                 .as_ref()
-                .and_then(|client| client.server_cache_key(CODEX_APPS_MCP_SERVER_NAME));
+                .and_then(|client| client.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME));
             let previous_catalog_auth = state
                 .cloud_generation
                 .as_ref()
@@ -192,11 +192,11 @@ impl TurnLifecycleContributor for PluginContributor {
                 let auth = query
                     .mcp_resources
                     .as_ref()
-                    .map(|client| client.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME));
+                    .map(|client| client.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME));
                 let resources = query
                     .mcp_resources
                     .as_ref()
-                    .and_then(|client| client.server_cache_key(CODEX_APPS_MCP_SERVER_NAME));
+                    .and_then(|client| client.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME));
                 if let Some(generation) = &state.cloud_generation
                     && generation
                         .catalog

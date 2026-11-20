@@ -1899,7 +1899,7 @@ fn list_marketplaces_resolves_plugin_interface_paths_to_absolute() {
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL",
-        "products": ["CODEX", "CHATGPT", "ATLAS"]
+        "products": ["BAICODE", "CHATGPT", "ATLAS"]
       },
       "category": "Design"
     }

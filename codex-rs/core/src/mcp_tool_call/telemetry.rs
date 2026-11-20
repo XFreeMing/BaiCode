@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use codex_mcp::MCP_TOOL_CODEX_APPS_META_KEY;
+use codex_mcp::MCP_TOOL_BAICODE_APPS_META_KEY;
 use codex_otel::SessionTelemetry;
 use codex_otel::sanitize_metric_tag_value;
 use codex_protocol::mcp::CallToolResult;
@@ -145,7 +145,7 @@ pub(super) fn mcp_call_metric_outcome(
                         .meta
                         .as_ref()
                         .and_then(JsonValue::as_object)
-                        .and_then(|meta| meta.get(MCP_TOOL_CODEX_APPS_META_KEY))
+                        .and_then(|meta| meta.get(MCP_TOOL_BAICODE_APPS_META_KEY))
                         .and_then(JsonValue::as_object)
                         .and_then(|codex_apps| codex_apps.get("connector_auth_failure"))
                         .and_then(JsonValue::as_object)

@@ -56,7 +56,7 @@ fn repair_legacy_bin_as_its_owner() -> anyhow::Result<()> {
     use std::os::windows::io::AsHandle;
     use windows_sys::Win32::System::RemoteDesktop::WTSQueryUserToken;
 
-    let session = std::env::var("CODEX_TEST_OWNER_SESSION")?.parse()?;
+    let session = std::env::var("BAICODE_TEST_OWNER_SESSION")?.parse()?;
     let mut token = std::ptr::null_mut();
     if unsafe { WTSQueryUserToken(session, &mut token) } == 0 {
         return Err(std::io::Error::last_os_error().into());
@@ -64,8 +64,8 @@ fn repair_legacy_bin_as_its_owner() -> anyhow::Result<()> {
     // SAFETY: WTSQueryUserToken transferred this interactive user's token.
     let owner = unsafe { OwnedHandle::from_raw_handle(token) };
     for (variable, should_repair) in [
-        ("CODEX_TEST_LEGACY_HOME", true),
-        ("CODEX_TEST_DENIED_HOME", false),
+        ("BAICODE_TEST_LEGACY_HOME", true),
+        ("BAICODE_TEST_DENIED_HOME", false),
     ] {
         let home = std::path::PathBuf::from(std::env::var(variable)?);
         let (home, _pins) = crate::package_lifecycle::with_owner_impersonation(token, || {

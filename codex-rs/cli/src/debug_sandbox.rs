@@ -15,8 +15,8 @@ use codex_core::config::ConfigOverrides;
 use codex_core::config::NetworkProxyAuditMetadata;
 use codex_core::exec_env::create_env;
 #[cfg(target_os = "macos")]
-use codex_core::spawn::CODEX_SANDBOX_ENV_VAR;
-use codex_core::spawn::CODEX_SANDBOX_NETWORK_DISABLED_ENV_VAR;
+use codex_core::spawn::BAICODE_SANDBOX_ENV_VAR;
+use codex_core::spawn::BAICODE_SANDBOX_NETWORK_DISABLED_ENV_VAR;
 use codex_core::windows_sandbox::local_binding_policy_for_sandbox;
 use codex_protocol::config_types::SandboxMode;
 use codex_protocol::config_types::WindowsSandboxLevel;
@@ -520,7 +520,7 @@ async fn start_command_under_sandbox(
     let env = {
         let mut env_map = env;
         if sandbox == SandboxBackend::MacosSeatbelt {
-            env_map.insert(CODEX_SANDBOX_ENV_VAR.to_string(), "seatbelt".to_string());
+            env_map.insert(BAICODE_SANDBOX_ENV_VAR.to_string(), "seatbelt".to_string());
         }
         env_map
     };
@@ -638,7 +638,7 @@ async fn spawn_debug_sandbox_child(
 ) -> std::io::Result<Child> {
     let mut cmd = TokioCommand::from(command);
     if !network_sandbox_policy.is_enabled() {
-        cmd.env(CODEX_SANDBOX_NETWORK_DISABLED_ENV_VAR, "1");
+        cmd.env(BAICODE_SANDBOX_NETWORK_DISABLED_ENV_VAR, "1");
     }
 
     cmd.stdin(if piped {

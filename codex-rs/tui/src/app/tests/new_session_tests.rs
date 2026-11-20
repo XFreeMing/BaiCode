@@ -783,7 +783,7 @@ async fn replacement_uses_server_defaults_and_preserves_explicit_launch_settings
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn plan_implementation_reads_approved_plan_file_in_fresh_session() -> Result<()> {
     let (mut app, mut events, _ops) = make_test_app_with_channels().await;
-    // Match the canonical CODEX_HOME used at launch.
+    // Match the canonical BAICODE_HOME used at launch.
     app.config.codex_home = app.config.codex_home.canonicalize()?;
     let model = responses::start_mock_server().await;
     app_test_support::MockResponsesConfig::new(&model.uri())

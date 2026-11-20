@@ -1,7 +1,7 @@
 //! Connector-free installs invalidate a warmed cloud skill catalog before the next inference.
 
 use super::*;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_skills_extension::SkillProvider;
 use codex_skills_extension::SkillProviders;
 use codex_skills_extension::SkillsExtensionConfig;
@@ -38,7 +38,7 @@ impl SkillProvider for InstallableCloudSkillProvider {
                 vec![
                     SkillCatalogEntry::new(
                         SkillPackageId("skill://calendar/plan-week".to_string()),
-                        SkillAuthority::new(SkillSourceKind::Cloud, CODEX_APPS_MCP_SERVER_NAME),
+                        SkillAuthority::new(SkillSourceKind::Cloud, BAICODE_APPS_MCP_SERVER_NAME),
                         "calendar:plan-week",
                         SKILL_DESCRIPTION,
                         SkillResourceId::new("skill://calendar/plan-week/SKILL.md"),

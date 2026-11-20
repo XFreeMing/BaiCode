@@ -67,7 +67,7 @@ fn normalizes_legacy_form_capability_into_extensions() {
 fn user_verification_is_projected_only_to_the_host_owned_plugin_service() {
     use crate::catalog::McpServerRegistration;
     use crate::catalog::ResolvedMcpCatalog;
-    use crate::mcp::CODEX_APPS_MCP_SERVER_NAME;
+    use crate::mcp::BAICODE_APPS_MCP_SERVER_NAME;
     use crate::mcp::codex_apps_mcp_server_config;
     use codex_rmcp_client::McpProtocolMode;
 
@@ -89,7 +89,7 @@ fn user_verification_is_projected_only_to_the_host_owned_plugin_service() {
     assert_eq!(
         server_mcp_extensions(
             &extensions,
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             /*server*/ None,
             /*advertise_network_policy*/ true,
             "https://chatgpt.com",
@@ -101,7 +101,7 @@ fn user_verification_is_projected_only_to_the_host_owned_plugin_service() {
     );
     for (name, registration, settings) in [
         (
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             McpServerRegistration::from_hosted_apps(
                 "host",
                 /*contribution_order*/ 0,
@@ -110,7 +110,7 @@ fn user_verification_is_projected_only_to_the_host_owned_plugin_service() {
             json!({"form": {}, "userVerification": {}}),
         ),
         (
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             McpServerRegistration::from_hosted_apps(
                 "host",
                 /*contribution_order*/ 0,
@@ -120,9 +120,9 @@ fn user_verification_is_projected_only_to_the_host_owned_plugin_service() {
             json!({"form": {}, "userVerification": {}}),
         ),
         (
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             McpServerRegistration::from_extension(
-                CODEX_APPS_MCP_SERVER_NAME.into(),
+                BAICODE_APPS_MCP_SERVER_NAME.into(),
                 "ordinary",
                 /*contribution_order*/ 0,
                 config.clone(),
@@ -131,8 +131,8 @@ fn user_verification_is_projected_only_to_the_host_owned_plugin_service() {
             json!({"form": {}}),
         ),
         (
-            CODEX_APPS_MCP_SERVER_NAME,
-            McpServerRegistration::from_config(CODEX_APPS_MCP_SERVER_NAME.into(), config.clone()),
+            BAICODE_APPS_MCP_SERVER_NAME,
+            McpServerRegistration::from_config(BAICODE_APPS_MCP_SERVER_NAME.into(), config.clone()),
             json!({"form": {}}),
         ),
         (

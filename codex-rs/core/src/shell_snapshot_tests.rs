@@ -172,9 +172,9 @@ async fn snapshot_helpers_preserve_thread_without_caching_exec_metadata() -> Res
         .arg("--exact")
         .arg("shell_snapshot::tests::snapshot_helper_exec_metadata_child")
         .arg("--nocapture")
-        .env("CODEX_TEST_SNAPSHOT_HELPER_CHILD", "1")
-        .env("CODEX_THREAD_ID", "helper-thread")
-        .env("CODEX_TOOL_CALL_ID", "stale-call")
+        .env("BAICODE_TEST_SNAPSHOT_HELPER_CHILD", "1")
+        .env("BAICODE_THREAD_ID", "helper-thread")
+        .env("BAICODE_TOOL_CALL_ID", "stale-call")
         .env("BASH_ENV", "/dev/null")
         .output()?;
 
@@ -190,15 +190,15 @@ async fn snapshot_helpers_preserve_thread_without_caching_exec_metadata() -> Res
 #[cfg(unix)]
 #[tokio::test]
 async fn snapshot_helper_exec_metadata_child() -> Result<()> {
-    if std::env::var_os("CODEX_TEST_SNAPSHOT_HELPER_CHILD").is_none() {
+    if std::env::var_os("BAICODE_TEST_SNAPSHOT_HELPER_CHILD").is_none() {
         return Ok(());
     }
     assert_eq!(
-        std::env::var("CODEX_THREAD_ID").as_deref(),
+        std::env::var("BAICODE_THREAD_ID").as_deref(),
         Ok("helper-thread")
     );
     assert_eq!(
-        std::env::var("CODEX_TOOL_CALL_ID").as_deref(),
+        std::env::var("BAICODE_TOOL_CALL_ID").as_deref(),
         Ok("stale-call")
     );
 
@@ -206,7 +206,7 @@ async fn snapshot_helper_exec_metadata_child() -> Result<()> {
     let shell = crate::shell::get_shell(ShellType::Bash).context("No available Bash shell")?;
     let helper_env = run_script_with_timeout(
         &shell,
-        "printf '%s|%s' \"${CODEX_THREAD_ID-unset}\" \"${CODEX_TOOL_CALL_ID-unset}\"",
+        "printf '%s|%s' \"${BAICODE_THREAD_ID-unset}\" \"${BAICODE_TOOL_CALL_ID-unset}\"",
         SNAPSHOT_TIMEOUT,
         SnapshotShellMode::NonLogin,
         &dir.path().abs(),
@@ -216,16 +216,16 @@ async fn snapshot_helper_exec_metadata_child() -> Result<()> {
     .await?;
     assert_eq!(helper_env, "helper-thread|unset");
     let snapshot = get_snapshot(ShellType::Bash).await?;
-    assert!(!snapshot.contains("CODEX_THREAD_ID"));
-    assert!(!snapshot.contains("CODEX_TOOL_CALL_ID"));
+    assert!(!snapshot.contains("BAICODE_THREAD_ID"));
+    assert!(!snapshot.contains("BAICODE_TOOL_CALL_ID"));
     assert!(!snapshot.contains("helper-thread"));
     assert!(!snapshot.contains("stale-call"));
 
     let validation_path = dir.path().join("validation.sh").abs();
     fs::write(
         &validation_path,
-        "test \"${CODEX_THREAD_ID-missing}\" = helper-thread && \
-         test \"${CODEX_TOOL_CALL_ID-missing}\" = missing\n",
+        "test \"${BAICODE_THREAD_ID-missing}\" = helper-thread && \
+         test \"${BAICODE_TOOL_CALL_ID-missing}\" = missing\n",
     )
     .await?;
     validate_snapshot(
@@ -863,7 +863,7 @@ async fn snapshot_discovers_and_redacts_shell_initialized_credentials() -> Resul
         assert!(!snapshot.contains(secret), "snapshot exposed {secret}");
     }
     assert!(!snapshot.contains("attacker.example"));
-    assert!(!snapshot.contains("CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS"));
+    assert!(!snapshot.contains("BAICODE_NETWORK_PROXY_BROKERED_CREDENTIALS"));
     assert!(snapshot.contains(r#"DENO_CERT="profile.pem""#));
     assert!(!snapshot.contains("CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE="));
     assert!(snapshot.contains("api.snapshot.example"));
@@ -891,7 +891,7 @@ async fn snapshot_discovers_and_redacts_shell_initialized_credentials() -> Resul
     fs::write(
         &validation_path,
         "test \"${HOME-missing}\" = missing && \
-         test \"${CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE-}\" = 1\n",
+         test \"${BAICODE_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE-}\" = 1\n",
     )
     .await?;
     validate_snapshot(

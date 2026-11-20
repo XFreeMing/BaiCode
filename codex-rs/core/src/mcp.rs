@@ -24,7 +24,7 @@ use codex_extension_api::SelectedPluginSnapshot;
 use codex_extension_api::SessionIsolation;
 use codex_features::Feature;
 use codex_login::CodexAuth;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::EffectiveMcpServer;
 use codex_mcp::McpConfig;
 use codex_mcp::McpEnvironmentAuthority;
@@ -41,7 +41,7 @@ use codex_protocol::protocol::EnvironmentConfigState;
 use codex_protocol::protocol::SessionSource;
 use codex_protocol::protocol::TurnEnvironmentSelection;
 
-const LEGACY_CODEX_APPS_REGISTRATION_ID: &str = "legacy_codex_apps";
+const LEGACY_BAICODE_APPS_REGISTRATION_ID: &str = "legacy_codex_apps";
 
 /// Thread-local policy that excludes all MCP servers, including runtime contributions.
 /// Insert into `StartThreadOptions::thread_extension_init` before starting the thread.
@@ -512,8 +512,8 @@ impl McpManager {
                 != Some(&SessionIsolation::Isolated)
         {
             catalog.register(McpServerRegistration::from_compatibility(
-                CODEX_APPS_MCP_SERVER_NAME.to_string(),
-                LEGACY_CODEX_APPS_REGISTRATION_ID,
+                BAICODE_APPS_MCP_SERVER_NAME.to_string(),
+                LEGACY_BAICODE_APPS_REGISTRATION_ID,
                 codex_apps_mcp_server_config(
                     &mcp_config.client.chatgpt_base_url,
                     mcp_config.apps_mcp_product_sku.as_deref(),
@@ -522,8 +522,8 @@ impl McpManager {
             ));
         } else {
             catalog.remove_compatibility(
-                CODEX_APPS_MCP_SERVER_NAME.to_string(),
-                LEGACY_CODEX_APPS_REGISTRATION_ID,
+                BAICODE_APPS_MCP_SERVER_NAME.to_string(),
+                LEGACY_BAICODE_APPS_REGISTRATION_ID,
             );
         }
 

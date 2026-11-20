@@ -2,28 +2,28 @@
 
 set -eu
 
-RELEASE="${CODEX_RELEASE:-latest}"
-NON_INTERACTIVE="${CODEX_NON_INTERACTIVE:-false}"
-DAEMON_ONLY="${CODEX_INSTALL_DAEMON_ONLY:-0}"
+RELEASE="${BAICODE_RELEASE:-latest}"
+NON_INTERACTIVE="${BAICODE_NON_INTERACTIVE:-false}"
+DAEMON_ONLY="${BAICODE_INSTALL_DAEMON_ONLY:-0}"
 DEFAULT_PREFER_RELEASES_OPENAI_COM="true"
-PREFER_RELEASES_OPENAI_COM="${CODEX_INSTALLER_USE_RELEASES_OPENAI_COM:-$DEFAULT_PREFER_RELEASES_OPENAI_COM}"
+PREFER_RELEASES_OPENAI_COM="${BAICODE_INSTALLER_USE_RELEASES_OPENAI_COM:-$DEFAULT_PREFER_RELEASES_OPENAI_COM}"
 RELEASES_BASE_URL="https://releases.openai.com/codex"
 RELEASES_CONNECT_TIMEOUT=10
 RELEASES_METADATA_TIMEOUT=30
 RELEASES_ASSET_TIMEOUT=300
 release_source="github"
 
-BIN_DIR="${CODEX_INSTALL_DIR:-$HOME/.local/bin}"
+BIN_DIR="${BAICODE_INSTALL_DIR:-$HOME/.local/bin}"
 BIN_PATH="$BIN_DIR/codex"
 CODE_MODE_HOST_BIN_PATH="$BIN_DIR/codex-code-mode-host"
-CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
-STANDALONE_ROOT="$CODEX_HOME_DIR/packages/standalone"
+BAICODE_HOME_DIR="${BAICODE_HOME:-$HOME/.BaiCode}"
+STANDALONE_ROOT="$BAICODE_HOME_DIR/packages/standalone"
 if [ "$DAEMON_ONLY" = "1" ]; then
-  STANDALONE_ROOT="$CODEX_HOME_DIR/packages/app-server-daemon"
+  STANDALONE_ROOT="$BAICODE_HOME_DIR/packages/app-server-daemon"
 fi
 RELEASES_DIR="$STANDALONE_ROOT/releases"
 CURRENT_LINK="$STANDALONE_ROOT/current"
-if [ "${CODEX_INSTALL_DEFER_SELECTION:-0}" = "1" ]; then
+if [ "${BAICODE_INSTALL_DEFER_SELECTION:-0}" = "1" ]; then
   if [ "$DAEMON_ONLY" != "1" ]; then
     echo "Deferred selection requires a daemon-only installation." >&2
     exit 1
@@ -96,9 +96,9 @@ parse_args() {
 Usage: install.sh [--release VERSION]
 
 Environment:
-  CODEX_RELEASE          Version to install; overridden by --release.
-  CODEX_NON_INTERACTIVE  Set to 1, true, or yes to skip prompts.
-  CODEX_INSTALLER_USE_RELEASES_OPENAI_COM
+  BAICODE_RELEASE          Version to install; overridden by --release.
+  BAICODE_NON_INTERACTIVE  Set to 1, true, or yes to skip prompts.
+  BAICODE_INSTALLER_USE_RELEASES_OPENAI_COM
                          Set to 0, false, or no to use GitHub Releases.
 EOF
         exit 0
@@ -652,7 +652,7 @@ rewrite_path_block() {
   path_line="$4"
   tmp_profile="$tmp_dir/profile.$$.tmp"
 
-  CODEX_PATH_LINE="$path_line" awk -v begin="$begin_marker" -v end="$end_marker" '
+  BAICODE_PATH_LINE="$path_line" awk -v begin="$begin_marker" -v end="$end_marker" '
     BEGIN {
       in_block = 0
       replaced = 0
@@ -660,7 +660,7 @@ rewrite_path_block() {
     $0 == begin {
       if (!replaced) {
         print begin
-        print ENVIRON["CODEX_PATH_LINE"]
+        print ENVIRON["BAICODE_PATH_LINE"]
         print end
         replaced = 1
       }
@@ -845,7 +845,7 @@ release_is_unused() {
   if [ "$os" = "linux" ]; then
     path_field="n$1"
   else
-    # lsof +D scopes the scan to this tree, but may escape bytes in CODEX_HOME.
+    # lsof +D scopes the scan to this tree, but may escape bytes in BAICODE_HOME.
     # Match the installer-owned ASCII path, including the temporary retirement name.
     path_field="/packages/${STANDALONE_ROOT##*/}/releases/${1#"$releases"/}"
   fi
@@ -856,7 +856,7 @@ release_is_unused() {
 # Run under the install lock, after the visible command has been verified.
 # Only retire ordinary, manifest-owned packages; never retry a retired tree.
 prune_standalone_releases() (
-  [ ! -L "$CODEX_HOME_DIR/packages" ] &&
+  [ ! -L "$BAICODE_HOME_DIR/packages" ] &&
     [ ! -L "$STANDALONE_ROOT" ] && [ ! -L "$RELEASES_DIR" ] || return 1
   releases="$(cd -P "$RELEASES_DIR" && pwd)" || return 1
   # Local process inspection cannot establish whether a network home is in
@@ -909,8 +909,8 @@ prune_standalone_releases() (
     [ ! -s "$tmp_dir/unowned" ] || continue
     if [ "$os" = "linux" ]; then
       # mountinfo escapes spaces, tabs, newlines, and backslashes in paths.
-      if ! CODEX_PRUNE_RELEASE="$candidate" LC_ALL=C awk '
-        BEGIN { release = ENVIRON["CODEX_PRUNE_RELEASE"] }
+      if ! BAICODE_PRUNE_RELEASE="$candidate" LC_ALL=C awk '
+        BEGIN { release = ENVIRON["BAICODE_PRUNE_RELEASE"] }
         { path = $5; gsub(/\\040/, " ", path); gsub(/\\011/, "\t", path)
           gsub(/\\012/, "\n", path); gsub(/\\134/, "\\", path)
           if (path == release || index(path, release "/") == 1) found = 1 }
@@ -1359,17 +1359,17 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 
 acquire_install_lock
-if [ "${CODEX_INSTALL_DEFER_SELECTION:-0}" = "1" ] &&
+if [ "${BAICODE_INSTALL_DEFER_SELECTION:-0}" = "1" ] &&
   { [ -e "$STANDALONE_ROOT/current" ] || [ -L "$STANDALONE_ROOT/current" ]; }; then
   echo "A dedicated daemon is already selected; retry the update." >&2
   exit 1
 fi
-updater_record="$CODEX_HOME_DIR/app-server-daemon/app-server-updater.pid"
+updater_record="$BAICODE_HOME_DIR/app-server-daemon/app-server-updater.pid"
 if [ "$DAEMON_ONLY" = "1" ]; then
-  updater_record="$CODEX_HOME_DIR/app-server-daemon/daemon-updater.pid"
+  updater_record="$BAICODE_HOME_DIR/app-server-daemon/daemon-updater.pid"
 fi
 old_updater_parent="false"
-if [ "${CODEX_INSTALL_IF_LATEST:-}" != "1" ] && [ "${CODEX_INSTALL_IF_CURRENT:-}" != "1" ] && [ -f "$updater_record" ]; then
+if [ "${BAICODE_INSTALL_IF_LATEST:-}" != "1" ] && [ "${BAICODE_INSTALL_IF_CURRENT:-}" != "1" ] && [ -f "$updater_record" ]; then
   updater_pid="$(sed -n 's/.*"pid"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p' "$updater_record" | head -n 1)"
   recorded_start="$(sed -n 's/.*"processStartTime"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$updater_record" | head -n 1)"
   if [ -r "/proc/$$/stat" ]; then
@@ -1393,8 +1393,8 @@ if [ "${CODEX_INSTALL_IF_LATEST:-}" != "1" ] && [ "${CODEX_INSTALL_IF_CURRENT:-}
     exit 0
   fi
 fi
-if [ "${CODEX_INSTALL_IF_LATEST:-}" = "1" ] || [ "${CODEX_INSTALL_IF_CURRENT:-}" = "1" ] || [ "$old_updater_parent" = "true" ]; then
-  guarded_release="${CODEX_UPDATE_FROM_RELEASE:-}"
+if [ "${BAICODE_INSTALL_IF_LATEST:-}" = "1" ] || [ "${BAICODE_INSTALL_IF_CURRENT:-}" = "1" ] || [ "$old_updater_parent" = "true" ]; then
+  guarded_release="${BAICODE_UPDATE_FROM_RELEASE:-}"
   if [ "$old_updater_parent" = "true" ]; then
     guarded_release="$(cat "$AUTO_UPDATE_VERSION" 2>/dev/null || true)"
   fi
@@ -1402,7 +1402,7 @@ if [ "${CODEX_INSTALL_IF_LATEST:-}" = "1" ] || [ "${CODEX_INSTALL_IF_CURRENT:-}"
   releases_dir="$(cd -P "$RELEASES_DIR" 2>/dev/null && pwd)" || exit 0
   if [ "$RELEASE" != "latest" ] || [ -z "$guarded_release" ] ||
     [ "$current_release_dir" != "$releases_dir/$guarded_release" ]; then
-    if [ "${CODEX_INSTALL_IF_CURRENT:-}" = "1" ]; then
+    if [ "${BAICODE_INSTALL_IF_CURRENT:-}" = "1" ]; then
       echo "Daemon selection changed; retry the update." >&2
       exit 1
     fi
@@ -1410,7 +1410,7 @@ if [ "${CODEX_INSTALL_IF_LATEST:-}" = "1" ] || [ "${CODEX_INSTALL_IF_CURRENT:-}"
   fi
   # An explicit daemon update may leave a local or pinned release. Scheduled
   # updates still require the selected release to follow the latest channel.
-  if [ "${CODEX_INSTALL_IF_CURRENT:-}" != "1" ] &&
+  if [ "${BAICODE_INSTALL_IF_CURRENT:-}" != "1" ] &&
     [ "$(cat "$AUTO_UPDATE_VERSION" 2>/dev/null || true)" != "$guarded_release" ]; then
     exit 0
   fi
@@ -1450,7 +1450,7 @@ if ! release_dir_is_complete "$release_dir" "$resolved_version" "$vendor_target"
   echo "Installed Codex command did not report expected version $resolved_version." >&2
   exit 1
 fi
-if [ "$DAEMON_ONLY" = "1" ] && [ "${CODEX_INSTALL_DEFER_SELECTION:-0}" != "1" ]; then
+if [ "$DAEMON_ONLY" = "1" ] && [ "${BAICODE_INSTALL_DEFER_SELECTION:-0}" != "1" ]; then
   installed_codex="$release_dir/codex"
   if [ "$install_layout" = "package" ]; then
     installed_codex="$release_dir/bin/codex"
@@ -1460,7 +1460,7 @@ if [ "$DAEMON_ONLY" = "1" ] && [ "${CODEX_INSTALL_DEFER_SELECTION:-0}" != "1" ];
     exit 1
   fi
 fi
-if [ "${CODEX_INSTALL_DEFER_SELECTION:-0}" != "1" ]; then
+if [ "${BAICODE_INSTALL_DEFER_SELECTION:-0}" != "1" ]; then
   # A no-op must not replace the selection link: history is bound to it.
   selected_dir="$(cd -P "$release_dir" && pwd)"
   previous_dir="$(cd -P "$CURRENT_LINK" 2>/dev/null && pwd)" || previous_dir=""

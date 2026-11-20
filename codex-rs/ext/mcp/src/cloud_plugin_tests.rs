@@ -639,7 +639,7 @@ async fn run_cloud_catalog_refresh_lifecycle() -> anyhow::Result<()> {
             config.chatgpt_base_url = apps_server.chatgpt_base_url;
         });
     let test = builder.build_with_auto_env(&server).await?;
-    assert!(!test.config.mcp_servers.get()[codex_mcp::CODEX_APPS_MCP_SERVER_NAME].enabled);
+    assert!(!test.config.mcp_servers.get()[codex_mcp::BAICODE_APPS_MCP_SERVER_NAME].enabled);
     let calendar = ("calendar", "list_events", "Cloud Demo");
     let gmail = ("gmail", "search_email", "Gmail Demo");
     for (turn, reply, expected_plugin, new_account, tool_call) in [
@@ -836,7 +836,7 @@ async fn run_cloud_catalog_refresh_lifecycle() -> anyhow::Result<()> {
                 .clone()
                 .context("cloud provider resource client missing")?;
             let previous_auth =
-                resources.auth_cache_key_for_server(codex_mcp::CODEX_APPS_MCP_SERVER_NAME);
+                resources.auth_cache_key_for_server(codex_mcp::BAICODE_APPS_MCP_SERVER_NAME);
             codex_login::auth::login_with_chatgpt_auth_tokens(
                 test.codex_home_path(),
                 "header.e30.changed",
@@ -846,7 +846,7 @@ async fn run_cloud_catalog_refresh_lifecycle() -> anyhow::Result<()> {
             test.thread_manager.auth_manager().reload().await;
             tokio::time::timeout(std::time::Duration::from_secs(10), async {
                 loop {
-                    if resources.auth_cache_key_for_server(codex_mcp::CODEX_APPS_MCP_SERVER_NAME)
+                    if resources.auth_cache_key_for_server(codex_mcp::BAICODE_APPS_MCP_SERVER_NAME)
                         != previous_auth
                         && test
                             .codex
@@ -906,18 +906,18 @@ async fn run_cloud_catalog_refresh_lifecycle() -> anyhow::Result<()> {
                             .clone()
                             .context("cloud provider resource client missing")?;
                         let previous_auth = resources
-                            .auth_cache_key_for_server(codex_mcp::CODEX_APPS_MCP_SERVER_NAME);
+                            .auth_cache_key_for_server(codex_mcp::BAICODE_APPS_MCP_SERVER_NAME);
                         let previous_resource =
-                            resources.server_cache_key(codex_mcp::CODEX_APPS_MCP_SERVER_NAME);
+                            resources.server_cache_key(codex_mcp::BAICODE_APPS_MCP_SERVER_NAME);
                         if turn == "in-flight-resource-change" {
                             test.codex.submit(Op::RefreshMcpServers).await?;
-                            while resources.server_cache_key(codex_mcp::CODEX_APPS_MCP_SERVER_NAME)
+                            while resources.server_cache_key(codex_mcp::BAICODE_APPS_MCP_SERVER_NAME)
                                 == previous_resource
                             {
                                 tokio::task::yield_now().await;
                             }
                             assert!(
-                                resources.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME)
+                                resources.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME)
                                     == previous_auth
                             );
                         } else {
@@ -930,7 +930,7 @@ async fn run_cloud_catalog_refresh_lifecycle() -> anyhow::Result<()> {
                             )?;
                             test.thread_manager.auth_manager().reload().await;
                             // Auth must be published while cloud discovery remains paused.
-                            while resources.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME)
+                            while resources.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME)
                                 == previous_auth
                             {
                                 tokio::task::yield_now().await;
@@ -1066,17 +1066,17 @@ async fn run_cloud_catalog_refresh_lifecycle() -> anyhow::Result<()> {
     provider.set_reply(Ok(cloud_catalog()));
     assert!(!contributor.refresh_catalog_for_step(input).await);
     assert_eq!(state.cloud_catalog(), Some(PluginCatalog::default()));
-    let key = resources.server_cache_key(CODEX_APPS_MCP_SERVER_NAME);
-    let auth = resources.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME);
+    let key = resources.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME);
+    let auth = resources.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME);
     test.codex.submit(Op::RefreshMcpServers).await?;
     tokio::time::timeout(Duration::from_secs(10), async {
-        while resources.server_cache_key(CODEX_APPS_MCP_SERVER_NAME) == key {
+        while resources.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME) == key {
             tokio::task::yield_now().await;
         }
     })
     .await?;
-    assert!(resources.server_cache_key(CODEX_APPS_MCP_SERVER_NAME) != key);
-    assert!(resources.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME) == auth);
+    assert!(resources.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME) != key);
+    assert!(resources.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME) == auth);
     assert!(contributor.refresh_catalog_for_step(input).await);
     assert_eq!(state.cloud_catalog(), Some(cloud_catalog()));
     let calls = provider.calls.load(Ordering::SeqCst);

@@ -134,7 +134,7 @@ with urllib.request.urlopen(request, timeout=30) as response:
     let mut app_server = TestAppServer::builder()
         .with_codex_home(codex_home.path())
         .without_auto_env()
-        .with_env_overrides(&[(codex_exec_server::CODEX_EXEC_SERVER_URL_ENV_VAR, None)])
+        .with_env_overrides(&[(codex_exec_server::BAICODE_EXEC_SERVER_URL_ENV_VAR, None)])
         .build_initialized_with_timeout(TIMEOUT)
         .await?;
     let start = app_server

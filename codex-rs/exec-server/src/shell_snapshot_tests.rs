@@ -315,19 +315,19 @@ fn snapshot_filters_profile_exports_after_capture() {
         exclude: vec!["PROFILE_DENIED".to_string()],
         r#set: HashMap::from([
             ("PROFILE_ALLOWED".to_string(), "override".to_string()),
-            ("CODEX_THREAD_ID".to_string(), "policy-thread".to_string()),
-            ("CODEX_TOOL_CALL_ID".to_string(), "policy-call".to_string()),
+            ("BAICODE_THREAD_ID".to_string(), "policy-thread".to_string()),
+            ("BAICODE_TOOL_CALL_ID".to_string(), "policy-call".to_string()),
         ]),
         // Metadata must survive policy filtering so the cache owns its removal.
         include_only: vec![
             "PROFILE_*".to_string(),
-            "CODEX_THREAD_ID".to_string(),
-            "CODEX_TOOL_CALL_ID".to_string(),
+            "BAICODE_THREAD_ID".to_string(),
+            "BAICODE_TOOL_CALL_ID".to_string(),
         ],
     };
     let snapshot = parse_snapshot(
         ShellType::Bash,
-        b"profile \xff noise\n# Snapshot file\nfunction profile_helper() { :; }\n\0alias profile_alias='profile_helper'\n\0PROFILE_DENIED\0export PROFILE_DENIED=denied\n\0NON_UTF8\0export NON_UTF8='\xff'\n\0\0PROFILE_ALLOWED=profile\0PROFILE_DENIED=denied\0PROFILE_SECRET=secret\0PWD=/tmp\0NON_UTF8=\xff\0CODEX_THREAD_ID=capture-thread\0CODEX_TOOL_CALL_ID=profile-call\0",
+        b"profile \xff noise\n# Snapshot file\nfunction profile_helper() { :; }\n\0alias profile_alias='profile_helper'\n\0PROFILE_DENIED\0export PROFILE_DENIED=denied\n\0NON_UTF8\0export NON_UTF8='\xff'\n\0\0PROFILE_ALLOWED=profile\0PROFILE_DENIED=denied\0PROFILE_SECRET=secret\0PWD=/tmp\0NON_UTF8=\xff\0BAICODE_THREAD_ID=capture-thread\0BAICODE_TOOL_CALL_ID=profile-call\0",
         Some(&policy),
         SnapshotReplay::Environment,
     )
@@ -378,7 +378,7 @@ fn snapshot_preserves_profile_exports_with_restrictive_inheritance() {
 fn snapshot_caches_only_unmanaged_proxy_state() {
     for (exports, expected) in [
         (
-            "PROFILE_ALLOWED=profile\0HTTP_PROXY=http://127.0.0.1:4321\0CODEX_NETWORK_PROXY_ACTIVE=1\0CODEX_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE=1\0",
+            "PROFILE_ALLOWED=profile\0HTTP_PROXY=http://127.0.0.1:4321\0BAICODE_NETWORK_PROXY_ACTIVE=1\0BAICODE_NETWORK_PROXY_CREDENTIAL_BROKER_ACTIVE=1\0",
             HashMap::from([("PROFILE_ALLOWED".to_string(), "profile".to_string())]),
         ),
         (
@@ -393,7 +393,7 @@ fn snapshot_caches_only_unmanaged_proxy_state() {
         ),
     ] {
         let output = format!(
-            "# Snapshot file\n\0\0\0{exports}CODEX_THREAD_ID=capture-thread\0CODEX_TOOL_CALL_ID=profile-call\0"
+            "# Snapshot file\n\0\0\0{exports}BAICODE_THREAD_ID=capture-thread\0BAICODE_TOOL_CALL_ID=profile-call\0"
         );
         let snapshot = parse_snapshot(
             ShellType::Bash,

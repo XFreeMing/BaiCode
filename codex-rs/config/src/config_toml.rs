@@ -234,10 +234,10 @@ pub struct ConfigToml {
     /// Sandbox mode to use.
     pub sandbox_mode: Option<SandboxMode>,
 
-    /// Allow macOS sandbox writable roots at or beneath CODEX_HOME to traverse
+    /// Allow macOS sandbox writable roots at or beneath BAICODE_HOME to traverse
     /// symlinks. Read only from the host's user config at startup; defaults to false.
     /// This grants no write access by itself, but trusts symlink targets even if
-    /// they change between commands or lie outside CODEX_HOME.
+    /// they change between commands or lie outside BAICODE_HOME.
     /// This setting has no effect on Linux or Windows.
     pub allow_symlinked_codex_home: Option<bool>,
 
@@ -385,12 +385,12 @@ pub struct ConfigToml {
     pub rollout_trace: Option<RolloutTraceToml>,
 
     /// Directory where Codex stores the SQLite state DB.
-    /// Defaults to `$CODEX_SQLITE_HOME` when set. Otherwise uses `$CODEX_HOME`.
+    /// Defaults to `$BAICODE_SQLITE_HOME` when set. Otherwise uses `$BAICODE_HOME`.
     pub sqlite_home: Option<AbsolutePathBuf>,
 
     /// Directory for log files. Setting this value explicitly also routes the
     /// SQLite logs database here and enables the TUI text log in this directory.
-    /// When unset, log files use `$CODEX_HOME/log` and SQLite logs use `sqlite_home`.
+    /// When unset, log files use `$BAICODE_HOME/log` and SQLite logs use `sqlite_home`.
     /// Existing SQLite logs in `sqlite_home` are not migrated automatically.
     /// A managed `sqlite_home` requirement keeps SQLite logs in that required directory.
     pub log_dir: Option<AbsolutePathBuf>,

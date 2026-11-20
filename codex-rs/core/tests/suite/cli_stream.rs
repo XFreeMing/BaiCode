@@ -1,7 +1,7 @@
 use codex_git_utils::SanitizedGitUrl;
 use codex_git_utils::collect_git_info;
-use codex_login::CODEX_ACCESS_TOKEN_ENV_VAR;
-use codex_login::CODEX_API_KEY_ENV_VAR;
+use codex_login::BAICODE_ACCESS_TOKEN_ENV_VAR;
+use codex_login::BAICODE_API_KEY_ENV_VAR;
 use codex_protocol::protocol::GitInfo;
 use core_test_support::fs_wait;
 use core_test_support::responses;
@@ -80,10 +80,10 @@ fn personal_access_token_exec_command(server: &MockServer, home: &TempDir) -> Co
         .arg("-C")
         .arg(repo_root())
         .arg("hello?");
-    cmd.env("CODEX_HOME", home.path())
-        .env(CODEX_ACCESS_TOKEN_ENV_VAR, PERSONAL_ACCESS_TOKEN)
-        .env("CODEX_AUTHAPI_BASE_URL", server.uri())
-        .env_remove(CODEX_API_KEY_ENV_VAR)
+    cmd.env("BAICODE_HOME", home.path())
+        .env(BAICODE_ACCESS_TOKEN_ENV_VAR, PERSONAL_ACCESS_TOKEN)
+        .env("BAICODE_AUTHAPI_BASE_URL", server.uri())
+        .env_remove(BAICODE_API_KEY_ENV_VAR)
         .env_remove("OPENAI_API_KEY");
     cmd
 }
@@ -240,7 +240,7 @@ async fn responses_mode_stream_cli() {
         .arg("model_provider=\"mock\"")
         .current_dir(cwd.path())
         .arg("hello?");
-    cmd.env("CODEX_HOME", home.path())
+    cmd.env("BAICODE_HOME", home.path())
         .env("OPENAI_API_KEY", "dummy");
 
     let output = run_cli_command(&mut cmd).unwrap();
@@ -279,7 +279,7 @@ async fn responses_mode_stream_cli_supports_openai_base_url_config_override() {
         .arg(format!("openai_base_url=\"{}/v1\"", server.uri()))
         .current_dir(cwd.path())
         .arg("hello?");
-    cmd.env("CODEX_HOME", home.path())
+    cmd.env("BAICODE_HOME", home.path())
         .env("OPENAI_API_KEY", "dummy");
 
     let output = run_cli_command(&mut cmd).unwrap();
@@ -336,7 +336,7 @@ async fn exec_cli_applies_model_instructions_file() {
         .arg(format!("model_instructions_file=\"{custom_path_str}\""))
         .current_dir(cwd.path())
         .arg("hello?\n");
-    cmd.env("CODEX_HOME", home.path())
+    cmd.env("BAICODE_HOME", home.path())
         .env("OPENAI_API_KEY", "dummy");
 
     let output = run_cli_command(&mut cmd).unwrap();
@@ -402,7 +402,7 @@ async fn exec_cli_profile_applies_model_instructions_file() {
         .arg("model_provider=\"mock\"")
         .current_dir(cwd.path())
         .arg("hello?\n");
-    cmd.env("CODEX_HOME", home.path())
+    cmd.env("BAICODE_HOME", home.path())
         .env("OPENAI_API_KEY", "dummy");
 
     let output = run_cli_command(&mut cmd).unwrap();
@@ -437,7 +437,7 @@ async fn responses_api_stream_cli() {
         .arg(format!("openai_base_url=\"{}/v1\"", server.uri()))
         .current_dir(cwd.path())
         .arg("hello?");
-    cmd.env("CODEX_HOME", home.path())
+    cmd.env("BAICODE_HOME", home.path())
         .env("OPENAI_API_KEY", "dummy");
 
     let output = run_cli_command(&mut cmd).unwrap();
@@ -477,8 +477,8 @@ async fn integration_creates_and_checks_session_file() -> anyhow::Result<()> {
         .arg(format!("openai_base_url=\"{}/v1\"", server.uri()))
         .current_dir(cwd.path())
         .arg(&prompt);
-    cmd.env("CODEX_HOME", home.path())
-        .env(CODEX_API_KEY_ENV_VAR, "dummy");
+    cmd.env("BAICODE_HOME", home.path())
+        .env(BAICODE_API_KEY_ENV_VAR, "dummy");
 
     let output = run_cli_command(&mut cmd).unwrap();
     assert!(
@@ -594,7 +594,7 @@ async fn integration_creates_and_checks_session_file() -> anyhow::Result<()> {
         .arg(&prompt2)
         .arg("resume")
         .arg("--last");
-    cmd2.env("CODEX_HOME", home.path())
+    cmd2.env("BAICODE_HOME", home.path())
         .env("OPENAI_API_KEY", "dummy");
 
     let output2 = run_cli_command(&mut cmd2).unwrap();

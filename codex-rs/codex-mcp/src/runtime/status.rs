@@ -15,7 +15,7 @@ use crate::McpServerKey;
 use crate::McpServerStatusSnapshot;
 use crate::McpSnapshotDetail;
 use crate::ResolvedMcpServer;
-use crate::mcp::CODEX_APPS_MCP_SERVER_NAME;
+use crate::mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use crate::mcp::collect_mcp_server_status_snapshot_from_manager;
 use crate::mcp::compute_auth_statuses;
 use crate::mcp::effective_mcp_server;
@@ -100,7 +100,7 @@ impl McpRuntime {
                 continue;
             };
             // Apps has its own auth, protocol, and connector filtering.
-            if key.name() == CODEX_APPS_MCP_SERVER_NAME
+            if key.name() == BAICODE_APPS_MCP_SERVER_NAME
                 || expected.mcp_server_catalog.server(key) != Some(registration)
                 || config.permission_profile_for_server(key)
                     != expected.permission_profile_for_server(key)

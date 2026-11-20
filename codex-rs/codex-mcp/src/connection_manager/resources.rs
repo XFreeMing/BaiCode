@@ -1,5 +1,5 @@
 use super::McpServerConnection;
-use crate::CODEX_APPS_MCP_SERVER_NAME;
+use crate::BAICODE_APPS_MCP_SERVER_NAME;
 use crate::McpRuntime;
 use crate::McpServerKey;
 use codex_rmcp_client::RmcpClient;
@@ -202,7 +202,7 @@ impl McpConnectionSet {
         }
         let view = self
             .servers
-            .get(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))?;
+            .get(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))?;
         let connection = &view.connection;
         if connection.initialized_apps.is_some()
             && !connection.client.startup_complete.load(Ordering::Acquire)
@@ -245,9 +245,9 @@ impl McpServerConnection {
         timeout: Option<Duration>,
         request: impl AsyncFnOnce(Arc<RmcpClient>, Option<Duration>) -> Result<ServerResult>,
     ) -> Result<ServerResult> {
-        let auth = runtime.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME);
+        let auth = runtime.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME);
         let key = runtime
-            .resource_cache_key(CODEX_APPS_MCP_SERVER_NAME)
+            .resource_cache_key(BAICODE_APPS_MCP_SERVER_NAME)
             .context("Apps registration was removed")?;
         anyhow::ensure!(
             key.connection.ptr_eq(&Arc::downgrade(self)),
@@ -261,8 +261,8 @@ impl McpServerConnection {
             response = request(client, timeout) => response?,
         };
         anyhow::ensure!(
-            Some(key) == runtime.resource_cache_key(CODEX_APPS_MCP_SERVER_NAME)
-                && auth == runtime.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME),
+            Some(key) == runtime.resource_cache_key(BAICODE_APPS_MCP_SERVER_NAME)
+                && auth == runtime.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME),
             "Apps connection changed during catalog discovery"
         );
         Ok(response)

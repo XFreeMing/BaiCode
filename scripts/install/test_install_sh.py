@@ -1115,72 +1115,72 @@ def run_installer_in(
               fi
               previous="$arg"
             done
-            printf '%s\n' "$url" >>"$CODEX_TEST_REQUEST_LOG"
+            printf '%s\n' "$url" >>"$BAICODE_TEST_REQUEST_LOG"
 
             case "$url" in
               https://api.github.com/*)
-                if [ "$CODEX_TEST_METADATA_FAILURE" = "1" ]; then
+                if [ "$BAICODE_TEST_METADATA_FAILURE" = "1" ]; then
                   echo "curl: (22) The requested URL returned error: 403" >&2
                   exit 22
                 fi
-                printf '%s\n' "$CODEX_TEST_METADATA_JSON"
+                printf '%s\n' "$BAICODE_TEST_METADATA_JSON"
                 ;;
               https://releases.openai.com/codex/channels/latest|https://releases.openai.com/codex/releases/*/release.json)
-                if [ "$CODEX_TEST_RELEASES_MODE" = "channel_failure" ]; then
+                if [ "$BAICODE_TEST_RELEASES_MODE" = "channel_failure" ]; then
                   exit 22
                 fi
-                printf '%s\n' "$CODEX_TEST_RELEASES_METADATA_JSON"
+                printf '%s\n' "$BAICODE_TEST_RELEASES_METADATA_JSON"
                 ;;
               https://releases.openai.com/codex/releases/*/codex-package_SHA256SUMS)
-                if [ "$CODEX_TEST_RELEASES_MODE" = "asset_fallback" ]; then
+                if [ "$BAICODE_TEST_RELEASES_MODE" = "asset_fallback" ]; then
                   exit 22
                 fi
-                if [ "$CODEX_TEST_RELEASES_MODE" = "corrupt_assets" ] ||
-                  [ "$CODEX_TEST_RELEASES_MODE" = "corrupt_checksum_and_github" ]; then
+                if [ "$BAICODE_TEST_RELEASES_MODE" = "corrupt_assets" ] ||
+                  [ "$BAICODE_TEST_RELEASES_MODE" = "corrupt_checksum_and_github" ]; then
                   printf '<html>proxy error</html>\n' >"$output"
                   exit 0
                 fi
-                if [ -n "$CODEX_TEST_RELEASES_CHECKSUM_PATH" ]; then
-                  cp "$CODEX_TEST_RELEASES_CHECKSUM_PATH" "$output"
+                if [ -n "$BAICODE_TEST_RELEASES_CHECKSUM_PATH" ]; then
+                  cp "$BAICODE_TEST_RELEASES_CHECKSUM_PATH" "$output"
                 else
                   exit 22
                 fi
                 ;;
               https://releases.openai.com/codex/releases/*/codex-package-*.tar.gz)
-                if [ "$CODEX_TEST_RELEASES_MODE" = "asset_fallback" ]; then
+                if [ "$BAICODE_TEST_RELEASES_MODE" = "asset_fallback" ]; then
                   exit 22
                 fi
-                if [ "$CODEX_TEST_RELEASES_MODE" = "corrupt_assets" ]; then
+                if [ "$BAICODE_TEST_RELEASES_MODE" = "corrupt_assets" ]; then
                   printf '<html>proxy error</html>\n' >"$output"
                   exit 0
                 fi
-                if [ -n "$CODEX_TEST_ARCHIVE_PATH" ]; then
-                  cp "$CODEX_TEST_ARCHIVE_PATH" "$output"
+                if [ -n "$BAICODE_TEST_ARCHIVE_PATH" ]; then
+                  cp "$BAICODE_TEST_ARCHIVE_PATH" "$output"
                 else
                   exit 22
                 fi
                 ;;
               https://github.com/openai/codex/releases/download/*/codex-package_SHA256SUMS)
-                if [ "$CODEX_TEST_RELEASES_MODE" = "corrupt_checksum_and_github" ]; then
+                if [ "$BAICODE_TEST_RELEASES_MODE" = "corrupt_checksum_and_github" ]; then
                   printf '<html>proxy error</html>\n' >"$output"
                   exit 0
                 fi
-                if [ -n "$CODEX_TEST_CHECKSUM_PATH" ]; then
-                  cp "$CODEX_TEST_CHECKSUM_PATH" "$output"
+                if [ -n "$BAICODE_TEST_CHECKSUM_PATH" ]; then
+                  cp "$BAICODE_TEST_CHECKSUM_PATH" "$output"
                 else
                   exit 22
                 fi
                 ;;
               https://github.com/openai/codex/releases/download/*/codex-package-*.tar.gz)
-                if [ -n "$CODEX_TEST_ARCHIVE_PATH" ]; then
-                  cp "$CODEX_TEST_ARCHIVE_PATH" "$output"
+                if [ -n "$BAICODE_TEST_ARCHIVE_PATH" ]; then
+                  cp "$BAICODE_TEST_ARCHIVE_PATH" "$output"
                 else
                   exit 22
                 fi
                 ;;
               https://github.com/openai/codex/releases/download/*/codex-npm-*.tgz)
-                if [ -n "$CODEX_TEST_LEGACY_ARCHIVE_PATH" ]; then
-                  cp "$CODEX_TEST_LEGACY_ARCHIVE_PATH" "$output"
+                if [ -n "$BAICODE_TEST_LEGACY_ARCHIVE_PATH" ]; then
+                  cp "$BAICODE_TEST_LEGACY_ARCHIVE_PATH" "$output"
                 else
                   exit 22
                 fi
@@ -1212,8 +1212,8 @@ def run_installer_in(
             if fail_ps
             else "#!/bin/sh\n"
             'case "$*" in\n'
-            '  *lstart*) printf "S %s\\n" "$CODEX_TEST_PARENT_START" ;;\n'
-            '  *) printf "%s\\n" "$CODEX_TEST_PARENT_PID" ;;\n'
+            '  *lstart*) printf "S %s\\n" "$BAICODE_TEST_PARENT_START" ;;\n'
+            '  *) printf "%s\\n" "$BAICODE_TEST_PARENT_PID" ;;\n'
             "esac\n",
             encoding="utf-8",
         )
@@ -1228,49 +1228,49 @@ def run_installer_in(
     env = os.environ.copy()
     env.update(
         {
-            "CODEX_HOME": str(root / "codex-home"),
-            "CODEX_INSTALL_DIR": str(install_dir),
-            "CODEX_NON_INTERACTIVE": "1",
-            "CODEX_RELEASE": release,
-            "CODEX_INSTALL_DAEMON_ONLY": "1" if daemon_only else "0",
-            "CODEX_TEST_ARCHIVE_PATH": str(archive_path or ""),
-            "CODEX_TEST_CHECKSUM_PATH": str(checksum_path or ""),
-            "CODEX_TEST_RELEASES_CHECKSUM_PATH": str(
+            "BAICODE_HOME": str(root / "codex-home"),
+            "BAICODE_INSTALL_DIR": str(install_dir),
+            "BAICODE_NON_INTERACTIVE": "1",
+            "BAICODE_RELEASE": release,
+            "BAICODE_INSTALL_DAEMON_ONLY": "1" if daemon_only else "0",
+            "BAICODE_TEST_ARCHIVE_PATH": str(archive_path or ""),
+            "BAICODE_TEST_CHECKSUM_PATH": str(checksum_path or ""),
+            "BAICODE_TEST_RELEASES_CHECKSUM_PATH": str(
                 releases_checksum_path or checksum_path or ""
             ),
-            "CODEX_TEST_LEGACY_ARCHIVE_PATH": str(legacy_archive_path or ""),
-            "CODEX_TEST_METADATA_FAILURE": "1" if metadata_failure else "0",
-            "CODEX_TEST_METADATA_JSON": (
+            "BAICODE_TEST_LEGACY_ARCHIVE_PATH": str(legacy_archive_path or ""),
+            "BAICODE_TEST_METADATA_FAILURE": "1" if metadata_failure else "0",
+            "BAICODE_TEST_METADATA_JSON": (
                 metadata_json if metadata_json is not None else release_metadata()
             ),
-            "CODEX_TEST_RELEASES_METADATA_JSON": (
+            "BAICODE_TEST_RELEASES_METADATA_JSON": (
                 releases_metadata_json
                 if releases_metadata_json is not None
                 else metadata_json
                 if metadata_json is not None
                 else release_metadata()
             ),
-            "CODEX_TEST_RELEASES_MODE": releases_mode,
-            "CODEX_TEST_REQUEST_LOG": str(request_log),
+            "BAICODE_TEST_RELEASES_MODE": releases_mode,
+            "BAICODE_TEST_REQUEST_LOG": str(request_log),
             "HOME": str(home),
             "PATH": path,
             "SHELL": "/bin/sh",
         }
     )
-    env["CODEX_INSTALL_IF_CURRENT"] = "1" if manual_update else "0"
+    env["BAICODE_INSTALL_IF_CURRENT"] = "1" if manual_update else "0"
     if update_guard_from_release is None:
-        env.pop("CODEX_INSTALL_IF_LATEST", None)
-        env.pop("CODEX_UPDATE_FROM_RELEASE", None)
+        env.pop("BAICODE_INSTALL_IF_LATEST", None)
+        env.pop("BAICODE_UPDATE_FROM_RELEASE", None)
     else:
-        env["CODEX_INSTALL_IF_LATEST"] = "0" if manual_update else "1"
-        env["CODEX_UPDATE_FROM_RELEASE"] = update_guard_from_release
+        env["BAICODE_INSTALL_IF_LATEST"] = "0" if manual_update else "1"
+        env["BAICODE_UPDATE_FROM_RELEASE"] = update_guard_from_release
     if old_updater_parent_pid is not None:
-        env["CODEX_TEST_PARENT_PID"] = str(old_updater_parent_pid)
-        env["CODEX_TEST_PARENT_START"] = process_start_time()
+        env["BAICODE_TEST_PARENT_PID"] = str(old_updater_parent_pid)
+        env["BAICODE_TEST_PARENT_START"] = process_start_time()
     if use_mirror is None:
-        env.pop("CODEX_INSTALLER_USE_RELEASES_OPENAI_COM", None)
+        env.pop("BAICODE_INSTALLER_USE_RELEASES_OPENAI_COM", None)
     else:
-        env["CODEX_INSTALLER_USE_RELEASES_OPENAI_COM"] = (
+        env["BAICODE_INSTALLER_USE_RELEASES_OPENAI_COM"] = (
             "TRUE" if use_mirror else "false"
         )
     result = subprocess.run(

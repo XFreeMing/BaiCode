@@ -132,7 +132,7 @@ fn host_bridge_tasks(launcher: i32) -> io::Result<Vec<i32>> {
 
 #[tokio::test]
 async fn reaps_bridges_after_exit_and_cancellation() -> io::Result<()> {
-    const OBSERVER: &str = "CODEX_TEST_BRIDGE_OBSERVER";
+    const OBSERVER: &str = "BAICODE_TEST_BRIDGE_OBSERVER";
     if std::env::var_os(OBSERVER).is_some() {
         timeout(SANDBOX_TIMEOUT, observe_bridge_teardown()).await??;
         println!("verified bridge teardown");

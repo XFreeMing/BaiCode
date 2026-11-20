@@ -24,7 +24,7 @@ use codex_login::CodexAuth;
 use codex_login::collect_auth_env_telemetry;
 use codex_login::default_client::ClientRedirectPolicy;
 use codex_login::default_client::create_client_for_route_async;
-use codex_model_provider_info::CHATGPT_CODEX_BASE_URL;
+use codex_model_provider_info::CHATGPT_BAICODE_BASE_URL;
 use codex_model_provider_info::GatewayOAuthConfig;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_models_manager::ModelCatalogOriginator;
@@ -48,7 +48,7 @@ use crate::request_setup::resolve_request_auth;
 
 const MODELS_REFRESH_TIMEOUT: Duration = Duration::from_secs(5);
 const MODELS_ENDPOINT: &str = "/models";
-const FEDRAMP_CODEX_BASE_URL: &str = "https://gov.chatgpt.com/backend-api/codex";
+const FEDRAMP_BAICODE_BASE_URL: &str = "https://gov.chatgpt.com/backend-api/codex";
 
 // Catalog requests use the model provider's credentials. Before enabling a fetch
 // with gateway OAuth alone, check that the catalog URL has the same origin as the gateway.
@@ -194,9 +194,9 @@ impl OpenAiModelsEndpoint {
         {
             // Codex metadata is served by the Codex backend, not the public /v1/models API.
             api_provider.base_url = if uses_fedramp_api_key(auth.as_ref(), &self.provider_info)? {
-                FEDRAMP_CODEX_BASE_URL
+                FEDRAMP_BAICODE_BASE_URL
             } else {
-                CHATGPT_CODEX_BASE_URL
+                CHATGPT_BAICODE_BASE_URL
             }
             .to_string();
         }

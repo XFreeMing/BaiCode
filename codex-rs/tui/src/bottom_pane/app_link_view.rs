@@ -37,8 +37,8 @@ use crate::style::user_message_style;
 use crate::wrapping::RtOptions;
 use crate::wrapping::adaptive_wrap_lines;
 
-const MCP_CODEX_APPS_SERVER_NAME: &str = "codex_apps";
-const MCP_TOOL_CODEX_APPS_META_KEY: &str = "_codex_apps";
+const MCP_BAICODE_APPS_SERVER_NAME: &str = "codex_apps";
+const MCP_TOOL_BAICODE_APPS_META_KEY: &str = "_codex_apps";
 const CONNECTOR_AUTH_FAILURE_META_KEY: &str = "connector_auth_failure";
 const CONNECTOR_AUTH_FAILURE_IS_AUTH_FAILURE_KEY: &str = "is_auth_failure";
 const CONNECTOR_AUTH_FAILURE_CONNECTOR_ID_KEY: &str = "connector_id";
@@ -96,7 +96,7 @@ impl AppLinkViewParams {
         else {
             return None;
         };
-        if server_name == MCP_CODEX_APPS_SERVER_NAME && environment_id.is_none() {
+        if server_name == MCP_BAICODE_APPS_SERVER_NAME && environment_id.is_none() {
             let url = validate_external_url(url, /*require_chatgpt_host*/ true)?;
             return Self::from_codex_apps_auth_url_parts(
                 thread_id,
@@ -132,7 +132,7 @@ impl AppLinkViewParams {
     ) -> Option<Self> {
         let auth_failure = meta?
             .as_object()?
-            .get(MCP_TOOL_CODEX_APPS_META_KEY)?
+            .get(MCP_TOOL_BAICODE_APPS_META_KEY)?
             .as_object()?
             .get(CONNECTOR_AUTH_FAILURE_META_KEY)?
             .as_object()?;
@@ -390,7 +390,7 @@ impl AppLinkView {
         let should_refresh_connectors = self
             .elicitation_target
             .as_ref()
-            .is_none_or(|target| target.server_name == MCP_CODEX_APPS_SERVER_NAME);
+            .is_none_or(|target| target.server_name == MCP_BAICODE_APPS_SERVER_NAME);
         if should_refresh_connectors {
             self.app_event_tx.send(AppEvent::RefreshConnectors {
                 force_refetch: true,
@@ -568,7 +568,7 @@ impl AppLinkView {
             && self
                 .elicitation_target
                 .as_ref()
-                .is_some_and(|target| target.server_name == MCP_CODEX_APPS_SERVER_NAME);
+                .is_some_and(|target| target.server_name == MCP_BAICODE_APPS_SERVER_NAME);
         lines.push(Line::from(
             if is_auth_suggestion {
                 if is_codex_apps_auth {

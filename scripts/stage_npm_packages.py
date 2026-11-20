@@ -36,9 +36,9 @@ _BUILD_MODULE = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(_BUILD_MODULE)
 PACKAGE_NATIVE_COMPONENTS = getattr(_BUILD_MODULE, "PACKAGE_NATIVE_COMPONENTS", {})
 PACKAGE_EXPANSIONS = getattr(_BUILD_MODULE, "PACKAGE_EXPANSIONS", {})
-CODEX_PLATFORM_PACKAGES = getattr(_BUILD_MODULE, "CODEX_PLATFORM_PACKAGES", {})
-CODEX_PACKAGE_COMPONENT = getattr(
-    _BUILD_MODULE, "CODEX_PACKAGE_COMPONENT", "codex-package"
+BAICODE_PLATFORM_PACKAGES = getattr(_BUILD_MODULE, "BAICODE_PLATFORM_PACKAGES", {})
+BAICODE_PACKAGE_COMPONENT = getattr(
+    _BUILD_MODULE, "BAICODE_PACKAGE_COMPONENT", "codex-package"
 )
 
 
@@ -213,7 +213,7 @@ def install_from_downloaded_artifacts(
     components: Sequence[str],
     vendor_dir: Path,
 ) -> None:
-    if CODEX_PACKAGE_COMPONENT in components:
+    if BAICODE_PACKAGE_COMPONENT in components:
         install_codex_package_archives(artifacts_dir, vendor_dir, BINARY_TARGETS)
 
 
@@ -221,7 +221,7 @@ def select_target_artifacts(
     workflow_id: str,
     components: Sequence[str],
 ) -> list[WorkflowArtifact]:
-    if CODEX_PACKAGE_COMPONENT not in components:
+    if BAICODE_PACKAGE_COMPONENT not in components:
         return []
 
     artifacts_by_name = {
@@ -374,7 +374,7 @@ def run_command(cmd: list[str]) -> None:
 
 
 def tarball_name_for_package(package: str, version: str) -> str:
-    if package in CODEX_PLATFORM_PACKAGES:
+    if package in BAICODE_PLATFORM_PACKAGES:
         platform = package.removeprefix("codex-")
         return f"codex-npm-{platform}-{version}.tgz"
     return f"{package}-npm-{version}.tgz"

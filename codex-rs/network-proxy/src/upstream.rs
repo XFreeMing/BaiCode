@@ -81,7 +81,7 @@ impl ProxyConfig {
                 .tool_call_id
                 .as_deref()
                 .and_then(|id| {
-                    let endpoint = read_proxy_env(&["CODEX_TOOL_CALL_ATTRIBUTION_PROXY"])?;
+                    let endpoint = read_proxy_env(&["BAICODE_TOOL_CALL_ATTRIBUTION_PROXY"])?;
                     Some(ToolCallAttribution {
                         endpoint,
                         call_id: HeaderValue::from_str(id).ok()?,

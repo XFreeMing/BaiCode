@@ -10,7 +10,7 @@ use crate::mcp::McpRuntimeProjection;
 use codex_config::McpServerDisabledReason;
 use codex_config::McpServerTransportConfig;
 use codex_file_system::WindowsSandboxSelection;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::ElicitationReviewerHandle;
 use codex_mcp::McpServerKey;
 use codex_mcp::McpServerRegistration;
@@ -62,7 +62,7 @@ impl Session {
         self.refresh_mcp_if_dirty().await;
         // Apps refreshes fetch tools outside the MCP runtime lock. Wait for any
         // in-flight refresh before capturing the catalog for this call.
-        if advertised_tool.server_name() == CODEX_APPS_MCP_SERVER_NAME {
+        if advertised_tool.server_name() == BAICODE_APPS_MCP_SERVER_NAME {
             self.wait_for_apps_tool_refresh().await;
         }
         self.services
@@ -199,7 +199,7 @@ impl Session {
                         /*inc*/ 1,
                         &[("server_name", name.as_str()), ("outcome", outcome)],
                     );
-                    if name == CODEX_APPS_MCP_SERVER_NAME || !server.is_local_environment() {
+                    if name == BAICODE_APPS_MCP_SERVER_NAME || !server.is_local_environment() {
                         continue;
                     }
                     let McpServerTransportConfig::StreamableHttp {

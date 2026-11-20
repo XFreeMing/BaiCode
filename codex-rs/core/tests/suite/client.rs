@@ -8,7 +8,7 @@ use codex_core::StartThreadOptions;
 use codex_core::ThreadManager;
 use codex_core::ThreadStoreBuilder;
 use codex_core::TurnInputRequest;
-use codex_core::X_CODEX_ROUTING_HINT_HEADER;
+use codex_core::X_BAICODE_ROUTING_HINT_HEADER;
 use codex_core::resolve_installation_id;
 use codex_extension_api::empty_extension_registry;
 use codex_features::Feature;
@@ -1711,7 +1711,7 @@ async fn includes_session_id_thread_id_and_model_headers_in_request(
 
     let request = resp_mock.single_request();
     assert_eq!(request.path(), "/v1/responses");
-    assert_eq!(request.header(X_CODEX_ROUTING_HINT_HEADER), None);
+    assert_eq!(request.header(X_BAICODE_ROUTING_HINT_HEADER), None);
     let request_session_id = request.header("session-id").expect("session-id header");
     let request_thread_id = request.header("thread-id").expect("thread-id header");
     let request_authorization = request
@@ -2133,7 +2133,7 @@ async fn chatgpt_auth_sends_correct_request() {
         .as_str()
         .expect("missing request model");
     assert_eq!(
-        request.header(X_CODEX_ROUTING_HINT_HEADER),
+        request.header(X_BAICODE_ROUTING_HINT_HEADER),
         Some(format!("model={model}"))
     );
 
@@ -3155,7 +3155,7 @@ async fn sequential_cutoff_is_omitted_for_non_openai_provider() -> anyhow::Resul
     wait_for_event(&codex, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
     let request = resp_mock.single_request();
-    assert_eq!(request.header(X_CODEX_ROUTING_HINT_HEADER), None);
+    assert_eq!(request.header(X_BAICODE_ROUTING_HINT_HEADER), None);
     let request_body = request.body_json();
     pretty_assertions::assert_eq!(request_body.get("stream_options"), None);
 
@@ -4620,7 +4620,7 @@ async fn env_var_overrides_loaded_auth() {
         .into_iter()
         .find(|request| request.url.path() == "/openai/responses")
         .expect("missing provider request");
-    assert_eq!(request.headers.get(X_CODEX_ROUTING_HINT_HEADER), None);
+    assert_eq!(request.headers.get(X_BAICODE_ROUTING_HINT_HEADER), None);
 }
 
 fn create_dummy_codex_auth() -> CodexAuth {

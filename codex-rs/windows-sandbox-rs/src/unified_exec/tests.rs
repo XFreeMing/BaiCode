@@ -60,7 +60,7 @@ use windows_sys::Win32::System::Threading::WaitForSingleObject;
 static TEST_HOME_COUNTER: AtomicU64 = AtomicU64::new(0);
 static LEGACY_PROCESS_TEST_LOCK: Mutex<()> = Mutex::new(());
 
-const LEGACY_FIXTURE_ROLE: &str = "CODEX_TEST_LEGACY_PROCESS_ROLE";
+const LEGACY_FIXTURE_ROLE: &str = "BAICODE_TEST_LEGACY_PROCESS_ROLE";
 const LEGACY_FIXTURE_TEST: &str =
     "unified_exec::tests::legacy_capture_emits_output_and_preserves_descendant_after_normal_exit";
 
@@ -335,7 +335,7 @@ fn elevated_non_tty_cmd_forwards_env_output_and_exit() {
         let codex_home = sandbox_home("elevated-non-tty-cmd");
         let permission_profile = PermissionProfile::workspace_write();
         let env_map = HashMap::from([(
-            "CODEX_ELEVATED_TEST".to_string(),
+            "BAICODE_ELEVATED_TEST".to_string(),
             "ELEVATED-ENV-OK".to_string(),
         )]);
         let spawned = spawn_windows_sandbox_session_elevated_for_permission_profile(
@@ -346,7 +346,7 @@ fn elevated_non_tty_cmd_forwards_env_output_and_exit() {
                 "C:\\Windows\\System32\\cmd.exe".to_string(),
                 "/d".to_string(),
                 "/c".to_string(),
-                "echo %CODEX_ELEVATED_TEST% & exit /b 23".to_string(),
+                "echo %BAICODE_ELEVATED_TEST% & exit /b 23".to_string(),
             ],
             cwd.as_path(),
             env_map,
@@ -377,13 +377,13 @@ fn elevated_non_tty_cmd_forwards_env_output_and_exit() {
 }
 
 #[test]
-#[ignore = "requires this test binary in an installed test MSIX, launched with package identity, CODEX_WINDOWS_REGISTERED_CORE=1, and CODEX_HOME provisioned by that package's service in a disposable Windows VM"]
+#[ignore = "requires this test binary in an installed test MSIX, launched with package identity, BAICODE_WINDOWS_REGISTERED_CORE=1, and BAICODE_HOME provisioned by that package's service in a disposable Windows VM"]
 fn registered_non_tty_cmd_forwards_env_output_and_exit() {
     assert!(
         crate::registered_core_requested(),
         "registered Core opt-in is required"
     );
-    let codex_home = PathBuf::from(std::env::var_os("CODEX_HOME").expect("fixture CODEX_HOME"));
+    let codex_home = PathBuf::from(std::env::var_os("BAICODE_HOME").expect("fixture BAICODE_HOME"));
     assert!(
         crate::app_package::registered_setup_is_ready(&codex_home)
             .expect("validate the installed package and service receipt"),
@@ -392,7 +392,7 @@ fn registered_non_tty_cmd_forwards_env_output_and_exit() {
     let cwd = tempfile::tempdir().expect("isolated command workspace");
     current_thread_runtime().block_on(async {
         let mut env_map: HashMap<String, String> = std::env::vars().collect();
-        env_map.insert("CODEX_REGISTERED_TEST".into(), "REGISTERED-ENV-OK".into());
+        env_map.insert("BAICODE_REGISTERED_TEST".into(), "REGISTERED-ENV-OK".into());
         let spawned = spawn_windows_sandbox_session_elevated_for_permission_profile(
             &PermissionProfile::workspace_write(),
             workspace_roots_for(cwd.path()).as_slice(),
@@ -401,7 +401,7 @@ fn registered_non_tty_cmd_forwards_env_output_and_exit() {
                 "C:\\Windows\\System32\\cmd.exe".into(),
                 "/d".into(),
                 "/c".into(),
-                "echo %CODEX_REGISTERED_TEST%& exit /b 23".into(),
+                "echo %BAICODE_REGISTERED_TEST%& exit /b 23".into(),
             ],
             cwd.path(),
             env_map,

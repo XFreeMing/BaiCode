@@ -120,7 +120,7 @@ async fn resumed_initial_messages_render_history() {
         .map(ToString::to_string)
         .collect::<Vec<_>>()
         .join("\n")
-        .replace(CODEX_CLI_VERSION, "<VERSION>")
+        .replace(BAICODE_CLI_VERSION, "<VERSION>")
         .replace(
             &test_path_display("/home/user/project"),
             "/home/user/project",
@@ -1162,7 +1162,7 @@ async fn app_server_forked_thread_history_line_uses_app_server_title_snapshot() 
     assert!(combined.contains("app-server-parent-thread"));
     assert!(
         !combined.contains("stale-local-thread"),
-        "app-server fork title lookup should not read local CODEX_HOME"
+        "app-server fork title lookup should not read local BAICODE_HOME"
     );
     assert_chatwidget_snapshot!("app_server_forked_thread_history_line", combined);
 }
@@ -1201,7 +1201,7 @@ async fn app_server_forked_thread_history_line_without_app_server_name_ignores_l
 
     assert!(
         !combined.contains("stale-local-thread"),
-        "app-server fork title lookup should not read local CODEX_HOME"
+        "app-server fork title lookup should not read local BAICODE_HOME"
     );
     assert_chatwidget_snapshot!(
         "app_server_forked_thread_history_line_without_app_server_name",

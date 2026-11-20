@@ -84,7 +84,7 @@ const MAX_REQUEST_MAX_RETRIES: u64 = 100;
 pub const OPENAI_PROVIDER_NAME: &str = "OpenAI";
 const OPENAI_ACTOR_AUTHORIZATION_HEADER: &str = "x-openai-actor-authorization";
 pub const OPENAI_PROVIDER_ID: &str = "openai";
-pub const CHATGPT_CODEX_BASE_URL: &str = "https://chatgpt.com/backend-api/codex";
+pub const CHATGPT_BAICODE_BASE_URL: &str = "https://chatgpt.com/backend-api/codex";
 pub const AMAZON_BEDROCK_PROVIDER_NAME: &str = "Amazon Bedrock";
 pub const AMAZON_BEDROCK_PROVIDER_ID: &str = "amazon-bedrock";
 pub const AMAZON_BEDROCK_RUNTIME_PROVIDER_NAME: &str = "Amazon Bedrock Runtime";
@@ -482,7 +482,7 @@ other non-default provider fields are not supported"
                     | AuthMode::PersonalAccessToken
             )
         ) {
-            CHATGPT_CODEX_BASE_URL
+            CHATGPT_BAICODE_BASE_URL
         } else {
             "https://api.openai.com/v1"
         };
@@ -898,18 +898,18 @@ pub fn merge_gcp_provider_overrides(
 }
 
 pub fn create_oss_provider(default_provider_port: u16, wire_api: WireApi) -> ModelProviderInfo {
-    // These CODEX_OSS_ environment variables are experimental: we may
+    // These BAICODE_OSS_ environment variables are experimental: we may
     // switch to reading values from config.toml instead.
     let default_codex_oss_base_url = format!(
         "http://localhost:{codex_oss_port}/v1",
-        codex_oss_port = std::env::var("CODEX_OSS_PORT")
+        codex_oss_port = std::env::var("BAICODE_OSS_PORT")
             .ok()
             .filter(|value| !value.trim().is_empty())
             .and_then(|value| value.parse::<u16>().ok())
             .unwrap_or(default_provider_port)
     );
 
-    let codex_oss_base_url = std::env::var("CODEX_OSS_BASE_URL")
+    let codex_oss_base_url = std::env::var("BAICODE_OSS_BASE_URL")
         .ok()
         .filter(|v| !v.trim().is_empty())
         .unwrap_or(default_codex_oss_base_url);

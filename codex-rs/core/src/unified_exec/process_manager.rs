@@ -17,9 +17,9 @@ use super::oneshot::Completion;
 use super::process::OutputDrainPolicy;
 
 use crate::codex_thread::BackgroundTerminalInfo;
-use crate::exec_env::CODEX_PERMISSION_PROFILE_ENV_VAR;
-use crate::exec_env::CODEX_THREAD_ID_ENV_VAR;
-use crate::exec_env::CODEX_VERSION_ENV_VAR;
+use crate::exec_env::BAICODE_PERMISSION_PROFILE_ENV_VAR;
+use crate::exec_env::BAICODE_THREAD_ID_ENV_VAR;
+use crate::exec_env::BAICODE_VERSION_ENV_VAR;
 use crate::exec_env::create_env;
 use crate::exec_env::inject_apply_patch_env;
 use crate::exec_env::inject_permission_profile_env;
@@ -97,7 +97,7 @@ const UNIFIED_EXEC_ENV: [(&str, &str); 10] = [
     ("PAGER", "cat"),
     ("GIT_PAGER", "cat"),
     ("GH_PAGER", "cat"),
-    ("CODEX_CI", "1"),
+    ("BAICODE_CI", "1"),
 ];
 const NETWORK_ACCESS_DENIED_MESSAGE: &str =
     "Network access was denied by the Codex sandbox network proxy.";
@@ -139,17 +139,17 @@ pub(crate) fn exec_env_policy_from_shell_policy(
         .map(std::string::ToString::to_string)
         .collect::<Vec<_>>();
     exclude.extend([
-        CODEX_PERMISSION_PROFILE_ENV_VAR.to_string(),
-        CODEX_VERSION_ENV_VAR.to_string(),
-        codex_apply_patch::CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS_ENV_VAR.to_string(),
+        BAICODE_PERMISSION_PROFILE_ENV_VAR.to_string(),
+        BAICODE_VERSION_ENV_VAR.to_string(),
+        codex_apply_patch::BAICODE_APPLY_PATCH_PRESERVE_LINE_ENDINGS_ENV_VAR.to_string(),
         PLUGIN_METRICS_OUTPUT_ENV_VAR.to_string(),
     ]);
     let mut r#set = policy.r#set.clone();
     r#set.retain(|key, _| {
         ![
-            CODEX_PERMISSION_PROFILE_ENV_VAR,
-            CODEX_VERSION_ENV_VAR,
-            codex_apply_patch::CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS_ENV_VAR,
+            BAICODE_PERMISSION_PROFILE_ENV_VAR,
+            BAICODE_VERSION_ENV_VAR,
+            codex_apply_patch::BAICODE_APPLY_PATCH_PRESERVE_LINE_ENDINGS_ENV_VAR,
             PLUGIN_METRICS_OUTPUT_ENV_VAR,
         ]
         .iter()
@@ -179,9 +179,9 @@ fn env_overlay_for_exec_server(
             !is_non_inheritable_env_var(key)
                 && (matches!(
                     key.as_str(),
-                    CODEX_PERMISSION_PROFILE_ENV_VAR
-                        | CODEX_VERSION_ENV_VAR
-                        | codex_apply_patch::CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS_ENV_VAR
+                    BAICODE_PERMISSION_PROFILE_ENV_VAR
+                        | BAICODE_VERSION_ENV_VAR
+                        | codex_apply_patch::BAICODE_APPLY_PATCH_PRESERVE_LINE_ENDINGS_ENV_VAR
                 ) || local_policy_env.get(*key) != Some(*value))
         })
         .map(|(key, value)| (key.clone(), value.clone()))
@@ -1486,9 +1486,9 @@ impl UnifiedExecProcessManager {
         let local_policy_env = create_env(shell_environment_policy, /*thread_id*/ None);
         let mut env = local_policy_env.clone();
         #[cfg(windows)]
-        env.retain(|name, _| !name.eq_ignore_ascii_case(CODEX_THREAD_ID_ENV_VAR));
+        env.retain(|name, _| !name.eq_ignore_ascii_case(BAICODE_THREAD_ID_ENV_VAR));
         env.insert(
-            CODEX_THREAD_ID_ENV_VAR.to_string(),
+            BAICODE_THREAD_ID_ENV_VAR.to_string(),
             context.session.thread_id.to_string(),
         );
         set_tool_call_id_env_var(&mut env, Some(&context.call_id));

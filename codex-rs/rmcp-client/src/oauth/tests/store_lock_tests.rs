@@ -195,7 +195,7 @@ fn legacy_rmcp_oauth_keyring_credentials_remain_readable() -> Result<()> {
 
 const LOCK_HOLDER_CHILD_TEST: &str =
     "oauth::store_lock::tests::store_lock_is_released_when_holder_process_exits_child";
-const LOCK_HOLDER_READY_PATH_ENV: &str = "CODEX_OAUTH_STORE_LOCK_CHILD_READY_PATH";
+const LOCK_HOLDER_READY_PATH_ENV: &str = "BAICODE_OAUTH_STORE_LOCK_CHILD_READY_PATH";
 
 #[test]
 fn store_lock_is_released_when_holder_process_exits() -> Result<()> {
@@ -205,7 +205,7 @@ fn store_lock_is_released_when_holder_process_exits() -> Result<()> {
         .arg("--exact")
         .arg(LOCK_HOLDER_CHILD_TEST)
         .arg("--ignored")
-        .env("CODEX_HOME", env.path())
+        .env("BAICODE_HOME", env.path())
         .env(LOCK_HOLDER_READY_PATH_ENV, &ready_file)
         .spawn()
         .context("spawn OAuth store lock holder test process")?;
@@ -473,14 +473,14 @@ where
 #[test]
 fn aggregate_store_readers_share_access_while_writers_remain_exclusive() -> Result<()> {
     // Isolate process-global metrics from other libtest cases, including under Bazel.
-    if std::env::var_os("CODEX_AUTH_STORAGE_TEST_CHILD").is_none() {
+    if std::env::var_os("BAICODE_AUTH_STORAGE_TEST_CHILD").is_none() {
         let output = Command::new(std::env::current_exe()?)
             .args([
                 "--exact",
                 std::thread::current().name().unwrap(),
                 "--nocapture",
             ])
-            .env("CODEX_AUTH_STORAGE_TEST_CHILD", "1")
+            .env("BAICODE_AUTH_STORAGE_TEST_CHILD", "1")
             .output()?;
         assert!(
             output.status.success(),

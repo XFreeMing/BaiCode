@@ -107,12 +107,12 @@ async fn managed_tcp_native_client_uses_attributed_socks_and_preserves_restricti
     if !pid_options.is_empty() {
         let pid_namespace = std::fs::read_link("/proc/self/ns/pid").unwrap();
         env.insert(
-            "CODEX_TEST_PID_NAMESPACE".into(),
+            "BAICODE_TEST_PID_NAMESPACE".into(),
             pid_namespace.display().to_string(),
         );
     }
     if kill_relay {
-        env.insert("CODEX_TEST_RELAY_FAILURE".into(), "1".into());
+        env.insert("BAICODE_TEST_RELAY_FAILURE".into(), "1".into());
     }
     let serve = |mut stdin: tokio::process::ChildStdin| async move {
         let mut kept = None;
@@ -163,8 +163,8 @@ async fn managed_tcp_native_client_uses_attributed_socks_and_preserves_restricti
     };
     let script = r#"
         unset ALL_PROXY all_proxy
-        if [ -n "${CODEX_TEST_PID_NAMESPACE:-}" ]; then
-            test "$(readlink /proc/self/ns/pid)" = "$CODEX_TEST_PID_NAMESPACE"
+        if [ -n "${BAICODE_TEST_PID_NAMESPACE:-}" ]; then
+            test "$(readlink /proc/self/ns/pid)" = "$BAICODE_TEST_PID_NAMESPACE"
         fi
         if command -v ip >/dev/null; then
             ip link show codextun >/dev/null
@@ -196,7 +196,7 @@ PY
         fi
         if (exec 5<>/dev/tcp/127.0.0.2/"$1") 2>/dev/null; then exit 13; fi
         if (exec 5>>"$2") 2>/dev/null; then exit 14; fi
-        if [ -n "${CODEX_TEST_RELAY_FAILURE:-}" ]; then
+        if [ -n "${BAICODE_TEST_RELAY_FAILURE:-}" ]; then
             # Keep stdout open in both processes so the test only sees EOF
             # after cleanup reaches the whole process group.
             sleep 60 &

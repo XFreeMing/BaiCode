@@ -6,10 +6,10 @@ use std::sync::Mutex;
 
 use anyhow::Context;
 use anyhow::Result;
-use codex_exec_server::CODEX_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR;
-use codex_exec_server::CODEX_EXEC_SERVER_NOISE_ENVIRONMENT_ID_ENV_VAR;
-use codex_exec_server::CODEX_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR;
-use codex_exec_server::CODEX_EXEC_SERVER_URL_ENV_VAR;
+use codex_exec_server::BAICODE_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR;
+use codex_exec_server::BAICODE_EXEC_SERVER_NOISE_ENVIRONMENT_ID_ENV_VAR;
+use codex_exec_server::BAICODE_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR;
+use codex_exec_server::BAICODE_EXEC_SERVER_URL_ENV_VAR;
 use codex_exec_server::REMOTE_ENVIRONMENT_ID;
 use codex_exec_server_test_support::relay::TEST_TIMEOUT as VERSION_SKEW_TIMEOUT;
 use codex_exec_server_test_support::relay::accept_websocket;
@@ -40,9 +40,9 @@ const ENVIRONMENT_ID: &str = "env-noise-relay-test";
 const EXECUTOR_REGISTRATION_ID: &str = "registration-1";
 const HARNESS_KEY_AUTHORIZATION: &str = "harness-key-authorization";
 const REGISTRY_TOKEN: &str = "registry-token";
-const RELEASED_CODEX_ENV_VAR: &str = "CODEX_TEST_RELEASED_CODEX";
-const CURRENT_CODEX_ENV_VAR: &str = "CODEX_TEST_CURRENT_CODEX";
-const EXECUTOR_MARKER_ENV_VAR: &str = "CODEX_EXECUTOR_VERSION_SKEW_MARKER";
+const RELEASED_BAICODE_ENV_VAR: &str = "BAICODE_TEST_RELEASED_BAICODE";
+const CURRENT_BAICODE_ENV_VAR: &str = "BAICODE_TEST_CURRENT_BAICODE";
+const EXECUTOR_MARKER_ENV_VAR: &str = "BAICODE_EXECUTOR_VERSION_SKEW_MARKER";
 const EXPECTED_OUTPUT: &str = "executor-version-skew-ok";
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
@@ -62,11 +62,11 @@ async fn released_app_server_runs_commands_on_current_exec_server_over_noise() -
 }
 
 fn version_skew_binaries() -> Result<Option<(PathBuf, PathBuf)>> {
-    let Some(released) = std::env::var_os(RELEASED_CODEX_ENV_VAR) else {
+    let Some(released) = std::env::var_os(RELEASED_BAICODE_ENV_VAR) else {
         return Ok(None);
     };
-    let current = std::env::var_os(CURRENT_CODEX_ENV_VAR)
-        .with_context(|| format!("{CURRENT_CODEX_ENV_VAR} must name the current Codex binary"))?;
+    let current = std::env::var_os(CURRENT_BAICODE_ENV_VAR)
+        .with_context(|| format!("{CURRENT_BAICODE_ENV_VAR} must name the current Codex binary"))?;
     let current = PathBuf::from(current);
     let released = PathBuf::from(released);
     anyhow::ensure!(
@@ -167,8 +167,8 @@ stream_max_retries = 0
             ENVIRONMENT_ID,
         ])
         .current_dir(codex_home.path())
-        .env("CODEX_HOME", codex_home.path())
-        .env("CODEX_API_KEY", REGISTRY_TOKEN)
+        .env("BAICODE_HOME", codex_home.path())
+        .env("BAICODE_API_KEY", REGISTRY_TOKEN)
         .env(EXECUTOR_MARKER_ENV_VAR, EXPECTED_OUTPUT)
         .stdin(Stdio::null())
         .stdout(Stdio::null())
@@ -209,19 +209,19 @@ stream_max_retries = 0
     let mut app_server = Command::new(app_binary)
         .arg("app-server")
         .current_dir(codex_home.path())
-        .env("CODEX_HOME", codex_home.path())
-        .env("CODEX_API_KEY", REGISTRY_TOKEN)
+        .env("BAICODE_HOME", codex_home.path())
+        .env("BAICODE_API_KEY", REGISTRY_TOKEN)
         .env(
-            "CODEX_APP_SERVER_MANAGED_CONFIG_PATH",
+            "BAICODE_APP_SERVER_MANAGED_CONFIG_PATH",
             codex_home.path().join("managed_config.toml"),
         )
-        .env(CODEX_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR, &registry_url)
+        .env(BAICODE_EXEC_SERVER_NOISE_REGISTRY_URL_ENV_VAR, &registry_url)
         .env(
-            CODEX_EXEC_SERVER_NOISE_ENVIRONMENT_ID_ENV_VAR,
+            BAICODE_EXEC_SERVER_NOISE_ENVIRONMENT_ID_ENV_VAR,
             ENVIRONMENT_ID,
         )
-        .env(CODEX_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR, REGISTRY_TOKEN)
-        .env_remove(CODEX_EXEC_SERVER_URL_ENV_VAR)
+        .env(BAICODE_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR, REGISTRY_TOKEN)
+        .env_remove(BAICODE_EXEC_SERVER_URL_ENV_VAR)
         .env_remove(EXECUTOR_MARKER_ENV_VAR)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())

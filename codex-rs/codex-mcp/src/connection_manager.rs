@@ -47,9 +47,9 @@ use crate::connection_pool::ConnectionSharing;
 use crate::elicitation::ElicitationRequestManager;
 use crate::elicitation::ElicitationRequestRouter;
 use crate::event_stream::EventStreamConnectionSettings;
-use crate::mcp::CODEX_APPS_MCP_SERVER_NAME;
+use crate::mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use crate::mcp::ToolPluginContext;
-use crate::pagination::MAX_CODEX_APPS_TOOL_CATALOG_ITEMS;
+use crate::pagination::MAX_BAICODE_APPS_TOOL_CATALOG_ITEMS;
 use crate::pagination::MAX_MCP_CATALOG_ITEMS;
 use crate::rmcp_client::AsyncManagedClient;
 use crate::rmcp_client::DEFAULT_STARTUP_TIMEOUT;
@@ -553,7 +553,7 @@ impl McpConnectionSet {
                 | McpServerSource::Extension { .. } => None,
             });
             let catalog_item_limit = if is_host_owned_codex_apps {
-                MAX_CODEX_APPS_TOOL_CATALOG_ITEMS
+                MAX_BAICODE_APPS_TOOL_CATALOG_ITEMS
             } else {
                 MAX_MCP_CATALOG_ITEMS
             };
@@ -604,7 +604,7 @@ impl McpConnectionSet {
             );
             let resolved_environment =
                 runtime_context.resolve_server_environment(&server_name, &configured_config);
-            // For built-in Codex Apps, `CODEX_CONNECTORS_TOKEN` is a debug
+            // For built-in Codex Apps, `BAICODE_CONNECTORS_TOKEN` is a debug
             // override: it supplies runtime auth but bypasses the shared tools
             // cache.
             let uses_env_bearer_token = match &configured_config.transport {
@@ -663,7 +663,7 @@ impl McpConnectionSet {
             // AuthManager across refreshes. In the hosted-plugin path, this
             // is the ChatGPT /ps/mcp connection. User-configured MCP
             // registrations keep their existing configured auth path.
-            let chatgpt_auth_provider = if server_name == CODEX_APPS_MCP_SERVER_NAME {
+            let chatgpt_auth_provider = if server_name == BAICODE_APPS_MCP_SERVER_NAME {
                 codex_apps_auth_provider
                     .clone()
                     .or_else(|| static_chatgpt_auth_provider.clone())
@@ -673,7 +673,7 @@ impl McpConnectionSet {
             // If Codex Apps has an env bearer token, that is its auth path. Do
             // not also attach the ambient CodexAuth provider.
             let runtime_auth_provider =
-                if server_name == CODEX_APPS_MCP_SERVER_NAME && uses_env_bearer_token {
+                if server_name == BAICODE_APPS_MCP_SERVER_NAME && uses_env_bearer_token {
                     None
                 } else {
                     chatgpt_auth_provider_for_server(&server, chatgpt_auth_provider).map(
@@ -732,7 +732,7 @@ impl McpConnectionSet {
                 McpServerTransportConfig::Stdio { .. } => server.stdio_protocol_mode(protocol_mode),
             };
             let mut tool_catalog_cache_context = LazyCell::new(|| {
-                if server_name == CODEX_APPS_MCP_SERVER_NAME
+                if server_name == BAICODE_APPS_MCP_SERVER_NAME
                     || server.requires_read_only_mcp_tools()
                     || matches!(configured_config.auth, McpServerAuth::EmaAuth)
                 {

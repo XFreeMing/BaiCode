@@ -272,7 +272,7 @@ fn resolves_apps_hook_metadata_from_the_registered_connector() {
         "contains_mcp_source": true,
     });
     expected.mcp_metadata = Some(Map::from_iter([(
-        MCP_TOOL_CODEX_APPS_META_KEY.to_string(),
+        MCP_TOOL_BAICODE_APPS_META_KEY.to_string(),
         routing.clone(),
     )]));
 

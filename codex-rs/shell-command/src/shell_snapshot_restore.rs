@@ -2,8 +2,8 @@
 
 use std::collections::HashMap;
 
-pub const SNAPSHOT_BROKERED_VALUE_ENV_PREFIX: &str = "CODEX_NETWORK_PROXY_SNAPSHOT_BROKERED_VALUE_";
-pub const SNAPSHOT_BROKERED_UNSET_ENV_PREFIX: &str = "CODEX_NETWORK_PROXY_SNAPSHOT_BROKERED_UNSET_";
+pub const SNAPSHOT_BROKERED_VALUE_ENV_PREFIX: &str = "BAICODE_NETWORK_PROXY_SNAPSHOT_BROKERED_VALUE_";
+pub const SNAPSHOT_BROKERED_UNSET_ENV_PREFIX: &str = "BAICODE_NETWORK_PROXY_SNAPSHOT_BROKERED_UNSET_";
 
 /// Restore protected credential copies and unsets after shell startup.
 /// Keep the copies for another replay stage, or remove them before the user command.
@@ -64,7 +64,7 @@ pub fn build_brokered_credential_exports(
         return exports;
     }
     format!(
-        "case $- in\n  *x*) __CODEX_SNAPSHOT_BROKER_XTRACE=1; set +x ;;\n  *) __CODEX_SNAPSHOT_BROKER_XTRACE= ;;\nesac\n{exports}\nif [ -n \"$__CODEX_SNAPSHOT_BROKER_XTRACE\" ]; then\n  unset __CODEX_SNAPSHOT_BROKER_XTRACE\n  set -x\nelse\n  unset __CODEX_SNAPSHOT_BROKER_XTRACE\nfi"
+        "case $- in\n  *x*) __BAICODE_SNAPSHOT_BROKER_XTRACE=1; set +x ;;\n  *) __BAICODE_SNAPSHOT_BROKER_XTRACE= ;;\nesac\n{exports}\nif [ -n \"$__BAICODE_SNAPSHOT_BROKER_XTRACE\" ]; then\n  unset __BAICODE_SNAPSHOT_BROKER_XTRACE\n  set -x\nelse\n  unset __BAICODE_SNAPSHOT_BROKER_XTRACE\nfi"
     )
 }
 

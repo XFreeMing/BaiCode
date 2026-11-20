@@ -10,7 +10,7 @@ use anyhow::Result;
 use codex_config::types::McpServerTransportConfig;
 use codex_core::config::edit::ConfigEditsBuilder;
 use codex_core::config::load_global_mcp_servers;
-use codex_login::CODEX_API_KEY_ENV_VAR;
+use codex_login::BAICODE_API_KEY_ENV_VAR;
 use codex_utils_absolute_path::AbsolutePathBuf;
 use predicates::prelude::PredicateBooleanExt;
 use predicates::str::contains;
@@ -31,7 +31,7 @@ use wiremock::matchers::path;
 
 fn codex_command(codex_home: &Path) -> Result<assert_cmd::Command> {
     let mut cmd = assert_cmd::Command::new(codex_utils_cargo_bin::cargo_bin("baic")?);
-    cmd.env("CODEX_HOME", codex_home);
+    cmd.env("BAICODE_HOME", codex_home);
     Ok(cmd)
 }
 
@@ -95,7 +95,7 @@ enabled = true
 
     let mut list_cmd = codex_command(codex_home.path())?;
     list_cmd
-        .env(CODEX_API_KEY_ENV_VAR, "sk-test")
+        .env(BAICODE_API_KEY_ENV_VAR, "sk-test")
         .args(["mcp", "list", "--json"])
         .assert()
         .success()
@@ -103,7 +103,7 @@ enabled = true
 
     let mut get_cmd = codex_command(codex_home.path())?;
     get_cmd
-        .env(CODEX_API_KEY_ENV_VAR, "sk-test")
+        .env(BAICODE_API_KEY_ENV_VAR, "sk-test")
         .args(["mcp", "get", "api-docs", "--json"])
         .assert()
         .success()

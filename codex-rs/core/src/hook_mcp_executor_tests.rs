@@ -83,7 +83,7 @@ async fn app_hook_dispatch_follows_current_policy() -> anyhow::Result<()> {
             .execute(HookMcpCall {
                 expected_app_connector_id: Some(connector),
                 skip_dormant_repl_cleanup: false,
-                server: CODEX_APPS_MCP_SERVER_NAME.into(),
+                server: BAICODE_APPS_MCP_SERVER_NAME.into(),
                 tool: "calendar.read_context".into(),
                 environment_id: None,
                 metadata: None,
@@ -103,7 +103,7 @@ async fn app_hook_dispatch_follows_current_policy() -> anyhow::Result<()> {
     }
     let binding = executor
         .runtime
-        .current_binding_for_call(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+        .current_binding_for_call(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
         .await
         .unwrap();
     assert!(

@@ -14,7 +14,7 @@ use crate::elicitation::ElicitationReviewer;
 use crate::elicitation::elicitation_is_rejected_by_policy;
 use crate::mcp::tests::test_elicitation_config;
 use crate::rmcp_client::AsyncManagedClient;
-use crate::rmcp_client::CODEX_APPS_RECONNECT_INITIAL_BACKOFF;
+use crate::rmcp_client::BAICODE_APPS_RECONNECT_INITIAL_BACKOFF;
 use crate::rmcp_client::CodexAppsStartupReconnect;
 use crate::rmcp_client::ManagedClient;
 use crate::rmcp_client::ManagedClientFuture;
@@ -657,10 +657,10 @@ async fn stalled_apps_client_publication_expires_at_the_configured_startup_timeo
     let mut client = create_ready_async_managed_client(Vec::new()).await;
     client.client = futures::future::pending().boxed().shared();
     client.startup_complete.store(false, Ordering::Release);
-    manager.insert_test_client(CODEX_APPS_MCP_SERVER_NAME, client);
+    manager.insert_test_client(BAICODE_APPS_MCP_SERVER_NAME, client);
     let view = manager
         .servers
-        .get_mut(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+        .get_mut(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
         .unwrap();
     let connection = Arc::get_mut(&mut view.connection).unwrap();
     let (_publisher, initialized) = watch::channel(None);
@@ -874,10 +874,10 @@ async fn connection_statuses_follow_latest_reconnect_outcome() {
         })
     };
     let manager = create_test_manager_with_failed_apps_startup(Vec::new(), factory);
-    let client = manager.test_client(CODEX_APPS_MCP_SERVER_NAME);
+    let client = manager.test_client(BAICODE_APPS_MCP_SERVER_NAME);
     assert!(client.client().await.is_err());
     let expected =
-        |status| HashMap::from([(McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME), status)]);
+        |status| HashMap::from([(McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME), status)]);
     assert_eq!(
         manager.connection_statuses().await,
         expected(Status::Failed)
@@ -897,7 +897,7 @@ async fn connection_statuses_follow_latest_reconnect_outcome() {
         release.notify_one();
         finished.notified().await;
         assert_eq!(manager.connection_statuses().await, expected(status));
-        tokio::time::advance(CODEX_APPS_RECONNECT_INITIAL_BACKOFF * 2).await;
+        tokio::time::advance(BAICODE_APPS_RECONNECT_INITIAL_BACKOFF * 2).await;
     }
     assert_eq!(attempts.load(Ordering::SeqCst), 3);
 }
@@ -947,7 +947,7 @@ pub(crate) async fn create_test_manager_with_ready_apps_client(
     list_started: Option<Arc<Notify>>,
     release_list: Option<Arc<Notify>>,
 ) -> anyhow::Result<Arc<McpConnectionSet>> {
-    let tool = create_test_tool(CODEX_APPS_MCP_SERVER_NAME, tool_name);
+    let tool = create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, tool_name);
     let client = create_test_apps_client(
         tool.tool.clone(),
         list_started,
@@ -992,7 +992,7 @@ pub(crate) async fn create_test_manager_with_ready_apps_client(
         /*prefix_mcp_tool_names*/ true,
     );
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: futures::future::ready::<Result<ManagedClient, StartupOutcomeError>>(Ok(
@@ -1012,10 +1012,10 @@ pub(crate) async fn create_test_manager_with_ready_apps_client(
         },
     );
     manager.set_test_server_metadata(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         McpServerMetadata {
             environment_id: codex_config::DEFAULT_MCP_SERVER_ENVIRONMENT_ID.to_string(),
-            server_key: McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            server_key: McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             pollutes_memory: false,
             origin: None,
             supports_parallel_tool_calls: false,
@@ -1053,7 +1053,7 @@ fn create_test_manager_with_failed_apps_startup(
         /*prefix_mcp_tool_names*/ true,
     );
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client,
@@ -2238,7 +2238,7 @@ fn filter_tools_applies_per_server_filters() {
 #[test]
 fn codex_apps_env_bearer_token_bypasses_shared_tools_cache() {
     assert!(!should_share_codex_apps_tools_cache(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         /*uses_env_bearer_token*/ true,
     ));
 }
@@ -2263,7 +2263,7 @@ async fn shared_apps_snapshot_requires_writable_discovery_and_a_shared_cache() -
         let cache_context = cache.context(codex_home.path().to_path_buf(), cache_key.clone());
         store_current_tools(
             &cache_context,
-            vec![create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "write")],
+            vec![create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "write")],
         );
 
         let mut config = crate::mcp::tests::test_mcp_config(codex_home.path().to_path_buf());
@@ -2290,7 +2290,7 @@ async fn shared_apps_snapshot_requires_writable_discovery_and_a_shared_cache() -
                 plugins_available: false,
                 ready_selected_capability_roots: Vec::new(),
                 mcp_servers: HashMap::from([(
-                    McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+                    McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
                     EffectiveMcpServer::from_host_config(server_config.clone()),
                 )]),
                 submit_id: "test".to_string(),
@@ -2372,7 +2372,7 @@ async fn hosted_apps_protocol_mode_is_independent_of_generic_mode() -> anyhow::R
                 ready_selected_capability_roots: Vec::new(),
                 mcp_servers: HashMap::from([
                     (
-                        McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+                        McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
                         EffectiveMcpServer::from_host_config(server_config.clone()),
                     ),
                     (
@@ -2403,7 +2403,7 @@ async fn hosted_apps_protocol_mode_is_independent_of_generic_mode() -> anyhow::R
         .await;
 
         assert_eq!(
-            manager.servers[&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME)].protocol_mode,
+            manager.servers[&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME)].protocol_mode,
             hosted_mode
         );
         assert_eq!(
@@ -2425,7 +2425,7 @@ async fn hosted_apps_protocol_mode_is_independent_of_generic_mode() -> anyhow::R
 
 #[tokio::test]
 async fn resource_template_listings_skip_only_hosted_apps() -> anyhow::Result<()> {
-    let name = CODEX_APPS_MCP_SERVER_NAME;
+    let name = BAICODE_APPS_MCP_SERVER_NAME;
     let codex_home = tempdir()?;
     let cache = create_codex_apps_tools_cache_context(
         codex_home.path().into(),
@@ -2500,7 +2500,7 @@ async fn codex_apps_extension_does_not_share_host_owned_tools_cache() -> anyhow:
     store_current_tools(
         &cache_context,
         vec![create_test_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "calendar_create_event",
         )],
     );
@@ -2522,7 +2522,7 @@ async fn codex_apps_extension_does_not_share_host_owned_tools_cache() -> anyhow:
         let mut config = crate::mcp::tests::test_mcp_config(codex_home.path().to_path_buf());
         config.host_owned_apps_protocol_mode = hosted_mode;
         let mut registration = crate::McpServerRegistration::from_extension(
-            CODEX_APPS_MCP_SERVER_NAME.to_string(),
+            BAICODE_APPS_MCP_SERVER_NAME.to_string(),
             "test-extension",
             /*contribution_order*/ 0,
             server_config.clone(),
@@ -2549,7 +2549,7 @@ async fn codex_apps_extension_does_not_share_host_owned_tools_cache() -> anyhow:
                 plugins_available: false,
                 ready_selected_capability_roots: Vec::new(),
                 mcp_servers: HashMap::from([(
-                    McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+                    McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
                     EffectiveMcpServer::from_host_config(server_config.clone()),
                 )]),
                 submit_id: "cache-ownership-test".to_string(),
@@ -2572,9 +2572,9 @@ async fn codex_apps_extension_does_not_share_host_owned_tools_cache() -> anyhow:
         )
         .await;
 
-        let client = manager.test_client(CODEX_APPS_MCP_SERVER_NAME);
+        let client = manager.test_client(BAICODE_APPS_MCP_SERVER_NAME);
         assert_eq!(
-            manager.servers[&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME)].protocol_mode,
+            manager.servers[&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME)].protocol_mode,
             expected_mode,
             "an ordinary extension must use its own mode, not the hosted protocol default"
         );
@@ -2602,7 +2602,7 @@ async fn list_all_tools_uses_shared_codex_apps_cache_while_client_is_pending() {
     store_current_tools(
         &cache_context,
         vec![create_test_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "calendar_create_event",
         )],
     );
@@ -2617,7 +2617,7 @@ async fn list_all_tools_uses_shared_codex_apps_cache_while_client_is_pending() {
         /*prefix_mcp_tool_names*/ true,
     );
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: pending_client,
@@ -2641,7 +2641,7 @@ async fn list_all_tools_uses_shared_codex_apps_cache_while_client_is_pending() {
                 == ToolName::namespaced("mcp__codex_apps", "calendar_create_event")
         })
         .expect("tool from shared cache");
-    assert_eq!(tool.server_name(), CODEX_APPS_MCP_SERVER_NAME);
+    assert_eq!(tool.server_name(), BAICODE_APPS_MCP_SERVER_NAME);
     assert_eq!(tool.callable_name, "calendar_create_event");
 }
 
@@ -2657,13 +2657,13 @@ async fn capture_binding_preserves_ready_client_catalog_and_shares_prepared_meta
     store_current_tools(
         &cache_context,
         vec![create_test_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "shared_cached_tool",
         )],
     );
-    let mut visible_collision = create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "collision");
+    let mut visible_collision = create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "collision");
     visible_collision.connector_id = Some("a-visible".to_string());
-    let mut hidden_collision = create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "collision");
+    let mut hidden_collision = create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "collision");
     hidden_collision.connector_id = Some("z-hidden".to_string());
     hidden_collision.tool.meta = Some(rmcp::model::MetaObject(
         serde_json::json!({ "ui": { "visibility": [] } })
@@ -2671,13 +2671,13 @@ async fn capture_binding_preserves_ready_client_catalog_and_shares_prepared_meta
             .expect("metadata object")
             .clone(),
     ));
-    let mut app_only = create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "calendar.read_context");
+    let mut app_only = create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "calendar.read_context");
     app_only.callable_namespace = "calendar".to_string();
     app_only.connector_id = Some("calendar".to_string());
     app_only.tool.meta = hidden_collision.tool.meta.clone();
     let mut ready_client = create_test_managed_client(vec![
-        create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "client_local_tool"),
-        create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "client_local_blocked"),
+        create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "client_local_tool"),
+        create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "client_local_blocked"),
         visible_collision,
         hidden_collision,
         app_only,
@@ -2696,7 +2696,7 @@ async fn capture_binding_preserves_ready_client_catalog_and_shares_prepared_meta
         /*prefix_mcp_tool_names*/ true,
     );
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: futures::future::ready(Ok(ready_client)).boxed().shared(),
@@ -2713,14 +2713,14 @@ async fn capture_binding_preserves_ready_client_catalog_and_shares_prepared_meta
     );
     manager
         .servers
-        .get_mut(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+        .get_mut(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
         .expect("test server exists")
         .tool_filter = tool_filter;
     manager.set_test_server_metadata(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         McpServerMetadata {
             environment_id: codex_config::DEFAULT_MCP_SERVER_ENVIRONMENT_ID.to_string(),
-            server_key: McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            server_key: McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             pollutes_memory: false,
             origin: None,
             supports_parallel_tool_calls: false,
@@ -2749,7 +2749,7 @@ async fn capture_binding_preserves_ready_client_catalog_and_shares_prepared_meta
     );
     let prepared = step
         .prepare_call(
-            &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             "client_local_tool",
         )
         .expect("client-local tool should be callable");
@@ -2761,7 +2761,7 @@ async fn capture_binding_preserves_ready_client_catalog_and_shares_prepared_meta
     ));
     assert_eq!(
         step.tool_info(
-            &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             "collision"
         )
         .and_then(|tool| tool.connector_id.as_deref()),
@@ -2769,21 +2769,21 @@ async fn capture_binding_preserves_ready_client_catalog_and_shares_prepared_meta
     );
     assert!(
         step.prepare_call(
-            &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             "collision"
         )
         .is_none()
     );
     assert!(
         step.prepare_call(
-            &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             "shared_cached_tool"
         )
         .is_none()
     );
     assert!(
         step.prepare_call(
-            &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             "client_local_blocked"
         )
         .is_none()
@@ -2792,7 +2792,7 @@ async fn capture_binding_preserves_ready_client_catalog_and_shares_prepared_meta
     let config = Arc::clone(step.config());
     let expected = step
         .tool_info(
-            &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             "calendar.read_context",
         )
         .expect("app-only tool metadata")
@@ -2906,7 +2906,7 @@ async fn hard_refresh_keeps_client_catalog_local_when_shared_cache_loses_race() 
 
     let mut config = crate::mcp::tests::test_mcp_config(codex_home.path().to_path_buf());
     config.server_permissions.insert(
-        McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+        McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
         McpServerPermissions::Thread,
     );
     let manager_a_for_refresh = Arc::clone(&manager_a);
@@ -2944,7 +2944,7 @@ async fn hard_refresh_keeps_client_catalog_local_when_shared_cache_loses_race() 
     Arc::get_mut(&mut manager_b)
         .expect("unshared manager")
         .servers
-        .get_mut(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+        .get_mut(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
         .expect("Apps server")
         .tool_filter
         .disabled
@@ -3153,7 +3153,7 @@ async fn list_available_server_infos_uses_cache_while_client_is_pending() {
     );
     let server_info = create_test_server_info("Codex Apps");
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: pending_client,
@@ -3176,7 +3176,7 @@ async fn list_available_server_infos_uses_cache_while_client_is_pending() {
     .await;
     let server_infos = timeout_result.expect("server info lookup should not block on startup");
     assert_eq!(
-        server_infos.get(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME)),
+        server_infos.get(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME)),
         Some(&server_info)
     );
 }
@@ -3220,7 +3220,7 @@ async fn capture_binding_exposes_cached_tools_before_startup() {
         Some("account-one"),
         Some("user-one"),
     );
-    let mut cached_tool = create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "shared_cached_tool");
+    let mut cached_tool = create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "shared_cached_tool");
     cached_tool.tool.annotations = Some(
         rmcp::model::ToolAnnotations::new()
             .read_only(true)
@@ -3237,7 +3237,7 @@ async fn capture_binding_exposes_cached_tools_before_startup() {
         startup_released.await.expect("release client startup");
         startup_complete_for_client.store(true, std::sync::atomic::Ordering::Release);
         Ok(create_test_managed_client(vec![create_test_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "client_local_tool",
         )])
         .await)
@@ -3252,7 +3252,7 @@ async fn capture_binding_exposes_cached_tools_before_startup() {
         /*prefix_mcp_tool_names*/ true,
     );
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: pending_client,
@@ -3268,10 +3268,10 @@ async fn capture_binding_exposes_cached_tools_before_startup() {
         },
     );
     manager.set_test_server_metadata(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         McpServerMetadata {
             environment_id: codex_config::DEFAULT_MCP_SERVER_ENVIRONMENT_ID.to_string(),
-            server_key: McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            server_key: McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             pollutes_memory: false,
             origin: None,
             supports_parallel_tool_calls: false,
@@ -3300,7 +3300,7 @@ async fn capture_binding_exposes_cached_tools_before_startup() {
     assert!(
         cached_binding
             .prepare_call(
-                &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+                &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
                 "shared_cached_tool"
             )
             .is_none()
@@ -3309,7 +3309,7 @@ async fn capture_binding_exposes_cached_tools_before_startup() {
     let manager_for_startup = Arc::clone(&manager);
     let startup = tokio::spawn(async move {
         manager_for_startup
-            .wait_for_server_startup(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+            .wait_for_server_startup(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
             .await
     });
 
@@ -4009,12 +4009,12 @@ async fn capture_binding_resolves_concurrently_and_rechecks_cached_clients() {
     store_current_tools(
         &cache_context,
         vec![create_test_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "shared_cached_tool",
         )],
     );
     let ready_apps_client = create_test_managed_client(vec![create_test_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "client_local_tool",
     )])
     .await;
@@ -4038,7 +4038,7 @@ async fn capture_binding_resolves_concurrently_and_rechecks_cached_clients() {
         &permission_profile,
         /*prefix_mcp_tool_names*/ true,
     );
-    manager.insert_test_client(CODEX_APPS_MCP_SERVER_NAME, apps_client);
+    manager.insert_test_client(BAICODE_APPS_MCP_SERVER_NAME, apps_client);
     manager.insert_test_client("first", first_client);
     manager.insert_test_client("second", second_client);
     let manager = Arc::new(manager);
@@ -4046,7 +4046,7 @@ async fn capture_binding_resolves_concurrently_and_rechecks_cached_clients() {
     let manager_for_startup = Arc::clone(&manager);
     let startup = tokio::spawn(async move {
         manager_for_startup
-            .wait_for_server_startup(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+            .wait_for_server_startup(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
             .await
     });
     tokio::time::timeout(Duration::from_secs(1), apps_started)
@@ -4080,7 +4080,7 @@ async fn capture_binding_resolves_concurrently_and_rechecks_cached_clients() {
     assert!(
         binding
             .prepare_call(
-                &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+                &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
                 "client_local_tool"
             )
             .is_some()
@@ -4088,7 +4088,7 @@ async fn capture_binding_resolves_concurrently_and_rechecks_cached_clients() {
     assert!(
         binding
             .prepare_call(
-                &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+                &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
                 "shared_cached_tool"
             )
             .is_none()
@@ -4314,13 +4314,13 @@ async fn list_all_tools_resolves_server_catalogs_concurrently() {
 async fn catalog_listing_preserves_legacy_apps_tools_during_failed_startup() {
     for startup_complete in [false, true] {
         let mut manager = create_test_manager_with_failed_apps_startup(
-            vec![create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "drive_search")],
+            vec![create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "drive_search")],
             Arc::new(|| futures::future::pending().boxed().shared()),
         );
         let connection = Arc::get_mut(
             &mut manager
                 .servers
-                .get_mut(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+                .get_mut(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
                 .expect("Apps server")
                 .connection,
         )
@@ -4364,7 +4364,7 @@ async fn list_all_tools_blocks_while_client_is_pending_without_cached_tools() {
         /*prefix_mcp_tool_names*/ true,
     );
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: pending_client,
@@ -4424,7 +4424,7 @@ async fn shutdown_cancels_pending_tool_listing() {
         /*prefix_mcp_tool_names*/ true,
     );
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: pending_client,
@@ -4473,7 +4473,7 @@ async fn shutdown_continues_after_caller_is_aborted() {
         /*prefix_mcp_tool_names*/ true,
     );
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: blocking_client,
@@ -4528,7 +4528,7 @@ async fn list_all_tools_does_not_block_when_shared_codex_apps_cache_is_empty() {
         /*prefix_mcp_tool_names*/ true,
     );
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: pending_client,
@@ -4561,7 +4561,7 @@ async fn list_all_tools_uses_shared_codex_apps_cache_when_client_startup_fails()
     store_current_tools(
         &cache_context,
         vec![create_test_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "calendar_create_event",
         )],
     );
@@ -4585,7 +4585,7 @@ async fn list_all_tools_uses_shared_codex_apps_cache_when_client_startup_fails()
     );
     let startup_complete = Arc::new(std::sync::atomic::AtomicBool::new(true));
     manager.insert_test_client(
-        CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         AsyncManagedClient {
             ema_authority: None,
             client: failed_client,
@@ -4609,13 +4609,13 @@ async fn list_all_tools_uses_shared_codex_apps_cache_when_client_startup_fails()
                 == ToolName::namespaced("mcp__codex_apps", "calendar_create_event")
         })
         .expect("tool from shared cache");
-    assert_eq!(tool.server_name(), CODEX_APPS_MCP_SERVER_NAME);
+    assert_eq!(tool.server_name(), BAICODE_APPS_MCP_SERVER_NAME);
     assert_eq!(tool.callable_name, "calendar_create_event");
     assert_eq!(
         manager
             .list_available_server_infos(|_| true)
             .await
-            .get(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME)),
+            .get(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME)),
         Some(&server_info)
     );
 }
@@ -4623,7 +4623,7 @@ async fn list_all_tools_uses_shared_codex_apps_cache_when_client_startup_fails()
 #[tokio::test]
 async fn list_all_tools_reconnects_failed_codex_apps_startup_and_reuses_client() {
     let recovered_client = create_test_managed_client(vec![create_test_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "drive_search",
     )])
     .await;
@@ -4645,11 +4645,11 @@ async fn list_all_tools_reconnects_failed_codex_apps_startup_and_reuses_client()
     let mut manager = create_test_manager_with_failed_apps_startup(Vec::new(), reconnect_factory);
     manager
         .servers
-        .get_mut(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+        .get_mut(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
         .expect("test server exists")
         .metadata = McpServerMetadata {
         environment_id: codex_config::DEFAULT_MCP_SERVER_ENVIRONMENT_ID.to_string(),
-        server_key: McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+        server_key: McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
         pollutes_memory: false,
         origin: None,
         supports_parallel_tool_calls: false,
@@ -4694,7 +4694,7 @@ async fn list_all_tools_reconnects_failed_codex_apps_startup_and_reuses_client()
     let step = capture_binding(&manager).await;
     let prepared = step
         .prepare_call(
-            &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             "drive_search",
         )
         .expect("recovered tool should have a prepared call");
@@ -4719,7 +4719,7 @@ async fn list_all_tools_reconnects_failed_codex_apps_startup_and_reuses_client()
 #[tokio::test(start_paused = true)]
 async fn later_tool_list_retries_after_failed_reconnect_and_keeps_cached_tools() {
     let recovered_client = create_test_managed_client(vec![create_test_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "drive_search",
     )])
     .await;
@@ -4750,7 +4750,7 @@ async fn later_tool_list_retries_after_failed_reconnect_and_keeps_cached_tools()
     });
     let manager = Arc::new(create_test_manager_with_failed_apps_startup(
         vec![create_test_tool(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             "cached_drive_search",
         )],
         reconnect_factory,
@@ -4791,7 +4791,7 @@ async fn later_tool_list_retries_after_failed_reconnect_and_keeps_cached_tools()
     );
     assert_eq!(attempts.load(std::sync::atomic::Ordering::SeqCst), 1);
 
-    tokio::time::advance(CODEX_APPS_RECONNECT_INITIAL_BACKOFF).await;
+    tokio::time::advance(BAICODE_APPS_RECONNECT_INITIAL_BACKOFF).await;
     let second_reconnect_finished = reconnect_finished.notified();
     let tools = manager.list_all_tools().await;
     assert_eq!(
@@ -4804,7 +4804,7 @@ async fn later_tool_list_retries_after_failed_reconnect_and_keeps_cached_tools()
     second_reconnect_finished.await;
     assert_eq!(attempts.load(std::sync::atomic::Ordering::SeqCst), 2);
 
-    tokio::time::advance(CODEX_APPS_RECONNECT_INITIAL_BACKOFF).await;
+    tokio::time::advance(BAICODE_APPS_RECONNECT_INITIAL_BACKOFF).await;
     let tools = manager.list_all_tools().await;
     assert_eq!(
         tools
@@ -4815,7 +4815,7 @@ async fn later_tool_list_retries_after_failed_reconnect_and_keeps_cached_tools()
     );
     assert_eq!(attempts.load(std::sync::atomic::Ordering::SeqCst), 2);
 
-    tokio::time::advance(CODEX_APPS_RECONNECT_INITIAL_BACKOFF).await;
+    tokio::time::advance(BAICODE_APPS_RECONNECT_INITIAL_BACKOFF).await;
     let third_reconnect_finished = reconnect_finished.notified();
     let tools = manager.list_all_tools().await;
     assert_eq!(
@@ -4841,7 +4841,7 @@ async fn later_tool_list_retries_after_failed_reconnect_and_keeps_cached_tools()
 #[tokio::test]
 async fn tool_lists_do_not_block_and_share_codex_apps_startup_reconnect() {
     let recovered_client = create_test_managed_client(vec![create_test_tool(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         "drive_search",
     )])
     .await;
@@ -4866,14 +4866,14 @@ async fn tool_lists_do_not_block_and_share_codex_apps_startup_reconnect() {
         .shared()
     });
     let mut manager = create_test_manager_with_failed_apps_startup(
-        vec![create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "drive_search")],
+        vec![create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "drive_search")],
         reconnect_factory,
     );
     manager.set_test_server_metadata(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         McpServerMetadata {
             environment_id: codex_config::DEFAULT_MCP_SERVER_ENVIRONMENT_ID.to_string(),
-            server_key: McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            server_key: McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             pollutes_memory: false,
             origin: None,
             supports_parallel_tool_calls: false,
@@ -4911,7 +4911,7 @@ async fn tool_lists_do_not_block_and_share_codex_apps_startup_reconnect() {
         .expect("step capture should not wait for reconnect");
     assert_eq!(pending_step.tools(), first_tools);
     // Readiness joins the retry that discovery started before call preparation.
-    let server_key = McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME);
+    let server_key = McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME);
     let mut ready = Box::pin(manager.wait_for_server_startup(&server_key));
     assert!(futures::poll!(&mut ready).is_pending());
     assert_eq!(attempts.load(Ordering::SeqCst), 1);
@@ -4944,7 +4944,7 @@ async fn tool_lists_do_not_block_and_share_codex_apps_startup_reconnect() {
     assert!(
         recovered_step
             .prepare_call(
-                &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+                &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
                 "drive_search"
             )
             .is_some()
@@ -5097,7 +5097,7 @@ fn gov_codex_apps_retain_local_chatgpt_auth_provider() -> anyhow::Result<()> {
     config.mcp_server_catalog = catalog.build();
 
     let servers = crate::effective_mcp_servers(&config, Some(&auth));
-    let local = &servers[&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME)];
+    let local = &servers[&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME)];
     assert_eq!(local.config().auth, McpServerAuth::ChatGpt);
     let retained = chatgpt_auth_provider_for_server(local, Some(Arc::clone(&provider)))
         .expect("local Gov Apps must retain ChatGPT authentication");
@@ -5190,13 +5190,13 @@ async fn executor_owned_chatgpt_mcp_accepts_only_safe_explicit_authorization() -
             "environment header",
             Some(("Authorization", "Bearer executor-secret")),
             None,
-            Some(("aUtHoRiZaTiOn", "CODEX_TEST_HOSTED_SECRET")),
+            Some(("aUtHoRiZaTiOn", "BAICODE_TEST_HOSTED_SECRET")),
             false,
         ),
         (
             "environment bearer",
             Some(("Authorization", "Bearer executor-secret")),
-            Some("CODEX_TEST_HOSTED_SECRET"),
+            Some("BAICODE_TEST_HOSTED_SECRET"),
             None,
             false,
         ),
@@ -5543,7 +5543,7 @@ fn mcp_init_error_display_prompts_for_github_pat() {
     let display = mcp_init_error_display(server_name, Some(&config), &err, /*reason*/ None);
 
     let expected = format!(
-        "GitHub MCP does not support OAuth. Log in by adding a personal access token (https://github.com/settings/personal-access-tokens) to your environment and config.toml:\n[mcp_servers.{server_name}]\nbearer_token_env_var = CODEX_GITHUB_PERSONAL_ACCESS_TOKEN"
+        "GitHub MCP does not support OAuth. Log in by adding a personal access token (https://github.com/settings/personal-access-tokens) to your environment and config.toml:\n[mcp_servers.{server_name}]\nbearer_token_env_var = BAICODE_GITHUB_PERSONAL_ACCESS_TOKEN"
     );
 
     assert_eq!(expected, display);
@@ -5764,7 +5764,7 @@ fn reusable_server_config(url: &str) -> McpServerConfig {
         auth: Default::default(),
         transport: McpServerTransportConfig::StreamableHttp {
             url: url.to_string(),
-            bearer_token_env_var: Some("CODEX_MCP_REUSE_TEST_TOKEN".to_string()),
+            bearer_token_env_var: Some("BAICODE_MCP_REUSE_TEST_TOKEN".to_string()),
             http_headers: None,
             env_http_headers: None,
             http_headers_helper: None,
@@ -5966,8 +5966,8 @@ async fn apps_catalog_broadcast_preserves_running_calls_and_rejects_stale_calls(
         /*chatgpt_user_id*/ None,
     )
     .with_live_scope("apps".to_string());
-    let original = vec![create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "original")];
-    let updated = vec![create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "updated")];
+    let original = vec![create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "original")];
+    let updated = vec![create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "updated")];
     store_current_tools(&context, original.clone());
     let catalog = ClientToolCatalog::new(original.clone(), /*meta*/ None, context.subscribe());
     let snapshot = catalog.read(Arc::new).await;
@@ -6016,8 +6016,8 @@ async fn apps_catalog_broadcast_restores_equivalent_calls() -> anyhow::Result<()
     )
     .with_live_scope("apps".to_string());
     let original = vec![
-        create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "first"),
-        create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "second"),
+        create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "first"),
+        create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "second"),
     ];
     store_current_tools(&context, original.clone());
     let catalog = ClientToolCatalog::new(original.clone(), /*meta*/ None, context.subscribe());
@@ -6068,7 +6068,7 @@ fn idle_apps_clients_do_not_retain_replaced_tools() {
             ),
         )
         .with_live_scope("apps".into());
-    let tool = create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "original");
+    let tool = create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "original");
     let schema = Arc::downgrade(&tool.tool.input_schema);
     store_current_tools(&context, vec![tool]);
     let clients = [
@@ -6077,7 +6077,7 @@ fn idle_apps_clients_do_not_retain_replaced_tools() {
     ];
     store_current_tools(
         &context,
-        vec![create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "updated")],
+        vec![create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "updated")],
     );
     assert!(
         schema.upgrade().is_none(),
@@ -6098,7 +6098,7 @@ async fn apps_catalog_broadcast_survives_an_older_local_refresh() -> anyhow::Res
     store_current_tools(&context, Vec::new());
     let catalog = ClientToolCatalog::new(Vec::new(), /*meta*/ None, context.subscribe());
     let older_ticket = context.begin_fetch(ConnectorRuntimeFetchSource::HardRefresh);
-    let newer = vec![create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "newer")];
+    let newer = vec![create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "newer")];
     store_current_tools(&context, newer.clone());
     assert_eq!(catalog.read(|catalog| catalog.tools.to_vec()).await, newer);
     catalog
@@ -6148,19 +6148,19 @@ async fn refreshed_catalog_follows_reused_client_without_mutating_old_bindings()
     let connection = Arc::get_mut(
         &mut manager
             .servers
-            .get_mut(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+            .get_mut(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
             .expect("Apps server")
             .connection,
     )
     .expect("unshared Apps connection");
     connection.identity = Some(reusable_server_identity(
-        CODEX_APPS_MCP_SERVER_NAME,
+        BAICODE_APPS_MCP_SERVER_NAME,
         &config,
         &runtime_context,
     ));
     let client = connection.client().await?;
     // Seed an earlier catalog before capturing the binding under test.
-    let startup_tools = vec![create_test_tool(CODEX_APPS_MCP_SERVER_NAME, "startup")];
+    let startup_tools = vec![create_test_tool(BAICODE_APPS_MCP_SERVER_NAME, "startup")];
     client
         .tool_catalog
         .refresh(
@@ -6173,7 +6173,7 @@ async fn refreshed_catalog_follows_reused_client_without_mutating_old_bindings()
     let old_tools = serde_json::to_value(old_binding.tools())?;
     let old_call = old_binding
         .prepare_call(
-            &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             "startup",
         )
         .expect("startup call");
@@ -6185,14 +6185,14 @@ async fn refreshed_catalog_follows_reused_client_without_mutating_old_bindings()
     let republished = Arc::new(
         reconcile_reusable_server_with_mcp_config(
             &previous,
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             config,
             runtime_context,
             crate::mcp::tests::test_mcp_config(codex_home.path().to_path_buf()),
         )
         .await,
     );
-    assert!(previous.shares_test_connection_with(&republished, CODEX_APPS_MCP_SERVER_NAME));
+    assert!(previous.shares_test_connection_with(&republished, BAICODE_APPS_MCP_SERVER_NAME));
     assert_eq!(
         model_tool_names(capture_binding(&republished).await.tools()),
         HashSet::from([ToolName::namespaced("mcp__codex_apps", "refreshed")]),
@@ -6708,7 +6708,7 @@ fn connection_identity_tracks_only_oauth_credentials_when_oauth_is_active() {
 #[test]
 fn connection_identity_uses_effective_authorization_headers() {
     let runtime_context = reusable_server_runtime_context();
-    let missing_env_var = format!("CODEX_TEST_UNSET_MCP_AUTHORIZATION_{}", std::process::id());
+    let missing_env_var = format!("BAICODE_TEST_UNSET_MCP_AUTHORIZATION_{}", std::process::id());
     assert!(std::env::var_os(&missing_env_var).is_none());
 
     for (static_header, environment_header, has_authorization) in [
@@ -6779,7 +6779,7 @@ async fn reconciliation_reuses_legacy_stdio_server_with_existing_protocol_marker
         command: "legacy-server".to_string(),
         args: Vec::new(),
         env: Some(HashMap::from([(
-            "CODEX_MCP_PROTOCOL_VERSION".to_string(),
+            "BAICODE_MCP_PROTOCOL_VERSION".to_string(),
             "1999-01-01".to_string(),
         )])),
         env_vars: Vec::new(),
@@ -7370,7 +7370,7 @@ async fn connection_identity_distinguishes_agent_account_runtime_and_task() -> a
     let connection_identity = |auth: &CodexAuth| {
         let provider = codex_model_provider::auth_provider_from_auth(auth);
         McpServerConnectionIdentity::new(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             &server,
             /*host_plugin_root*/ None,
             OAuthCredentialsStoreMode::default(),

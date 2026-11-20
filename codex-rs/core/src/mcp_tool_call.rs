@@ -41,8 +41,8 @@ use codex_connectors::AppToolPolicyInput;
 use codex_extension_api::McpToolContext;
 use codex_features::Feature;
 use codex_file_system::FileSystemSandboxContext;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
-use codex_mcp::MCP_TOOL_CODEX_APPS_META_KEY;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
+use codex_mcp::MCP_TOOL_BAICODE_APPS_META_KEY;
 use codex_mcp::McpPermissionPromptAutoApproveContext;
 use codex_mcp::McpPermissionSource;
 use codex_mcp::McpServerKey;
@@ -141,7 +141,7 @@ fn apps_invocation_context(tool: &ToolInfo) -> Option<&JsonValue> {
     tool.tool
         .meta
         .as_ref()?
-        .get(MCP_TOOL_CODEX_APPS_META_KEY)?
+        .get(MCP_TOOL_BAICODE_APPS_META_KEY)?
         .get(APPS_INVOCATION_CONTEXT)
 }
 
@@ -196,7 +196,7 @@ pub(crate) async fn handle_mcp_tool_call(
 
     let prepared = prepared_call.and_then(|call| {
         let issued_context = apps_invocation_context(advertised_tool);
-        let context_changed = server == CODEX_APPS_MCP_SERVER_NAME
+        let context_changed = server == BAICODE_APPS_MCP_SERVER_NAME
             && apps_invocation_context(call.tool_info()) != issued_context;
         // Only the connection that advertised the context may receive it after a catalog refresh.
         if context_changed && !call.uses_connection_from(&step_context.mcp) {
@@ -448,7 +448,7 @@ struct McpToolCallItemMetadata {
 
 impl McpToolCallItemMetadata {
     fn from_tool_metadata(server: &str, metadata: Option<&McpToolApprovalMetadata>) -> Self {
-        let trusted_mcp_app_metadata = if server == CODEX_APPS_MCP_SERVER_NAME {
+        let trusted_mcp_app_metadata = if server == BAICODE_APPS_MCP_SERVER_NAME {
             metadata
         } else {
             None
@@ -627,7 +627,7 @@ async fn handle_approved_mcp_tool_call(
                         let turn_meta = meta
                             .as_object_mut()
                             .ok_or_else(|| anyhow::anyhow!("invalid MCP metadata"))?
-                            .entry(crate::X_CODEX_TURN_METADATA_HEADER)
+                            .entry(crate::X_BAICODE_TURN_METADATA_HEADER)
                             .or_insert_with(|| serde_json::json!({}));
                         crate::model_search::with_search_context(turn_meta, context)?;
                         let pin = binding
@@ -636,7 +636,7 @@ async fn handle_approved_mcp_tool_call(
                                 anyhow::anyhow!("Search MCP connection changed after discovery")
                             })?;
                         let apps = meta
-                            .get_mut(MCP_TOOL_CODEX_APPS_META_KEY)
+                            .get_mut(MCP_TOOL_BAICODE_APPS_META_KEY)
                             .and_then(serde_json::Value::as_object_mut)
                             .ok_or_else(|| anyhow::anyhow!("missing hosted Apps call metadata"))?;
                         apps.insert("invocation_context".to_string(), pin.clone());
@@ -938,7 +938,7 @@ async fn maybe_request_codex_apps_auth_elicitation(
     metadata: Option<&McpToolApprovalMetadata>,
     result: CallToolResult,
 ) -> CallToolResult {
-    if server != CODEX_APPS_MCP_SERVER_NAME {
+    if server != BAICODE_APPS_MCP_SERVER_NAME {
         return result;
     }
 
@@ -983,7 +983,7 @@ async fn maybe_request_codex_apps_auth_elicitation(
     let response = sess
         .request_mcp_server_elicitation(
             turn_context,
-            McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             request_id,
             request,
         )
@@ -1241,7 +1241,7 @@ async fn maybe_track_codex_app_used(
     metadata: &McpToolApprovalMetadata,
     elicitation_type: Option<ElicitationType>,
 ) {
-    if server != CODEX_APPS_MCP_SERVER_NAME {
+    if server != BAICODE_APPS_MCP_SERVER_NAME {
         return;
     }
     let connector_id = metadata.connector_id.clone();
@@ -1297,7 +1297,7 @@ fn mcp_tool_call_auth_elicitation_type(
     connector_id: Option<&str>,
     result: &CallToolResult,
 ) -> Option<ElicitationType> {
-    (server == CODEX_APPS_MCP_SERVER_NAME
+    (server == BAICODE_APPS_MCP_SERVER_NAME
         && is_connector_auth_failure_from_tool_result(result, connector_id))
     .then_some(ElicitationType::AuthOrLink)
 }
@@ -1384,7 +1384,7 @@ impl Session {
     ) -> Arc<McpToolApprovalContext> {
         let key = (server_key.to_owned(), call_id.to_string());
         let metadata = Arc::new(McpToolApprovalContext {
-            invocation: (invocation.server == CODEX_APPS_MCP_SERVER_NAME
+            invocation: (invocation.server == BAICODE_APPS_MCP_SERVER_NAME
                 || is_node_repl_backed_server(&invocation.server))
             .then(|| invocation.clone()),
             metadata,
@@ -1487,7 +1487,7 @@ fn build_mcp_tool_call_request_meta(
         serde_json::Value::String(call_id.to_string()),
     );
 
-    if server == CODEX_APPS_MCP_SERVER_NAME {
+    if server == BAICODE_APPS_MCP_SERVER_NAME {
         let mut codex_apps_meta = metadata
             .and_then(|metadata| metadata.codex_apps_meta.clone())
             .unwrap_or_default();
@@ -1497,7 +1497,7 @@ fn build_mcp_tool_call_request_meta(
         );
         codex_apps_meta.remove("root_turn_id");
         request_meta.insert(
-            MCP_TOOL_CODEX_APPS_META_KEY.to_string(),
+            MCP_TOOL_BAICODE_APPS_META_KEY.to_string(),
             serde_json::Value::Object(codex_apps_meta),
         );
     }
@@ -1679,7 +1679,7 @@ async fn prepare_mcp_tool_approval(
         connector_id: metadata.connector_id.clone(),
         connector_name: metadata.connector_name.clone(),
         connector_description: metadata.connector_description.clone(),
-        connected_account_email: (invocation.server == CODEX_APPS_MCP_SERVER_NAME)
+        connected_account_email: (invocation.server == BAICODE_APPS_MCP_SERVER_NAME)
             .then(|| metadata.connected_account_email.clone())
             .flatten(),
         tool_title: metadata.tool_title.clone(),
@@ -1982,7 +1982,7 @@ fn session_mcp_tool_approval_key(
     }
 
     let connector_id = metadata.and_then(|metadata| metadata.connector_id.clone());
-    if invocation.server == CODEX_APPS_MCP_SERVER_NAME && connector_id.is_none() {
+    if invocation.server == BAICODE_APPS_MCP_SERVER_NAME && connector_id.is_none() {
         return None;
     }
 
@@ -2021,7 +2021,7 @@ pub(crate) fn build_guardian_mcp_tool_review_request(
         connector_id: metadata.and_then(|metadata| metadata.connector_id.clone()),
         connector_name: metadata.and_then(|metadata| metadata.connector_name.clone()),
         connector_description: metadata.and_then(|metadata| metadata.connector_description.clone()),
-        connected_account_email: (invocation.server == CODEX_APPS_MCP_SERVER_NAME)
+        connected_account_email: (invocation.server == BAICODE_APPS_MCP_SERVER_NAME)
             .then(|| metadata.and_then(|metadata| metadata.connected_account_email.clone()))
             .flatten(),
         tool_title: metadata.and_then(|metadata| metadata.tool_title.clone()),
@@ -2057,7 +2057,7 @@ fn mcp_tool_approval_policy(
     call: &PreparedMcpCall,
     metadata: &McpToolApprovalMetadata,
 ) -> Option<McpToolApprovalPolicy> {
-    let mode = if call.server_name() == CODEX_APPS_MCP_SERVER_NAME {
+    let mode = if call.server_name() == BAICODE_APPS_MCP_SERVER_NAME {
         let policy = app_tool_policy(call.config(), metadata, call.tool_info().tool.name.as_ref());
         if !policy.enabled {
             return None;
@@ -2107,7 +2107,7 @@ fn mcp_tool_metadata(
 ) -> Result<McpToolApprovalMetadata, McpToolAccountError> {
     let server = tool_info.server_name();
     let tool_info = tool_info.clone();
-    let connector_description = (server == CODEX_APPS_MCP_SERVER_NAME)
+    let connector_description = (server == BAICODE_APPS_MCP_SERVER_NAME)
         .then(|| tool_info.namespace_description.clone())
         .flatten();
 
@@ -2115,15 +2115,15 @@ fn mcp_tool_metadata(
         .tool
         .meta
         .as_ref()
-        .and_then(|meta| meta.get(MCP_TOOL_CODEX_APPS_META_KEY))
+        .and_then(|meta| meta.get(MCP_TOOL_BAICODE_APPS_META_KEY))
         .and_then(serde_json::Value::as_object)
         .cloned();
-    let link_id = if server == CODEX_APPS_MCP_SERVER_NAME {
+    let link_id = if server == BAICODE_APPS_MCP_SERVER_NAME {
         account::resolve_account(&tool_info, arguments)?
     } else {
         None
     };
-    let connected_account_email = if server == CODEX_APPS_MCP_SERVER_NAME {
+    let connected_account_email = if server == BAICODE_APPS_MCP_SERVER_NAME {
         codex_apps_meta
             .as_ref()
             .and_then(|meta| meta.get(MCP_TOOL_CONNECTED_ACCOUNT_EMAIL_META_KEY))
@@ -2180,7 +2180,7 @@ fn openai_file_input_optional_fields_for_server(
     server: &str,
     openai_file_input_optional_fields: &HashMap<String, Vec<String>>,
 ) -> Option<HashMap<String, Vec<String>>> {
-    (server == CODEX_APPS_MCP_SERVER_NAME)
+    (server == BAICODE_APPS_MCP_SERVER_NAME)
         .then(|| openai_file_input_optional_fields.clone())
         .filter(|params| !params.is_empty())
 }
@@ -2261,7 +2261,7 @@ fn build_mcp_tool_approval_fallback_message(
         .filter(|name| !name.is_empty())
         .map(ToString::to_string)
         .unwrap_or_else(|| {
-            if server == CODEX_APPS_MCP_SERVER_NAME {
+            if server == BAICODE_APPS_MCP_SERVER_NAME {
                 "this app".to_string()
             } else {
                 format!("the {server} MCP server")
@@ -2365,7 +2365,7 @@ fn build_mcp_tool_approval_elicitation_meta(
                 serde_json::Value::String(tool_description.clone()),
             );
         }
-        if server == CODEX_APPS_MCP_SERVER_NAME
+        if server == BAICODE_APPS_MCP_SERVER_NAME
             && (metadata.connector_id.is_some()
                 || metadata.connector_name.is_some()
                 || metadata.connector_description.is_some())
@@ -2604,7 +2604,7 @@ async fn maybe_persist_mcp_tool_approval(
 ) {
     let tool_name = key.tool_name.clone();
 
-    let persist_result = if key.server.name() == CODEX_APPS_MCP_SERVER_NAME {
+    let persist_result = if key.server.name() == BAICODE_APPS_MCP_SERVER_NAME {
         let Some(connector_id) = key.connector_id.clone() else {
             return;
         };

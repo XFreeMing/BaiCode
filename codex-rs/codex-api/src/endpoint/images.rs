@@ -14,7 +14,7 @@ use serde::Serialize;
 use serde_json::to_value;
 use std::sync::Arc;
 
-const X_CODEX_IMAGEGEN_REQUEST_ID_HEADER: &str = "x-codex-imagegen-request-id";
+const X_BAICODE_IMAGEGEN_REQUEST_ID_HEADER: &str = "x-codex-imagegen-request-id";
 
 pub struct ImagesClient<T: HttpTransport> {
     session: EndpointSession<T>,
@@ -109,7 +109,7 @@ impl<T: HttpTransport> ImagesClient<T> {
 
 fn imagegen_request_id_from_headers(headers: &HeaderMap) -> Option<String> {
     headers
-        .get(X_CODEX_IMAGEGEN_REQUEST_ID_HEADER)
+        .get(X_BAICODE_IMAGEGEN_REQUEST_ID_HEADER)
         .and_then(|value| value.to_str().ok())
         .filter(|request_id| !request_id.is_empty())
         .map(str::to_string)
@@ -248,7 +248,7 @@ mod tests {
     async fn generate_posts_typed_request_and_parses_image_response() {
         let mut response_headers = HeaderMap::new();
         response_headers.insert(
-            X_CODEX_IMAGEGEN_REQUEST_ID_HEADER,
+            X_BAICODE_IMAGEGEN_REQUEST_ID_HEADER,
             http::HeaderValue::from_static("req-imagegen-123"),
         );
         response_headers.insert(

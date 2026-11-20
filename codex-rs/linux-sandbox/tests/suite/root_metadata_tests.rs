@@ -44,7 +44,7 @@ async fn root_metadata_symlinks_cannot_reopen_approved_denials() {
     )
     .map(AbsolutePathBuf::into_path_buf)
     .or_else(|| {
-        option_env!("CODEX_BWRAP_SHA256")
+        option_env!("BAICODE_BWRAP_SHA256")
             .is_none_or(|digest| digest.chars().all(|character| character == '0'))
             .then(|| bwrap.clone())
     })

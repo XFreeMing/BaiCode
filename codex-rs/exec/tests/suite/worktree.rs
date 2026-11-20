@@ -329,9 +329,9 @@ async fn worktree_start_and_fork_use_host_pool_and_preserve_legacy_resume() -> a
             } else {
                 &source
             })
-            .env_remove("CODEX_API_KEY")
+            .env_remove("BAICODE_API_KEY")
             .env_remove("OPENAI_API_KEY")
-            .env_remove("CODEX_ACCESS_TOKEN")
+            .env_remove("BAICODE_ACCESS_TOKEN")
             .args(["--json", "--worktree", "--strict-config"])
             .args(args)
             .output()?;
@@ -385,7 +385,7 @@ fn worktree_rejects_remote_defaults_before_allocation() -> anyhow::Result<()> {
         let test = test_codex_exec();
         let mut command = test.cmd();
         if route == "environment" {
-            command.env("CODEX_EXEC_SERVER_URL", "ws://127.0.0.1:9");
+            command.env("BAICODE_EXEC_SERVER_URL", "ws://127.0.0.1:9");
         } else {
             fs::write(
                 test.home_path().join("environments.toml"),

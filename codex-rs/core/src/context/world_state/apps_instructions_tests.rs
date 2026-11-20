@@ -4,7 +4,7 @@ use super::*;
 use crate::context::world_state::WorldState;
 use crate::context::world_state::WorldStateSnapshot;
 use crate::context::world_state::test_support::render_section_cases;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_prompts::ResolvedModelMessages;
 use codex_protocol::models::ResponseItem;
 use pretty_assertions::assert_eq;
@@ -17,7 +17,7 @@ fn snapshots() {
     use PreviousSectionState::Unknown;
 
     let bundled =
-        ResolvedModelMessages::bundled().apps_usage_instructions(CODEX_APPS_MCP_SERVER_NAME);
+        ResolvedModelMessages::bundled().apps_usage_instructions(BAICODE_APPS_MCP_SERVER_NAME);
     let unavailable = AppsInstructionsState::new(/*available*/ false, bundled.clone());
     let available = AppsInstructionsState::new(/*available*/ true, bundled);
 
@@ -100,7 +100,7 @@ fn legacy_guidance_is_reused_or_retired_by_catalog_intent() {
         world_state.add_section(AppsInstructionsState::new(
             available,
             ResolvedModelMessages::from_model(&model)
-                .apps_usage_instructions(CODEX_APPS_MCP_SERVER_NAME),
+                .apps_usage_instructions(BAICODE_APPS_MCP_SERVER_NAME),
         ));
         let snapshot: Option<WorldStateSnapshot> = saved_available.map(|available| {
             serde_json::from_value(json!({"apps_instructions": available})).unwrap()
@@ -132,7 +132,7 @@ fn resume_after_an_older_catalog_client_silently_disabled_bundled_guidance() {
     let previous: WorldStateSnapshot =
         serde_json::from_value(json!({"apps_instructions": {"catalog": false}})).unwrap();
     let bundled =
-        ResolvedModelMessages::bundled().apps_usage_instructions(CODEX_APPS_MCP_SERVER_NAME);
+        ResolvedModelMessages::bundled().apps_usage_instructions(BAICODE_APPS_MCP_SERVER_NAME);
     for (resolved, expected) in [
         (bundled, retained.clone()),
         (
@@ -163,7 +163,7 @@ fn resume_after_an_older_catalog_client_silently_disabled_bundled_guidance() {
 fn persisted_guidance_is_restored_only_when_missing_from_history() {
     let retained: ResponseItem = ContextualUserFragment::into(AppsInstructions::default());
     let bundled =
-        ResolvedModelMessages::bundled().apps_usage_instructions(CODEX_APPS_MCP_SERVER_NAME);
+        ResolvedModelMessages::bundled().apps_usage_instructions(BAICODE_APPS_MCP_SERVER_NAME);
     for history in [vec![], vec![retained]] {
         let mut world_state = WorldState::default();
         world_state.add_section(AppsInstructionsState::new(
@@ -224,7 +224,7 @@ fn catalog_guidance_updates_clears_and_returns_to_bundled() {
         model.model_messages =
             Some(serde_json::from_value(json!({"apps": {"usage_instructions": catalog}})).unwrap());
         let resolved = ResolvedModelMessages::from_model(&model)
-            .apps_usage_instructions(CODEX_APPS_MCP_SERVER_NAME);
+            .apps_usage_instructions(BAICODE_APPS_MCP_SERVER_NAME);
         let mut world_state = WorldState::default();
         world_state.add_section(AppsInstructionsState::new(available, resolved));
         let (snapshot, fragments) =
@@ -399,7 +399,7 @@ fn retained_catalog_guidance_recovers_legacy_snapshots_and_repairs_lost_updates(
         model.model_messages =
             Some(serde_json::from_value(json!({"apps": {"usage_instructions": text}})).unwrap());
         let resolved = ResolvedModelMessages::from_model(&model)
-            .apps_usage_instructions(CODEX_APPS_MCP_SERVER_NAME);
+            .apps_usage_instructions(BAICODE_APPS_MCP_SERVER_NAME);
         let mut world_state = WorldState::default();
         world_state.add_section(AppsInstructionsState::new(available, resolved));
         let (snapshot, fragments) =

@@ -156,19 +156,19 @@ async fn provider_api_key_without_endpoint_overrides_uses_codex_backend() {
         (
             "provider-key",
             None,
-            CHATGPT_CODEX_BASE_URL,
+            CHATGPT_BAICODE_BASE_URL,
             "https://api.openai.com/v1",
         ),
         (
             "provider-key",
             Some(CodexAuth::create_dummy_chatgpt_auth_for_testing()),
-            CHATGPT_CODEX_BASE_URL,
-            CHATGPT_CODEX_BASE_URL,
+            CHATGPT_BAICODE_BASE_URL,
+            CHATGPT_BAICODE_BASE_URL,
         ),
         (
             "provider-key",
             Some(CodexAuth::from_api_key("sk-proj-fedramp-ambient-key")),
-            CHATGPT_CODEX_BASE_URL,
+            CHATGPT_BAICODE_BASE_URL,
             "https://api.openai.com/v1",
         ),
         (

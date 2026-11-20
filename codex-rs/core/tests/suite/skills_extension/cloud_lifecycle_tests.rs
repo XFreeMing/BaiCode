@@ -22,7 +22,7 @@ impl SkillProvider for CloudTurnProvider {
             *self.resource_key.lock().expect("resource key lock") = query
                 .mcp_resources
                 .as_ref()
-                .and_then(|client| client.server_cache_key(CODEX_APPS_MCP_SERVER_NAME));
+                .and_then(|client| client.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME));
             let reply = *self.reply.lock().expect("cloud reply lock");
             let selected =
                 reply.map_err(|()| SkillProviderError::new("cloud skill unavailable"))?;
@@ -32,7 +32,7 @@ impl SkillProvider for CloudTurnProvider {
                     let package = format!("skill://{plugin}/demo");
                     SkillCatalogEntry::new(
                         SkillPackageId(package.clone()),
-                        SkillAuthority::new(SkillSourceKind::Cloud, CODEX_APPS_MCP_SERVER_NAME),
+                        SkillAuthority::new(SkillSourceKind::Cloud, BAICODE_APPS_MCP_SERVER_NAME),
                         format!("{plugin}:demo"),
                         format!("Cloud {plugin} revision {revision}"),
                         SkillResourceId::new(format!("{package}/SKILL.md")),
@@ -249,11 +249,11 @@ async fn explicit_cloud_refresh_publishes_before_admission_and_reuses_catalogs()
             async {
                 gate.entered.notified().await;
                 let client = resources.0.lock().expect("resources").clone().unwrap();
-                let key = client.server_cache_key(CODEX_APPS_MCP_SERVER_NAME);
+                let key = client.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME);
                 let mut refresh = Box::pin(test.codex.refresh_cloud_plugins());
                 assert!(futures::poll!(&mut refresh).is_pending());
                 drop(refresh);
-                assert!(client.server_cache_key(CODEX_APPS_MCP_SERVER_NAME) == key);
+                assert!(client.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME) == key);
                 assert_eq!(provider.lists.load(Ordering::SeqCst), previous_calls);
                 gate.resume.notify_one();
                 anyhow::Ok(())
@@ -438,8 +438,8 @@ async fn cloud_skills_reuse_cache_and_invalidate_on_connection_or_auth_change() 
                 .expect("session resources lock")
                 .clone()
                 .expect("thread MCP resource client");
-            let auth = client.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME);
-            let connection = client.server_cache_key(CODEX_APPS_MCP_SERVER_NAME);
+            let auth = client.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME);
+            let connection = client.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME);
             // Step preparation must consume the pending reconnect before discovery.
             test.codex.submit(Op::RefreshMcpServers).await?;
             Some((client, auth, connection))
@@ -453,7 +453,7 @@ async fn cloud_skills_reuse_cache_and_invalidate_on_connection_or_auth_change() 
                 .expect("session resources lock")
                 .clone()
                 .expect("thread MCP resource client");
-            let previous_auth = client.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME);
+            let previous_auth = client.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME);
             codex_login::auth::login_with_chatgpt_auth_tokens(
                 test.codex_home_path(),
                 "header.e30.changed",
@@ -463,7 +463,7 @@ async fn cloud_skills_reuse_cache_and_invalidate_on_connection_or_auth_change() 
             test.thread_manager.auth_manager().reload().await;
             // Wait for the real auth transition, without manually refreshing MCP.
             tokio::time::timeout(Duration::from_secs(10), async {
-                while client.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME) == previous_auth
+                while client.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME) == previous_auth
                 {
                     tokio::task::yield_now().await;
                 }
@@ -514,14 +514,14 @@ async fn cloud_skills_reuse_cache_and_invalidate_on_connection_or_auth_change() 
             .clone()
             .expect("thread MCP resource client");
         assert!(
-            client.server_cache_key(CODEX_APPS_MCP_SERVER_NAME)
+            client.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME)
                 == *provider.resource_key.lock().expect("resource key lock"),
             "step reprojection must not invalidate resource caches: {turn}"
         );
         if let Some((client, scope, connection)) = previous_connection_scope {
-            assert!(client.server_cache_key(CODEX_APPS_MCP_SERVER_NAME) != connection);
+            assert!(client.server_cache_key(BAICODE_APPS_MCP_SERVER_NAME) != connection);
             assert!(
-                client.auth_cache_key_for_server(CODEX_APPS_MCP_SERVER_NAME) == scope,
+                client.auth_cache_key_for_server(BAICODE_APPS_MCP_SERVER_NAME) == scope,
                 "same-auth reconnect must preserve the cloud cache scope"
             );
         }

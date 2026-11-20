@@ -9,8 +9,8 @@ on:
         default: '["cargo"]'
 
 env:
-  CODEX_BAZEL_GCS_BUCKET: ${{ secrets.CODEX_BAZEL_GCS_BUCKET }}
-  CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
+  BAICODE_BAZEL_GCS_BUCKET: ${{ secrets.BAICODE_BAZEL_GCS_BUCKET }}
+  BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
   WINDOWS_BINARIES: "baic codex-code-mode-host codex-exec-server codex-windows-sandbox-setup codex-windows-sandbox-service codex-command-runner codex-app-server"
 
 jobs:

@@ -9,7 +9,7 @@ use anyhow::bail;
 use codex_hooks::HookMcpCall;
 use codex_hooks::HookMcpExecutor;
 use codex_hooks::HookMcpOutput;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::McpRuntime;
 use codex_mcp::McpToolCallResult;
 use codex_mcp::McpToolStartup;
@@ -46,7 +46,7 @@ impl HookMcpExecutor for CoreHookMcpExecutor {
                 async {
                     if let Some(expected_connector) = call.expected_app_connector_id {
                         anyhow::ensure!(
-                            call.server == CODEX_APPS_MCP_SERVER_NAME && call.environment_id.is_none(),
+                            call.server == BAICODE_APPS_MCP_SERVER_NAME && call.environment_id.is_none(),
                             "bundled App hook must use the host Apps server"
                         );
                         let session = self

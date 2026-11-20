@@ -39,7 +39,7 @@ dangerously_allow_non_loopback_proxy = false
 mode = "full" # default when unset; use "limited" for read-only mode
 # HTTPS MITM is enabled automatically when `mode = "limited"` or when MITM hooks are configured.
 # The CA private key remains in proxy memory. When MITM is active, spawned commands receive CA
-# bundle env vars pointing at immutable public files under $CODEX_HOME/proxy/ so common HTTPS
+# bundle env vars pointing at immutable public files under $BAICODE_HOME/proxy/ so common HTTPS
 # clients trust the managed CA.
 
 # If false, local/private networking is rejected. Explicit allowlisting of local IP literals
@@ -157,7 +157,7 @@ through the same host allowlist/denylist checks.
 
 ### Tool-call attribution on upstream requests
 
-A managed executor can set `CODEX_TOOL_CALL_ATTRIBUTION_PROXY` to the HTTP(S) URL of an upstream
+A managed executor can set `BAICODE_TOOL_CALL_ATTRIBUTION_PROXY` to the HTTP(S) URL of an upstream
 proxy that consumes and strips `x-openai-internal-tool-call-id`. When that endpoint is selected,
 the execution-scoped proxy attaches the controller's tool-call ID to plaintext HTTP requests or
 the outer HTTPS CONNECT. Set this option in the executor process environment. Leaving it unset
@@ -294,7 +294,7 @@ three reference files or environment variables in the proxy process. Resolve the
 at startup and replace the proxy installation to rotate them.
 
 For local Codex, enable `credential_masking = true` under `[features]` in
-`config.toml` and set `placeholder_access_key_id = "CODEXMASKEDWORKSPACE"` on the
+`config.toml` and set `placeholder_access_key_id = "BAICODEMASKEDWORKSPACE"` on the
 proxy action. Local managed commands receive the dummy access key, secret and,
 for temporary credentials, session token in their standard AWS environment.
 An empty AWS environment selects a single configured pair. With multiple pairs,

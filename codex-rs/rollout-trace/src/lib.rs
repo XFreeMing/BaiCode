@@ -65,7 +65,7 @@ pub use shard::PayloadReader;
 /// Raw payload captured when a child agent reports completion to its parent.
 pub use thread::AgentResultTracePayload;
 /// Environment variable that enables local trace-bundle recording.
-pub use thread::CODEX_ROLLOUT_TRACE_ROOT_ENV;
+pub use thread::BAICODE_ROLLOUT_TRACE_ROOT_ENV;
 /// Raw metadata captured when a thread starts.
 pub use thread::ThreadStartedTraceMetadata;
 /// No-op-capable handle for recording one thread in a rollout bundle.

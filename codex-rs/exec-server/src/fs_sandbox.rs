@@ -23,7 +23,7 @@ use tokio::io::AsyncWriteExt;
 
 use crate::ExecServerRuntimeOptions;
 use crate::FileSystemSandboxContext;
-use crate::fs_helper::CODEX_FS_HELPER_ARG1;
+use crate::fs_helper::BAICODE_FS_HELPER_ARG1;
 use crate::fs_helper::FsHelperPayload;
 use crate::fs_helper::FsHelperRequest;
 use crate::fs_helper::FsHelperResponse;
@@ -108,7 +108,7 @@ impl FileSystemSandboxRunner {
             .ok_or_else(|| invalid_request("filesystem sandbox cwd has no root".to_string()))?;
         let command = SandboxCommand {
             program: helper.as_os_str().to_owned(),
-            args: vec![CODEX_FS_HELPER_ARG1.to_string()],
+            args: vec![BAICODE_FS_HELPER_ARG1.to_string()],
             cwd: PathUri::from_abs_path(&helper_cwd),
             env: self.helper_env.clone(),
             managed_network: None,
@@ -662,9 +662,9 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn windows_helper_binds_executable_and_workspace_grants() {
-        const CHILD: &str = "CODEX_TEST_WINDOWS_HELPER_GRANTS_CHILD";
+        const CHILD: &str = "BAICODE_TEST_WINDOWS_HELPER_GRANTS_CHILD";
         if std::env::var_os(CHILD).is_none() {
-            // Preparing the token wrapper persists capability SIDs under CODEX_HOME.
+            // Preparing the token wrapper persists capability SIDs under BAICODE_HOME.
             let home = tempfile::tempdir().expect("isolated Codex home");
             let output = std::process::Command::new(std::env::current_exe().expect("test binary"))
                 .args([
@@ -672,7 +672,7 @@ mod tests {
                     "fs_sandbox::tests::windows_helper_binds_executable_and_workspace_grants",
                 ])
                 .env(CHILD, "1")
-                .env("CODEX_HOME", home.path())
+                .env("BAICODE_HOME", home.path())
                 .output()
                 .expect("run isolated Windows helper test");
             assert!(

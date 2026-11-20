@@ -19,7 +19,7 @@ use pretty_assertions::assert_eq;
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn remote_environment_reads_projected_executor_config() -> anyhow::Result<()> {
     let mut server =
-        exec_server_with_env([("CODEX_EXEC_SERVER_TEST_PREFER_MXC", "true")], &[]).await?;
+        exec_server_with_env([("BAICODE_EXEC_SERVER_TEST_PREFER_MXC", "true")], &[]).await?;
     let codex_home =
         AbsolutePathBuf::from_absolute_path(std::fs::canonicalize(server.codex_home())?)?;
     let config_file = codex_home.join(CONFIG_TOML_FILE);

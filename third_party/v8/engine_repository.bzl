@@ -12,7 +12,7 @@ toolchain graph.
 # a Starlark library. Reuse filegroups, so labels/globs retain their semantics
 # inside @v8. Compiled targets (including valid V8 v8_library/v8_binary calls)
 # belong in engine.BUILD.bazel, where we wire Codex's dependencies and runtime.
-_INVENTORY_SLOT = "# @CODEX_V8_UPSTREAM_FILEGROUPS@"
+_INVENTORY_SLOT = "# @BAICODE_V8_UPSTREAM_FILEGROUPS@"
 _FILE_GROUPS = "# File group rules"
 _GENERATED_FILES = "# Generated files"
 

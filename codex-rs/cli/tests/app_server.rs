@@ -9,9 +9,9 @@ use tempfile::TempDir;
 
 fn codex_command(codex_home: &Path) -> Result<assert_cmd::Command> {
     let mut cmd = assert_cmd::Command::new(codex_utils_cargo_bin::cargo_bin("baic")?);
-    cmd.env("CODEX_HOME", codex_home)
-        .env_remove("CODEX_ACCESS_TOKEN")
-        .env_remove("CODEX_API_KEY")
+    cmd.env("BAICODE_HOME", codex_home)
+        .env_remove("BAICODE_ACCESS_TOKEN")
+        .env_remove("BAICODE_API_KEY")
         .env_remove("OPENAI_API_KEY")
         .env_remove("OPENAI_FEDERATION_RULE_ID")
         .env_remove("OPENAI_IDENTITY_TOKEN_FILE")
@@ -160,9 +160,9 @@ fn app_server_keeps_sqlite_logs_in_overridden_sqlite_home() -> Result<()> {
     )?;
 
     codex_command(home.path())?
-        .env("CODEX_SQLITE_HOME", sqlite_home.path())
+        .env("BAICODE_SQLITE_HOME", sqlite_home.path())
         .env(
-            "CODEX_APP_SERVER_MANAGED_CONFIG_PATH",
+            "BAICODE_APP_SERVER_MANAGED_CONFIG_PATH",
             home.path().join("managed_config.toml"),
         )
         .arg("app-server")
@@ -191,9 +191,9 @@ fn app_server_preserves_the_existing_sqlite_logs_symlink() -> Result<()> {
     )?;
 
     codex_command(home.path())?
-        .env_remove("CODEX_SQLITE_HOME")
+        .env_remove("BAICODE_SQLITE_HOME")
         .env(
-            "CODEX_APP_SERVER_MANAGED_CONFIG_PATH",
+            "BAICODE_APP_SERVER_MANAGED_CONFIG_PATH",
             home.path().join("managed_config.toml"),
         )
         .arg("app-server")
@@ -250,7 +250,7 @@ fn print_startup_config_rejects_sign_out_with_environment_access_token() -> Resu
     std::fs::write(&auth_path, saved_auth)?;
     for token in ["at-test-token", "header.payload.signature"] {
         let output = codex_command(home.path())?
-            .env("CODEX_ACCESS_TOKEN", token)
+            .env("BAICODE_ACCESS_TOKEN", token)
             .args(["app-server", "--print-startup-config", "--startup-sign-out"])
             .assert()
             .failure();
@@ -314,10 +314,10 @@ async fn print_startup_config_is_independent_of_a_locked_history_database() -> R
     let binary = codex_utils_cargo_bin::cargo_bin("baic")?;
     let mut command = Command::new(&binary);
     command
-        .env("CODEX_HOME", home.path())
-        .env("CODEX_SQLITE_HOME", sqlite.path())
-        .env_remove("CODEX_ACCESS_TOKEN")
-        .env_remove("CODEX_API_KEY")
+        .env("BAICODE_HOME", home.path())
+        .env("BAICODE_SQLITE_HOME", sqlite.path())
+        .env_remove("BAICODE_ACCESS_TOKEN")
+        .env_remove("BAICODE_API_KEY")
         .env_remove("OPENAI_API_KEY")
         .env_remove("OPENAI_FEDERATION_RULE_ID")
         .env_remove("OPENAI_IDENTITY_TOKEN_FILE")

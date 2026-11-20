@@ -4605,7 +4605,7 @@ impl Session {
                         .features
                         .enabled(codex_features::Feature::HostedSearchPolicy))
             {
-                required_servers.push(codex_mcp::CODEX_APPS_MCP_SERVER_NAME.to_owned());
+                required_servers.push(codex_mcp::BAICODE_APPS_MCP_SERVER_NAME.to_owned());
             }
             let captured_executor_discovery_v2 = executor_capability_discovery_v2.as_deref();
             let catalogs = self.lock_cloud_catalogs().await;

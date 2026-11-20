@@ -52,7 +52,7 @@ Options:
           connect directly. Loopback stays local. This flag does not require
           upstream routing
 
-          [env: CODEX_EXEC_SERVER_PROXY_PRIVATE_IPS_VIA_UPSTREAM]
+          [env: BAICODE_EXEC_SERVER_PROXY_PRIVATE_IPS_VIA_UPSTREAM]
 
       --concurrent-requests <COUNT>
           Maximum number of requests to process concurrently on each connection
@@ -103,7 +103,7 @@ Options:
           Human-readable environment name
 
       --use-agent-identity-auth
-          Use Agent Identity auth from CODEX_ACCESS_TOKEN for remote
+          Use Agent Identity auth from BAICODE_ACCESS_TOKEN for remote
           registration
 
       --registration-bearer-stdin
@@ -137,7 +137,7 @@ Options:
       --exit-on-stdin-close
           Exit when the parent-owned standard-input pipe closes
 
-          [env: CODEX_EXEC_SERVER_EXIT_ON_STDIN_CLOSE]
+          [env: BAICODE_EXEC_SERVER_EXIT_ON_STDIN_CLOSE]
 
   -h, --help
           Print help (see a summary with '-h')

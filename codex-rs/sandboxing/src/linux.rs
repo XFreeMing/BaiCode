@@ -96,11 +96,11 @@ impl SandboxBackend for Linux<'_> {
         exec.command = std::iter::once(program).chain(args).collect();
         // Without bwrap --argv0, the Linux helper uses its own argv[0] as the inner executable.
         let arg0 = if let Some(path) = exe.to_str()
-            && exe.file_name() == Some(OsStr::new(CODEX_LINUX_SANDBOX_ARG0))
+            && exe.file_name() == Some(OsStr::new(BAICODE_LINUX_SANDBOX_ARG0))
         {
             path
         } else {
-            CODEX_LINUX_SANDBOX_ARG0
+            BAICODE_LINUX_SANDBOX_ARG0
         };
         exec.arg0 = Some(arg0.to_owned());
         Ok(())
@@ -109,7 +109,7 @@ impl SandboxBackend for Linux<'_> {
 
 /// Basename used when the Codex executable self-invokes as the Linux sandbox
 /// helper.
-pub const CODEX_LINUX_SANDBOX_ARG0: &str = "codex-linux-sandbox";
+pub const BAICODE_LINUX_SANDBOX_ARG0: &str = "codex-linux-sandbox";
 
 /// Converts the permission profile into the CLI invocation for
 /// `codex-linux-sandbox`.

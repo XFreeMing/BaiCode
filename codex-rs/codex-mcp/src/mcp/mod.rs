@@ -35,7 +35,7 @@ use codex_connectors::connector_runtime_context_key;
 use codex_exec_server::ExecutorCapabilityDiscoveryV2Snapshot;
 use codex_exec_server::FileSystemSandboxContext;
 use codex_login::CodexAuth;
-use codex_model_provider::CHATGPT_CODEX_BASE_URL;
+use codex_model_provider::CHATGPT_BAICODE_BASE_URL;
 use codex_protocol::mcp::ClientMcpExtensions;
 use codex_protocol::mcp::McpServerInfo;
 use codex_protocol::mcp::Resource;
@@ -67,11 +67,11 @@ use crate::runtime::McpStartupPolicy;
 use crate::server::EffectiveMcpServer;
 use crate::tools::ToolInfo;
 
-pub const CODEX_APPS_MCP_SERVER_NAME: &str = "codex_apps";
-pub(crate) const DEFAULT_CODEX_APPS_MCP_PRODUCT_SKU: &str = "codex";
+pub const BAICODE_APPS_MCP_SERVER_NAME: &str = "codex_apps";
+pub(crate) const DEFAULT_BAICODE_APPS_MCP_PRODUCT_SKU: &str = "codex";
 const MCP_TOOL_NAME_PREFIX: &str = "mcp";
 const MCP_TOOL_NAME_DELIMITER: &str = "__";
-const CODEX_CONNECTORS_TOKEN_ENV_VAR: &str = "CODEX_CONNECTORS_TOKEN";
+const BAICODE_CONNECTORS_TOKEN_ENV_VAR: &str = "BAICODE_CONNECTORS_TOKEN";
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum McpSnapshotDetail {
@@ -426,7 +426,7 @@ pub(crate) fn is_trusted_chatgpt_mcp_server(
         return false;
     }
 
-    if [CHATGPT_CODEX_BASE_URL, "https://gov.chatgpt.com"]
+    if [CHATGPT_BAICODE_BASE_URL, "https://gov.chatgpt.com"]
         .into_iter()
         .filter_map(|base_url| url::Url::parse(base_url).ok())
         .any(|trusted_url| server_url.origin() == trusted_url.origin())
@@ -465,7 +465,7 @@ pub(crate) fn effective_mcp_server(
     auth: Option<&CodexAuth>,
     registration: &ResolvedMcpServer,
 ) -> Option<EffectiveMcpServer> {
-    if registration.name() == CODEX_APPS_MCP_SERVER_NAME
+    if registration.name() == BAICODE_APPS_MCP_SERVER_NAME
         && !host_owned_codex_apps_enabled(config, auth)
     {
         return None;
@@ -669,11 +669,11 @@ pub(crate) fn sanitize_responses_api_tool_name(name: &str) -> String {
 }
 
 fn codex_apps_mcp_bearer_token_env_var() -> Option<String> {
-    match env::var(CODEX_CONNECTORS_TOKEN_ENV_VAR) {
-        Ok(value) if !value.trim().is_empty() => Some(CODEX_CONNECTORS_TOKEN_ENV_VAR.to_string()),
+    match env::var(BAICODE_CONNECTORS_TOKEN_ENV_VAR) {
+        Ok(value) if !value.trim().is_empty() => Some(BAICODE_CONNECTORS_TOKEN_ENV_VAR.to_string()),
         Ok(_) => None,
         Err(env::VarError::NotPresent) => None,
-        Err(env::VarError::NotUnicode(_)) => Some(CODEX_CONNECTORS_TOKEN_ENV_VAR.to_string()),
+        Err(env::VarError::NotUnicode(_)) => Some(BAICODE_CONNECTORS_TOKEN_ENV_VAR.to_string()),
     }
 }
 
@@ -726,7 +726,7 @@ fn mcp_server_config_for_url(
     originator: Option<&str>,
     auth_mode: McpServerAuth,
 ) -> McpServerConfig {
-    let product_sku = apps_mcp_product_sku.unwrap_or(DEFAULT_CODEX_APPS_MCP_PRODUCT_SKU);
+    let product_sku = apps_mcp_product_sku.unwrap_or(DEFAULT_BAICODE_APPS_MCP_PRODUCT_SKU);
     let mut http_headers =
         HashMap::from([("X-OpenAI-Product-Sku".to_string(), product_sku.to_string())]);
     if let Some(originator) = originator {

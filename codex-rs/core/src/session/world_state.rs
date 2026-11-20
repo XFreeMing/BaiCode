@@ -34,7 +34,7 @@ use codex_connectors::AppToolPolicyEvaluator;
 use codex_extension_api::WorldStateContributionInput;
 use codex_features::Feature;
 use codex_file_system::FileSystemSandboxContext;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_prompts::ApprovalPromptContext;
 use codex_prompts::ResolvedModelMessages;
 use codex_prompts::render_model_instructions;
@@ -428,7 +428,7 @@ impl Session {
         };
         world_state.add_section(AppsInstructionsState::new(
             apps_usage_instructions_available,
-            apps_messages.apps_usage_instructions(CODEX_APPS_MCP_SERVER_NAME),
+            apps_messages.apps_usage_instructions(BAICODE_APPS_MCP_SERVER_NAME),
         ));
         let plugins_usage_instructions_available =
             step_context.mcp.plugins_available() && model_info.include_plugin_usage_instructions;

@@ -19,7 +19,7 @@ use codex_extension_api::ExtensionRegistry;
 use codex_extension_api::ExtensionRegistryBuilder;
 use codex_features::Feature;
 use codex_login::CodexAuth;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_model_provider_info::AMAZON_BEDROCK_PROVIDER_ID;
 use codex_model_provider_info::OPENAI_PROVIDER_ID;
 use codex_plugin::PluginId;
@@ -480,7 +480,7 @@ async fn persisted_remote_plugin_command_attribution_flows_through_turn_context(
     let script_path = write_remote_plugin_script_and_config(codex_home.as_ref());
     std::fs::write(
         &script_path,
-        r#"printf '%s' '{"version":1,"measurements":[{"name":"files_scanned","value":7}]}' > "$CODEX_PLUGIN_METRICS_OUTPUT"
+        r#"printf '%s' '{"version":1,"measurements":[{"name":"files_scanned","value":7}]}' > "$BAICODE_PLUGIN_METRICS_OUTPUT"
 "#,
     )?;
     let plugin_root = script_path
@@ -609,10 +609,10 @@ async fn plugin_metrics_stdin_works_with_sandbox_approval_disabled(
     let script = write_remote_plugin_script_and_config(home.as_ref());
     std::fs::write(
         &script,
-        r#"test -n "${CODEX_PLUGIN_METRICS_OUTPUT:-}" || exit 2
+        r#"test -n "${BAICODE_PLUGIN_METRICS_OUTPUT:-}" || exit 2
 IFS= read -r input
 test "$input" = continue || exit 3
-printf '%s' '{"version":1,"measurements":[{"name":"files_scanned","value":7}]}' > "$CODEX_PLUGIN_METRICS_OUTPUT" || exit 4
+printf '%s' '{"version":1,"measurements":[{"name":"files_scanned","value":7}]}' > "$BAICODE_PLUGIN_METRICS_OUTPUT" || exit 4
 printf 'STDIN_OK\n'
 "#,
     )?;
@@ -738,8 +738,8 @@ async fn remote_plugin_measurements_require_the_frontend_version() -> Result<()>
     let server = start_mock_server().await;
     let home = Arc::new(TempDir::new()?);
     let frontend_script = write_remote_plugin_script_and_config(home.as_ref());
-    let script = r#"if [ -n "${CODEX_PLUGIN_METRICS_OUTPUT:-}" ]; then
-  printf '%s' '{"version":1,"measurements":[{"name":"duration_ms","value":7,"dimensions":{"release":"v1"}}]}' > "$CODEX_PLUGIN_METRICS_OUTPUT"
+    let script = r#"if [ -n "${BAICODE_PLUGIN_METRICS_OUTPUT:-}" ]; then
+  printf '%s' '{"version":1,"measurements":[{"name":"duration_ms","value":7,"dimensions":{"release":"v1"}}]}' > "$BAICODE_PLUGIN_METRICS_OUTPUT"
 else
   printf 'no metrics sidecar\n'
 fi
@@ -921,7 +921,7 @@ async fn thread_disabled_plugins_filter_skills_and_tools_without_changing_shared
             "echo",
             Some(serde_json::json!({"message": "plugin check"})),
         ),
-        (CODEX_APPS_MCP_SERVER_NAME, "calendar_list_events", None),
+        (BAICODE_APPS_MCP_SERVER_NAME, "calendar_list_events", None),
     ];
 
     for (phase, enabled, injection_count) in [(0, true, 1), (1, false, 1), (2, true, 2)] {
@@ -1031,7 +1031,7 @@ async fn thread_disabled_plugins_filter_skills_and_tools_without_changing_shared
                 .await;
             assert_eq!(
                 result.is_ok(),
-                enabled || *server_name == CODEX_APPS_MCP_SERVER_NAME,
+                enabled || *server_name == BAICODE_APPS_MCP_SERVER_NAME,
                 "unexpected {server_name}/{tool} result: {result:?}"
             );
         }
@@ -1103,7 +1103,7 @@ async fn agent_plugin_skills_use_shared_catalog_and_direct_child_discovery() -> 
 }
 
 #[test_case("CHATGPT", false, None; "product restricted skill is unavailable")]
-#[test_case("CODEX", true, Some("native review skill"); "native skill wins over migrated command")]
+#[test_case("BAICODE", true, Some("native review skill"); "native skill wins over migrated command")]
 #[test_case("CHATGPT", true, Some("migrated review command"); "migrated command replaces filtered native skill")]
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn plugin_skill_product_policy_and_migrated_command_precedence_reach_agent_turns(
@@ -1893,7 +1893,7 @@ async fn explicit_plugin_mentions_use_apps_for_chatgpt_dual_surface_plugins(
         build_apps_enabled_plugin_test_codex(&server, codex_home, apps_server.chatgpt_base_url)
             .await?;
     let codex = Arc::clone(&test_codex.codex);
-    wait_for_mcp_server(&codex, CODEX_APPS_MCP_SERVER_NAME).await?;
+    wait_for_mcp_server(&codex, BAICODE_APPS_MCP_SERVER_NAME).await?;
 
     codex
         .start_or_steer_turn(TurnInputRequest::user_input(vec![

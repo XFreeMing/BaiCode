@@ -7,8 +7,8 @@ use super::literals;
 use super::posix_env_path_expansion_function;
 use crate::shell_detect::ShellType;
 use crate::shell_startup_script;
-use codex_protocol::shell_environment::CODEX_THREAD_ID_ENV_VAR;
-use codex_protocol::shell_environment::CODEX_TOOL_CALL_ID_ENV_VAR;
+use codex_protocol::shell_environment::BAICODE_THREAD_ID_ENV_VAR;
+use codex_protocol::shell_environment::BAICODE_TOOL_CALL_ID_ENV_VAR;
 use std::borrow::Cow;
 
 const SNAPSHOT_COMMAND_HELPER: &str = r#"__codex_snapshot_command() {
@@ -106,7 +106,7 @@ fn capture_script(
             .replace(
                 "SNAPSHOT_STARTUP_ENVIRONMENT",
                 if options.declarations && options.environment {
-                    "printf '\\0CODEX_SNAPSHOT_POSIX_STARTUP\\0%s\\0' \"$__codex_env_file\"\n    SNAPSHOT_ENVIRONMENT\n    printf '\\0'"
+                    "printf '\\0BAICODE_SNAPSHOT_POSIX_STARTUP\\0%s\\0' \"$__codex_env_file\"\n    SNAPSHOT_ENVIRONMENT\n    printf '\\0'"
                 } else {
                     ""
                 },
@@ -305,7 +305,7 @@ impl<'a> CapturedSnapshot<'a> {
             return None;
         }
         let mut remaining = captured;
-        let startup_marker = b"\0CODEX_SNAPSHOT_POSIX_STARTUP\0";
+        let startup_marker = b"\0BAICODE_SNAPSHOT_POSIX_STARTUP\0";
         let startup_environment = if shell_type == ShellType::Sh
             && let Some(start) = remaining
                 .windows(startup_marker.len())
@@ -368,7 +368,7 @@ impl<'a> CapturedSnapshot<'a> {
                 records.retain(|export| {
                     !matches!(
                         export.key,
-                        CODEX_THREAD_ID_ENV_VAR | CODEX_TOOL_CALL_ID_ENV_VAR
+                        BAICODE_THREAD_ID_ENV_VAR | BAICODE_TOOL_CALL_ID_ENV_VAR
                     )
                 });
                 return Some(Self {

@@ -635,7 +635,7 @@ impl McpRequestProcessor {
         } = params;
         let mut resource_params = ReadResourceRequestParams::new(uri);
         let mut meta = meta.unwrap_or_default();
-        let is_codex_apps = server == codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+        let is_codex_apps = server == codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
         if is_codex_apps && origin_call_id.is_some() && environment_id.is_some() {
             return Err(invalid_request(
                 "originCallId requires the unscoped codex_apps registration",

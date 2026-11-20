@@ -208,20 +208,20 @@ function detectPackageManager() {
 const packageManager = detectPackageManager();
 const packageManagerEnvVar =
   packageManager === "bun"
-    ? "CODEX_MANAGED_BY_BUN"
+    ? "BAICODE_MANAGED_BY_BUN"
     : packageManager === "pnpm"
-      ? "CODEX_MANAGED_BY_PNPM"
+      ? "BAICODE_MANAGED_BY_PNPM"
       : packageManager === "vite-plus"
-        ? "CODEX_MANAGED_BY_VITE_PLUS"
-        : "CODEX_MANAGED_BY_NPM";
+        ? "BAICODE_MANAGED_BY_VITE_PLUS"
+        : "BAICODE_MANAGED_BY_NPM";
 const env = {
   ...process.env,
-  CODEX_MANAGED_PACKAGE_ROOT: codexPackageRoot,
+  BAICODE_MANAGED_PACKAGE_ROOT: codexPackageRoot,
 };
-delete env.CODEX_MANAGED_BY_NPM;
-delete env.CODEX_MANAGED_BY_BUN;
-delete env.CODEX_MANAGED_BY_PNPM;
-delete env.CODEX_MANAGED_BY_VITE_PLUS;
+delete env.BAICODE_MANAGED_BY_NPM;
+delete env.BAICODE_MANAGED_BY_BUN;
+delete env.BAICODE_MANAGED_BY_PNPM;
+delete env.BAICODE_MANAGED_BY_VITE_PLUS;
 env[packageManagerEnvVar] = "1";
 
 // Replace Node so the native binary receives signals and exits directly.

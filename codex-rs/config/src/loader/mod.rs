@@ -125,8 +125,8 @@ const PROJECT_LOCAL_CONFIG_DENYLIST: &[&str] = &[
 /// - system    `/etc/codex/config.toml` (Unix) or
 ///   `%ProgramData%\OpenAI\Codex\config.toml` (Windows)
 /// - cloud     enterprise-managed cloud config bundle fragments
-/// - user      `${CODEX_HOME}/config.toml`
-/// - profile   `${CODEX_HOME}/<name>.config.toml`, when selected
+/// - user      `${BAICODE_HOME}/config.toml`
+/// - profile   `${BAICODE_HOME}/<name>.config.toml`, when selected
 /// - cwd       `${PWD}/config.toml` (loaded but disabled when the directory is untrusted)
 /// - tree      parent directories up to root looking for `./.codex/config.toml` (loaded but disabled when untrusted)
 /// - repo      `$(git rev-parse --show-toplevel)/.codex/config.toml` (loaded but disabled when untrusted)

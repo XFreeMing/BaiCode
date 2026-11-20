@@ -284,7 +284,7 @@ async fn turn_interrupt_resolves_pending_command_approval_request() -> Result<()
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(&codex_home)
-        .with_env_overrides(&[("CODEX_ROLLOUT_TRACE_ROOT", traces.path().to_str())])
+        .with_env_overrides(&[("BAICODE_ROLLOUT_TRACE_ROOT", traces.path().to_str())])
         .build_initialized()
         .await?;
 

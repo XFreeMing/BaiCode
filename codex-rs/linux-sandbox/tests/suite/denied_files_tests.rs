@@ -99,15 +99,15 @@ async fn sandbox_starts_with_multiple_denied_files(rules: DeniedFileRules) {
             .expect("rg fixture");
         write_executable(
             workspace.join("rg").as_path(),
-            "#!/bin/sh\n: > \"$CODEX_TEST_REJECTED_RG_MARKER\"\nexit 0\n",
+            "#!/bin/sh\n: > \"$BAICODE_TEST_REJECTED_RG_MARKER\"\nexit 0\n",
         )
         .expect("write workspace rg fixture");
         if matches!(rules, DeniedFileRules::GlobsWithProtectedRg) {
             write_executable(
                 &fixture.path().join("rg"),
                 r#"#!/bin/sh
-: > "$CODEX_TEST_PROTECTED_RG_MARKER"
-printf '%s\000' "$CODEX_TEST_DENIED_PATH_0" "$CODEX_TEST_DENIED_PATH_1" "$CODEX_TEST_DENIED_PATH_2"
+: > "$BAICODE_TEST_PROTECTED_RG_MARKER"
+printf '%s\000' "$BAICODE_TEST_DENIED_PATH_0" "$BAICODE_TEST_DENIED_PATH_1" "$BAICODE_TEST_DENIED_PATH_2"
 "#,
             )
             .expect("write protected rg fixture");
@@ -129,16 +129,16 @@ printf '%s\000' "$CODEX_TEST_DENIED_PATH_0" "$CODEX_TEST_DENIED_PATH_1" "$CODEX_
         );
         for (name, path) in [
             (
-                "CODEX_TEST_REJECTED_RG_MARKER",
+                "BAICODE_TEST_REJECTED_RG_MARKER",
                 fixture.path().join("rejected-rg-ran"),
             ),
             (
-                "CODEX_TEST_PROTECTED_RG_MARKER",
+                "BAICODE_TEST_PROTECTED_RG_MARKER",
                 fixture.path().join("protected-rg-ran"),
             ),
-            ("CODEX_TEST_DENIED_PATH_0", denied_files[0].0.to_path_buf()),
-            ("CODEX_TEST_DENIED_PATH_1", denied_files[1].0.to_path_buf()),
-            ("CODEX_TEST_DENIED_PATH_2", denied_files[2].0.to_path_buf()),
+            ("BAICODE_TEST_DENIED_PATH_0", denied_files[0].0.to_path_buf()),
+            ("BAICODE_TEST_DENIED_PATH_1", denied_files[1].0.to_path_buf()),
+            ("BAICODE_TEST_DENIED_PATH_2", denied_files[2].0.to_path_buf()),
         ] {
             env.insert(
                 name.to_string(),

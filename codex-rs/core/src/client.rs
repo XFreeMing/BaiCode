@@ -161,12 +161,12 @@ use codex_response_debug_context::telemetry_transport_error_message;
 use codex_thread_context_ids::ThreadContextIds;
 
 pub const OPENAI_BETA_HEADER: &str = "OpenAI-Beta";
-pub const X_CODEX_INSTALLATION_ID_HEADER: &str = "x-codex-installation-id";
-pub const X_CODEX_ROUTING_HINT_HEADER: &str = "x-codex-routing-hint";
-pub const X_CODEX_TURN_STATE_HEADER: &str = "x-codex-turn-state";
-pub const X_CODEX_TURN_METADATA_HEADER: &str = "x-codex-turn-metadata";
-pub const X_CODEX_PARENT_THREAD_ID_HEADER: &str = "x-codex-parent-thread-id";
-pub const X_CODEX_WINDOW_ID_HEADER: &str = "x-codex-window-id";
+pub const X_BAICODE_INSTALLATION_ID_HEADER: &str = "x-codex-installation-id";
+pub const X_BAICODE_ROUTING_HINT_HEADER: &str = "x-codex-routing-hint";
+pub const X_BAICODE_TURN_STATE_HEADER: &str = "x-codex-turn-state";
+pub const X_BAICODE_TURN_METADATA_HEADER: &str = "x-codex-turn-metadata";
+pub const X_BAICODE_PARENT_THREAD_ID_HEADER: &str = "x-codex-parent-thread-id";
+pub const X_BAICODE_WINDOW_ID_HEADER: &str = "x-codex-window-id";
 pub const X_OPENAI_MEMGEN_REQUEST_HEADER: &str = "x-openai-memgen-request";
 pub const X_OPENAI_SUBAGENT_HEADER: &str = "x-openai-subagent";
 pub const X_RESPONSESAPI_INCLUDE_TIMING_METRICS_HEADER: &str =
@@ -174,7 +174,7 @@ pub const X_RESPONSESAPI_INCLUDE_TIMING_METRICS_HEADER: &str =
 const WS_REQUEST_HEADER_RESPONSES_LITE_CLIENT_METADATA_KEY: &str =
     "ws_request_header_x_openai_internal_codex_responses_lite";
 const RESPONSES_WEBSOCKETS_V2_BETA_HEADER_VALUE: &str = "responses_websockets=2026-02-06";
-const X_OPENAI_INTERNAL_CODEX_RESPONSES_LITE_HEADER: &str =
+const X_OPENAI_INTERNAL_BAICODE_RESPONSES_LITE_HEADER: &str =
     "x-openai-internal-codex-responses-lite";
 const REALTIME_CALLS_ENDPOINT: &str = "/realtime/calls";
 const MEMORIES_SUMMARIZE_ENDPOINT: &str = "/memories/trace_summarize";
@@ -278,7 +278,7 @@ pub(crate) fn is_local_connector_result_gateway(base_url: &str) -> bool {
     let url = base_url.strip_suffix('/').unwrap_or(base_url);
     matches!(
         url,
-        codex_model_provider_info::CHATGPT_CODEX_BASE_URL
+        codex_model_provider_info::CHATGPT_BAICODE_BASE_URL
             | "https://chatgpt-staging.com/backend-api/codex"
     )
 }
@@ -1654,7 +1654,7 @@ impl ModelClient {
         );
         add_originator_header(&mut headers, self.state.originator.as_str());
         if let Some(routing_hint) = &responses_metadata.routing_hint {
-            headers.insert(X_CODEX_ROUTING_HINT_HEADER, routing_hint.clone());
+            headers.insert(X_BAICODE_ROUTING_HINT_HEADER, routing_hint.clone());
         }
         if let Some(header_value) = self.generate_attestation_header_for().await {
             headers.insert(X_OAI_ATTESTATION_HEADER, header_value);
@@ -2125,7 +2125,7 @@ impl ResponsesHttpExecutor<'_> {
             ) {
                 options
                     .extra_headers
-                    .insert(X_CODEX_ROUTING_HINT_HEADER, header_value);
+                    .insert(X_BAICODE_ROUTING_HINT_HEADER, header_value);
             }
             request.access_programs = cyber_access_program::for_auth(
                 client_setup.auth.as_ref(),
@@ -2416,7 +2416,7 @@ impl ModelClientSession {
             let mut client_metadata =
                 ModelClient::build_ws_client_metadata(model_info.use_responses_lite);
             if let Some(turn_state) = self.turn_state.get() {
-                client_metadata.insert(X_CODEX_TURN_STATE_HEADER.to_string(), turn_state.clone());
+                client_metadata.insert(X_BAICODE_TURN_STATE_HEADER.to_string(), turn_state.clone());
             }
             let (continuation, mode, reason, previous_item_type, current_item_type) =
                 match self.prepare_websocket_request(&request) {
@@ -2876,7 +2876,7 @@ fn build_responses_headers(
         && let Some(state) = turn_state.get()
         && let Ok(header_value) = HeaderValue::from_str(state)
     {
-        headers.insert(X_CODEX_TURN_STATE_HEADER, header_value);
+        headers.insert(X_BAICODE_TURN_STATE_HEADER, header_value);
     }
     headers
 }
@@ -2884,7 +2884,7 @@ fn build_responses_headers(
 fn add_responses_lite_header(headers: &mut ApiHeaderMap, use_responses_lite: bool) {
     if use_responses_lite {
         headers.insert(
-            X_OPENAI_INTERNAL_CODEX_RESPONSES_LITE_HEADER,
+            X_OPENAI_INTERNAL_BAICODE_RESPONSES_LITE_HEADER,
             HeaderValue::from_static("true"),
         );
     }

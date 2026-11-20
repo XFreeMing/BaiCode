@@ -22,8 +22,8 @@ sandbox resources in `codex-resources/`.
 
 ## Command metadata
 
-Launches expose `metadata.threadId` as `CODEX_THREAD_ID` and `metadata.toolCallId`
-as `CODEX_TOOL_CALL_ID` in the initial child environment. `exec_command` supplies
+Launches expose `metadata.threadId` as `BAICODE_THREAD_ID` and `metadata.toolCallId`
+as `BAICODE_TOOL_CALL_ID` in the initial child environment. `exec_command` supplies
 the originating execution call ID, unchanged by later input. Code-mode uses the
 nested execution call ID, not the outer cell ID.
 
@@ -82,15 +82,15 @@ The forwarder does not replay requests or persist execution state, so recovery
 is limited by the destination's session and process-output retention.
 It uses the standard Codex ChatGPT sign-in state; run `baic login` first when
 remote registration needs authentication. Containerized callers that receive an
-Agent Identity JWT in `CODEX_ACCESS_TOKEN` can opt into that auth path with
+Agent Identity JWT in `BAICODE_ACCESS_TOKEN` can opt into that auth path with
 `--use-agent-identity-auth`; Codex then registers an Agent task and sends the
 derived AgentAssertion headers on the registry request.
 
-Alternatively, API users can instead use `CODEX_API_KEY`;
+Alternatively, API users can instead use `BAICODE_API_KEY`;
 Codex sends it as a bearer token on the registration request. For example:
 
 ```sh
-CODEX_API_KEY="$OPENAI_API_KEY" \
+BAICODE_API_KEY="$OPENAI_API_KEY" \
 baic exec-server \
   --remote ... \
   --environment-id "$ENVIRONMENT_ID"
@@ -528,7 +528,7 @@ factory that remote registration mode should use; the CLI builds the auth
 provider from Codex auth state before starting remote mode.
 
 `--proxy-private-ips-via-upstream` (or
-`CODEX_EXEC_SERVER_PROXY_PRIVATE_IPS_VIA_UPSTREAM=true`) allows permitted private IP
+`BAICODE_EXEC_SERVER_PROXY_PRIVATE_IPS_VIA_UPSTREAM=true`) allows permitted private IP
 destinations to use an inherited upstream proxy. If no valid proxy configuration
 applies to the request protocol, routing falls back to a direct connection. This
 includes unset, malformed, or unsupported proxy settings. Setting

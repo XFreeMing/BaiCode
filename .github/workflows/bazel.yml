@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 env:
-  CODEX_BAZEL_GCS_BUCKET: ${{ secrets.CODEX_BAZEL_GCS_BUCKET }}
-  CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
+  BAICODE_BAZEL_GCS_BUCKET: ${{ secrets.BAICODE_BAZEL_GCS_BUCKET }}
+  BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
 
 jobs:
   test:
@@ -86,7 +86,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           releases="$(python3 .github/scripts/resolve_exec_server_releases.py)"
-          echo "CODEX_COMPAT_RELEASES=$releases" >> "$GITHUB_ENV"
+          echo "BAICODE_COMPAT_RELEASES=$releases" >> "$GITHUB_ENV"
 
       - name: bazel test //...
         shell: bash
@@ -405,7 +405,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           releases="$(python3 .github/scripts/resolve_exec_server_releases.py)"
-          echo "CODEX_COMPAT_RELEASES=$releases" >> "$GITHUB_ENV"
+          echo "BAICODE_COMPAT_RELEASES=$releases" >> "$GITHUB_ENV"
 
       - name: bazel build --config=clippy lint targets
         shell: bash
@@ -509,7 +509,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           releases="$(python3 .github/scripts/resolve_exec_server_releases.py)"
-          echo "CODEX_COMPAT_RELEASES=$releases" >> "$GITHUB_ENV"
+          echo "BAICODE_COMPAT_RELEASES=$releases" >> "$GITHUB_ENV"
 
       - name: bazel build verify-release-build targets
         shell: bash

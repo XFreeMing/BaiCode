@@ -9,7 +9,7 @@ use codex_core::StartThreadOptions;
 use codex_core::TurnInputRequest;
 use codex_features::Feature;
 use codex_login::CodexAuth;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::McpSnapshotDetail;
 use codex_protocol::config_types::ApprovalsReviewer;
 use codex_protocol::models::PermissionProfile;
@@ -72,7 +72,7 @@ async fn standalone_codex_apps_respects_protocol_setting(
         .build_with_auto_env(&server)
         .await?;
 
-    wait_for_mcp_server(&fixture.codex, CODEX_APPS_MCP_SERVER_NAME).await?;
+    wait_for_mcp_server(&fixture.codex, BAICODE_APPS_MCP_SERVER_NAME).await?;
     let methods = server
         .received_requests()
         .await
@@ -116,7 +116,7 @@ async fn apps_call_survives_catalog_restoration_while_awaiting_approval() -> any
         })
         .build_with_auto_env(&server)
         .await?;
-    wait_for_mcp_server(&fixture.codex, CODEX_APPS_MCP_SERVER_NAME).await?;
+    wait_for_mcp_server(&fixture.codex, BAICODE_APPS_MCP_SERVER_NAME).await?;
     let call = responses::mount_sse_once(
         &server,
         responses::sse(vec![
@@ -172,7 +172,7 @@ async fn apps_call_survives_catalog_restoration_while_awaiting_approval() -> any
         .start_thread(StartThreadOptions::new(fixture.config.clone()))
         .await?
         .thread;
-    wait_for_mcp_server(&peer, CODEX_APPS_MCP_SERVER_NAME).await?;
+    wait_for_mcp_server(&peer, BAICODE_APPS_MCP_SERVER_NAME).await?;
     tools_available.store(true, Ordering::SeqCst);
     assert!(!peer.refresh_codex_apps_tools().await?.tools.is_empty());
 
@@ -214,7 +214,7 @@ async fn next_model_step_uses_the_in_flight_apps_refresh() -> anyhow::Result<()>
         .with_model_info_override("gpt-5.5", |model| model.supports_search_tool = false)
         .build_with_auto_env(&model)
         .await?;
-    wait_for_mcp_server(&fixture.codex, CODEX_APPS_MCP_SERVER_NAME).await?;
+    wait_for_mcp_server(&fixture.codex, BAICODE_APPS_MCP_SERVER_NAME).await?;
 
     let first_requested = Arc::new(Notify::new());
     let requested = Arc::clone(&first_requested);
@@ -284,7 +284,7 @@ async fn next_model_step_uses_the_in_flight_apps_refresh() -> anyhow::Result<()>
     tokio::time::timeout(
         Duration::from_secs(10),
         fixture.codex.mcp_server_status_snapshot(
-            CODEX_APPS_MCP_SERVER_NAME,
+            BAICODE_APPS_MCP_SERVER_NAME,
             /*environment_id*/ None,
             McpSnapshotDetail::ToolsAndAuthOnly,
             /*expected_registration*/ None,

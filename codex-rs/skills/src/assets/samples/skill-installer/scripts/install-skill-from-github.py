@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install a skill from a GitHub repo path into $CODEX_HOME/skills."""
+"""Install a skill from a GitHub repo path into $BAICODE_HOME/skills."""
 
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ class InstallError(Exception):
 
 
 def _codex_home() -> str:
-    return os.environ.get("CODEX_HOME", os.path.expanduser("~/.BaiCode"))
+    return os.environ.get("BAICODE_HOME", os.path.expanduser("~/.BaiCode"))
 
 
 def _tmp_root() -> str:

@@ -98,8 +98,8 @@ def bazel_args_with_remote_config(
     # Avoid storing a second copy while using the GCS action cache.
     if env.get("GITHUB_ACTIONS") == "true":
         cache_args.append("--disk_cache=")
-    bucket = env.get("CODEX_BAZEL_GCS_BUCKET")
-    credentials = env.get("CODEX_BAZEL_GCS_CREDENTIALS")
+    bucket = env.get("BAICODE_BAZEL_GCS_BUCKET")
+    credentials = env.get("BAICODE_BAZEL_GCS_CREDENTIALS")
     if (
         bucket
         and credentials
@@ -138,7 +138,7 @@ def bazel_args_with_remote_config(
 
 def bazel_command(*args: str, env: Mapping[str, str] | None = None) -> list[str]:
     env = os.environ if env is None else env
-    bazel = env.get("CODEX_BAZEL_BIN", "bazel")
+    bazel = env.get("BAICODE_BAZEL_BIN", "bazel")
     return [bazel, *startup_args(args, env), *bazel_args_with_remote_config(args, env)]
 
 

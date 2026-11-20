@@ -13,7 +13,7 @@ use codex_extension_api::ExtensionRegistryBuilder;
 use codex_extension_api::McpServerContribution;
 use codex_extension_api::McpServerContributionContext;
 use codex_extension_api::McpServerContributor;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_protocol::approvals::ElicitationRequest;
 use codex_protocol::mcp::ClientMcpExtensions;
 use codex_protocol::mcp::OPENAI_ELICITATION_EXTENSION_ID;
@@ -165,7 +165,7 @@ async fn user_verification_mcp_round_trip_requires_proof_in_full_access() -> Res
     let call = AbortOnDropHandle::new(tokio::spawn(async move {
         caller
             .call_mcp_tool(
-                CODEX_APPS_MCP_SERVER_NAME,
+                BAICODE_APPS_MCP_SERVER_NAME,
                 /*environment_id*/ None,
                 "verify_action",
                 /*arguments*/ None,
@@ -180,7 +180,7 @@ async fn user_verification_mcp_round_trip_requires_proof_in_full_access() -> Res
     else {
         unreachable!()
     };
-    assert_eq!(request.server_name, CODEX_APPS_MCP_SERVER_NAME);
+    assert_eq!(request.server_name, BAICODE_APPS_MCP_SERVER_NAME);
     assert_eq!(
         request.request,
         ElicitationRequest::UserVerification {

@@ -1,7 +1,7 @@
 //! Renders bundled Apps guidance and catalog updates with the same developer provenance.
 //! Older clients recognize only the bundled markers when recovering from retained history.
 
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_protocol::protocol::APPS_INSTRUCTIONS_CLOSE_TAG;
 use codex_protocol::protocol::APPS_INSTRUCTIONS_OPEN_TAG;
 use codex_protocol::protocol::CATALOG_APPS_INSTRUCTIONS_CLOSE_TAG;
@@ -19,7 +19,7 @@ impl Default for AppsInstructions {
     fn default() -> Self {
         Self(
             codex_prompts::ResolvedModelMessages::bundled()
-                .apps_usage_instructions(CODEX_APPS_MCP_SERVER_NAME)
+                .apps_usage_instructions(BAICODE_APPS_MCP_SERVER_NAME)
                 .usage_instructions,
         )
     }

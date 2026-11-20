@@ -38,7 +38,7 @@ use codex_protocol::protocol::FileSystemSandboxEntry;
 use codex_protocol::protocol::FileSystemSandboxPolicy;
 use codex_protocol::protocol::FileSystemSpecialPath;
 use codex_protocol::protocol::NetworkSandboxPolicy;
-use codex_sandboxing::linux::CODEX_LINUX_SANDBOX_ARG0;
+use codex_sandboxing::linux::BAICODE_LINUX_SANDBOX_ARG0;
 
 static BWRAP_CHILD_PID: AtomicI32 = AtomicI32::new(0);
 static PENDING_FORWARDED_SIGNAL: AtomicI32 = AtomicI32::new(0);
@@ -603,7 +603,7 @@ fn apply_inner_command_argv0_for_launcher(
     if supports_argv0 {
         argv.splice(
             command_separator_index..command_separator_index,
-            ["--argv0".to_string(), CODEX_LINUX_SANDBOX_ARG0.to_string()],
+            ["--argv0".to_string(), BAICODE_LINUX_SANDBOX_ARG0.to_string()],
         );
         return;
     }

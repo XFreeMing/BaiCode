@@ -27,7 +27,7 @@ use codex_windows_sandbox::environment_transport;
 use serde::Deserialize;
 use serde::Serialize;
 
-pub const CODEX_WINDOWS_MXC_ARG1: &str = "--__codex-windows-mxc";
+pub const BAICODE_WINDOWS_MXC_ARG1: &str = "--__codex-windows-mxc";
 const CLIENT_ONLY_LOOPBACK_UNSUPPORTED: &str = "MXC cannot enforce managed networking with allow_local_binding=false: native host-loopback access is bidirectional";
 
 fn validate_managed_network(network: &ManagedNetworkSandboxContext) -> Result<()> {
@@ -94,9 +94,9 @@ pub fn create_command_args(args: CreateMxcCommandArgsParams<'_>) -> Result<Vec<S
         },
         env,
     )?;
-    // The workload environment can omit or override the host's CODEX_HOME.
+    // The workload environment can omit or override the host's BAICODE_HOME.
     #[cfg(windows)]
-    let codex_home = match std::env::var("CODEX_HOME").as_deref() {
+    let codex_home = match std::env::var("BAICODE_HOME").as_deref() {
         Ok(home) if !home.is_empty() => std::fs::canonicalize(home)
             .ok()
             .filter(|home| home.is_dir()),
@@ -105,7 +105,7 @@ pub fn create_command_args(args: CreateMxcCommandArgsParams<'_>) -> Result<Vec<S
     .and_then(|home| AbsolutePathBuf::from_absolute_path(home).ok());
     #[cfg(not(windows))]
     let codex_home: Option<AbsolutePathBuf> = None;
-    Ok(std::iter::once(CODEX_WINDOWS_MXC_ARG1)
+    Ok(std::iter::once(BAICODE_WINDOWS_MXC_ARG1)
         .chain(codex_home.as_deref().and_then(Path::to_str))
         .map(str::to_owned)
         .collect())

@@ -5,7 +5,7 @@ use crate::bwrap::BwrapArgs;
 use crate::exec_util::make_files_inheritable;
 use crate::proxy_lifecycle::move_fd_above_stdio;
 use codex_protocol::protocol::FileSystemSandboxPolicy;
-use codex_sandboxing::linux::CODEX_LINUX_SANDBOX_ARG0;
+use codex_sandboxing::linux::BAICODE_LINUX_SANDBOX_ARG0;
 use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::fs::File;
@@ -26,7 +26,7 @@ const SETUP_ARG: &str = "--setup-transparent-tcp";
 /// dumpability so an unprivileged caller can write its own UID/GID mappings.
 pub(super) fn exec_setup(bwrap: &Path, args: &[String]) -> ! {
     let err = Command::new("/proc/self/exe")
-        .arg0(CODEX_LINUX_SANDBOX_ARG0)
+        .arg0(BAICODE_LINUX_SANDBOX_ARG0)
         .arg(SETUP_ARG)
         .arg(bwrap)
         .args(args)

@@ -14,7 +14,7 @@ use codex_protocol::protocol::EventMsg;
 use rmcp::model::ReadResourceRequestParams;
 use rmcp::model::ReadResourceResult;
 
-use crate::CODEX_APPS_MCP_SERVER_NAME;
+use crate::BAICODE_APPS_MCP_SERVER_NAME;
 use crate::McpBinding;
 use crate::McpServerKey;
 
@@ -194,7 +194,7 @@ impl ResourceOrigins {
         link_id: Option<&str>,
         uri: Option<&str>,
     ) {
-        if server != CODEX_APPS_MCP_SERVER_NAME {
+        if server != BAICODE_APPS_MCP_SERVER_NAME {
             return;
         }
         let Some(connector_id) = connector_id.filter(|value| !value.trim().is_empty()) else {
@@ -261,7 +261,7 @@ impl ResourceOrigin {
 
         let tool_info = binding
             .tool_info(
-                &McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+                &McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
                 &self.tool,
             )
             .context("originating MCP tool is unavailable")?;
@@ -313,7 +313,7 @@ impl ResourceOrigin {
             }),
         );
         binding
-            .read_resource(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME), params)
+            .read_resource(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME), params)
             .await
     }
 }

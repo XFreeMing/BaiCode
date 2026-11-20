@@ -25,7 +25,7 @@ use codex_network_proxy::is_managed_mitm_ca_trust_bundle_path;
 use codex_otel::SessionTelemetry;
 use codex_protocol::ThreadId;
 use codex_protocol::config_types::ShellEnvironmentPolicy;
-use codex_protocol::shell_environment::CODEX_TOOL_CALL_ID_ENV_VAR;
+use codex_protocol::shell_environment::BAICODE_TOOL_CALL_ID_ENV_VAR;
 use codex_protocol::shell_environment::create_env_from_vars;
 use codex_shell_command::shell_snapshot::CapturedSnapshot;
 use codex_shell_command::shell_snapshot::PreparedSnapshot;
@@ -703,7 +703,7 @@ async fn capture_snapshot(
         }
     }
     // The live broker regenerates this marker; captured dummies can belong to another scope.
-    snapshot_allowed_env.remove("CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS");
+    snapshot_allowed_env.remove("BAICODE_NETWORK_PROXY_BROKERED_CREDENTIALS");
     for key in &provider_context_keys {
         if env_value(&original_env, key) != env_value(&env, key) {
             remove_env_value(&mut snapshot_allowed_env, key);
@@ -1066,7 +1066,7 @@ async fn run_script_with_timeout(
             SnapshotShellMode::Login | SnapshotShellMode::NonLogin => None,
         };
         let mut env = prepared_env.unwrap_or_else(|| std::env::vars().collect());
-        remove_env_value(&mut env, CODEX_TOOL_CALL_ID_ENV_VAR);
+        remove_env_value(&mut env, BAICODE_TOOL_CALL_ID_ENV_VAR);
         return sandbox
             .run(
                 args,
@@ -1095,7 +1095,7 @@ async fn run_script_with_timeout(
         handler.env_clear();
         handler.envs(env);
     }
-    handler.env_remove(CODEX_TOOL_CALL_ID_ENV_VAR);
+    handler.env_remove(BAICODE_TOOL_CALL_ID_ENV_VAR);
     codex_protocol::shell_environment::scrub_non_inheritable_env_vars(handler.as_std_mut());
     #[cfg(unix)]
     let output = {

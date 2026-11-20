@@ -28,7 +28,7 @@ fn resolve_remote_addr_accepts_secure_websocket_url() {
 
 #[test]
 fn resolve_remote_addr_accepts_default_socket() -> color_eyre::Result<()> {
-    let codex_home = find_codex_home().wrap_err("failed to resolve CODEX_HOME")?;
+    let codex_home = find_codex_home().wrap_err("failed to resolve BAICODE_HOME")?;
     assert_eq!(
         resolve_remote_addr("unix://")?,
         RemoteAppServerEndpoint::UnixSocket {
@@ -80,7 +80,7 @@ fn resolve_remote_addr_rejects_invalid_remote_addresses() {
 }
 #[test]
 fn read_remote_auth_token_from_env_var_reports_missing_values() {
-    let err = read_remote_auth_token_from_env_var_with("CODEX_REMOTE_AUTH_TOKEN", |_| {
+    let err = read_remote_auth_token_from_env_var_with("BAICODE_REMOTE_AUTH_TOKEN", |_| {
         Err(std::env::VarError::NotPresent)
     })
     .expect_err("missing env vars should be rejected");
@@ -89,7 +89,7 @@ fn read_remote_auth_token_from_env_var_reports_missing_values() {
 
 #[test]
 fn read_remote_auth_token_from_env_var_trims_values() {
-    let auth_token = read_remote_auth_token_from_env_var_with("CODEX_REMOTE_AUTH_TOKEN", |_| {
+    let auth_token = read_remote_auth_token_from_env_var_with("BAICODE_REMOTE_AUTH_TOKEN", |_| {
         Ok("  bearer-token  ".to_string())
     })
     .expect("env var should parse");
@@ -98,7 +98,7 @@ fn read_remote_auth_token_from_env_var_trims_values() {
 
 #[test]
 fn read_remote_auth_token_from_env_var_rejects_empty_values() {
-    let err = read_remote_auth_token_from_env_var_with("CODEX_REMOTE_AUTH_TOKEN", |_| {
+    let err = read_remote_auth_token_from_env_var_with("BAICODE_REMOTE_AUTH_TOKEN", |_| {
         Ok(" \n\t ".to_string())
     })
     .expect_err("empty env vars should be rejected");

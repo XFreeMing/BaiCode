@@ -25,10 +25,10 @@ class RunBazelCiTest(unittest.TestCase):
                     env = {
                         "GITHUB_EVENT_NAME": event,
                         "GITHUB_REF": ref,
-                        "CODEX_BAZEL_GCS_BUCKET": "example-public",
+                        "BAICODE_BAZEL_GCS_BUCKET": "example-public",
                     }
                     if authenticated:
-                        env["CODEX_BAZEL_GCS_CREDENTIALS"] = str(credentials)
+                        env["BAICODE_BAZEL_GCS_CREDENTIALS"] = str(credentials)
                     flags = []
                     if mode != "local":
                         flags = [
@@ -59,8 +59,8 @@ class RunBazelCiTest(unittest.TestCase):
                 "RUNNER_OS": "macOS",
                 "GITHUB_EVENT_NAME": "push",
                 "GITHUB_REF": "refs/heads/main",
-                "CODEX_BAZEL_GCS_BUCKET": "example-public",
-                "CODEX_BAZEL_GCS_CREDENTIALS": str(credentials),
+                "BAICODE_BAZEL_GCS_BUCKET": "example-public",
+                "BAICODE_BAZEL_GCS_CREDENTIALS": str(credentials),
             }
             for supplied in (
                 [],
@@ -87,7 +87,7 @@ class RunBazelCiTest(unittest.TestCase):
             run_bazel.bazel_command(
                 "info",
                 "execution_root",
-                env={"CODEX_BAZEL_BIN": "fake-bazel"},
+                env={"BAICODE_BAZEL_BIN": "fake-bazel"},
             ),
             ["fake-bazel", "info", "execution_root"],
         )
@@ -176,7 +176,7 @@ class RunBazelCiTest(unittest.TestCase):
             f"import sys; sys.exit(37 if sys.argv[1] == {spaced_arg!r} else 91)"
         )
         env = os.environ.copy()
-        env["CODEX_BAZEL_BIN"] = sys.executable
+        env["BAICODE_BAZEL_BIN"] = sys.executable
         env.pop("BAZEL_OUTPUT_USER_ROOT", None)
         env.pop("GITHUB_ACTIONS", None)
 

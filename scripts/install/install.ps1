@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Release = $env:CODEX_RELEASE
+    [string]$Release = $env:BAICODE_RELEASE
 )
 
 Set-StrictMode -Version Latest
@@ -11,12 +11,12 @@ if ([string]::IsNullOrWhiteSpace($Release)) {
     $Release = "latest"
 }
 
-$NonInteractive = $env:CODEX_NON_INTERACTIVE -match "^(?i:1|true|yes)$"
+$NonInteractive = $env:BAICODE_NON_INTERACTIVE -match "^(?i:1|true|yes)$"
 $DefaultPreferReleasesOpenAICom = $true
-$PreferReleasesOpenAICom = if ([string]::IsNullOrWhiteSpace($env:CODEX_INSTALLER_USE_RELEASES_OPENAI_COM)) {
+$PreferReleasesOpenAICom = if ([string]::IsNullOrWhiteSpace($env:BAICODE_INSTALLER_USE_RELEASES_OPENAI_COM)) {
     $DefaultPreferReleasesOpenAICom
 } else {
-    $env:CODEX_INSTALLER_USE_RELEASES_OPENAI_COM -match "^(?i:1|true|yes)$"
+    $env:BAICODE_INSTALLER_USE_RELEASES_OPENAI_COM -match "^(?i:1|true|yes)$"
 }
 $ReleasesBaseUri = "https://releases.openai.com/codex"
 $ReleasesMetadataTimeoutSec = 30
@@ -972,16 +972,16 @@ switch ($architecture) {
     }
 }
 
-$codexHome = if ([string]::IsNullOrWhiteSpace($env:CODEX_HOME)) {
-    Join-Path $env:USERPROFILE ".codex"
+$codexHome = if ([string]::IsNullOrWhiteSpace($env:BAICODE_HOME)) {
+    Join-Path $env:USERPROFILE ".BaiCode"
 } else {
-    $env:CODEX_HOME
+    $env:BAICODE_HOME
 }
-$daemonOnly = $env:CODEX_INSTALL_DAEMON_ONLY -eq "1"
+$daemonOnly = $env:BAICODE_INSTALL_DAEMON_ONLY -eq "1"
 $standaloneRoot = Join-Path $codexHome $(if ($daemonOnly) { "packages\app-server-daemon" } else { "packages\standalone" })
 $releasesDir = Join-Path $standaloneRoot "releases"
 $currentDir = Join-Path $standaloneRoot "current"
-$deferSelection = $env:CODEX_INSTALL_DEFER_SELECTION -eq "1"
+$deferSelection = $env:BAICODE_INSTALL_DEFER_SELECTION -eq "1"
 if ($deferSelection) {
     if (-not $daemonOnly) { throw "Deferred selection requires a daemon-only installation." }
     $currentDir = Join-Path $standaloneRoot ".migration-current"
@@ -990,10 +990,10 @@ $autoUpdateVersion = Join-Path $standaloneRoot "auto-update-version"
 $lockPath = Join-Path $standaloneRoot "install.lock"
 
 $defaultVisibleBinDir = Join-Path $env:LOCALAPPDATA "Programs\OpenAI\Codex\bin"
-if ([string]::IsNullOrWhiteSpace($env:CODEX_INSTALL_DIR)) {
+if ([string]::IsNullOrWhiteSpace($env:BAICODE_INSTALL_DIR)) {
     $visibleBinDir = $defaultVisibleBinDir
 } else {
-    $visibleBinDir = $env:CODEX_INSTALL_DIR
+    $visibleBinDir = $env:BAICODE_INSTALL_DIR
 }
 
 $currentVersion = Get-CurrentInstalledVersion -StandaloneCurrentDir $currentDir
@@ -1031,7 +1031,7 @@ try {
         $updaterRecord = Join-Path $codexHome "app-server-daemon\app-server-updater.pid"
         if ($daemonOnly) { $updaterRecord = Join-Path $codexHome "app-server-daemon\daemon-updater.pid" }
         $oldUpdaterParent = $false
-        if ($Release -eq "latest" -and $env:CODEX_INSTALL_IF_LATEST -ne "1" -and $env:CODEX_INSTALL_IF_CURRENT -ne "1" -and (Test-Path -LiteralPath $updaterRecord)) {
+        if ($Release -eq "latest" -and $env:BAICODE_INSTALL_IF_LATEST -ne "1" -and $env:BAICODE_INSTALL_IF_CURRENT -ne "1" -and (Test-Path -LiteralPath $updaterRecord)) {
             $updaterPid = $null
             $updaterStartTime = $null
             try {
@@ -1059,23 +1059,23 @@ try {
                 }
             }
         }
-        if ($env:CODEX_INSTALL_IF_LATEST -eq "1" -or $env:CODEX_INSTALL_IF_CURRENT -eq "1" -or $oldUpdaterParent) {
+        if ($env:BAICODE_INSTALL_IF_LATEST -eq "1" -or $env:BAICODE_INSTALL_IF_CURRENT -eq "1" -or $oldUpdaterParent) {
             $previousRelease = if ($oldUpdaterParent -and (Test-Path -LiteralPath $autoUpdateVersion)) {
                 [System.IO.File]::ReadAllText($autoUpdateVersion)
             } else {
-                $env:CODEX_UPDATE_FROM_RELEASE
+                $env:BAICODE_UPDATE_FROM_RELEASE
             }
             Add-JunctionSupportType
             $currentTarget = if (Test-Path -LiteralPath $currentDir) { (Get-Item -LiteralPath $currentDir).Target } else { $null }
             if ($Release -ne "latest" -or [string]::IsNullOrEmpty($previousRelease) -or [string]::IsNullOrEmpty($currentTarget) -or
                 -not (Test-Path -LiteralPath (Join-Path $releasesDir $previousRelease)) -or
                 [CodexInstaller.JunctionV3]::ResolveDirectory($currentDir) -ne [CodexInstaller.JunctionV3]::ResolveDirectory((Join-Path $releasesDir $previousRelease))) {
-                if ($env:CODEX_INSTALL_IF_CURRENT -eq "1") { throw "Daemon selection changed; retry the update." }
+                if ($env:BAICODE_INSTALL_IF_CURRENT -eq "1") { throw "Daemon selection changed; retry the update." }
                 $script:guardRejected = $true
                 return
             }
             # Explicit daemon updates may leave a local or pinned release.
-            if ($env:CODEX_INSTALL_IF_CURRENT -ne "1" -and
+            if ($env:BAICODE_INSTALL_IF_CURRENT -ne "1" -and
                 (-not (Test-Path -LiteralPath $autoUpdateVersion) -or
                 [System.IO.File]::ReadAllText($autoUpdateVersion) -cne $previousRelease)) {
                 $script:guardRejected = $true

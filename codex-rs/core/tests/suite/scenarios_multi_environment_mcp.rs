@@ -192,7 +192,7 @@ async fn same_named_executor_mcps_keep_calls_and_approvals_separate() -> Result<
             codex_utils_cargo_bin::cargo_bin("baic")?,
         ))
         .args(["exec-server", "--listen", "ws://127.0.0.1:0"])
-        .env("CODEX_HOME", home.path())
+        .env("BAICODE_HOME", home.path())
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .kill_on_drop(true)

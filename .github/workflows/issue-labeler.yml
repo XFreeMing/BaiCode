@@ -28,7 +28,7 @@ jobs:
         id: suggest
         timeout-minutes: 7
         env:
-          OPENAI_API_KEY: ${{ secrets.CODEX_OPENAI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.BAICODE_OPENAI_API_KEY }}
         run: python3 .github/scripts/issue_labeler.py >> "$GITHUB_OUTPUT"
 
   apply-labels:

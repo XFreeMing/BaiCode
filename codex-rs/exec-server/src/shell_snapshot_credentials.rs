@@ -29,7 +29,7 @@ use crate::local_process::shell_environment_policy;
 use crate::protocol::ExecParams;
 use crate::rpc::internal_error;
 
-const CONFIGURED_VALUE_PREFIX: &str = "__CODEX_SHELL_SNAPSHOT_CONFIGURED_";
+const CONFIGURED_VALUE_PREFIX: &str = "__BAICODE_SHELL_SNAPSHOT_CONFIGURED_";
 
 pub(super) fn restore_fallback(
     script: &mut String,
@@ -85,9 +85,9 @@ pub(super) async fn prepare(
     configured.retain(|key, _| {
         !shell_environment::is_non_inheritable_env_var(key)
             && ![
-                crate::CODEX_EXEC_SERVER_EXIT_ON_STDIN_CLOSE_ENV_VAR,
-                shell_environment::CODEX_THREAD_ID_ENV_VAR,
-                shell_environment::CODEX_TOOL_CALL_ID_ENV_VAR,
+                crate::BAICODE_EXEC_SERVER_EXIT_ON_STDIN_CLOSE_ENV_VAR,
+                shell_environment::BAICODE_THREAD_ID_ENV_VAR,
+                shell_environment::BAICODE_TOOL_CALL_ID_ENV_VAR,
             ]
             .contains(&key.as_str())
             && !key.starts_with(SNAPSHOT_BROKERED_VALUE_ENV_PREFIX)

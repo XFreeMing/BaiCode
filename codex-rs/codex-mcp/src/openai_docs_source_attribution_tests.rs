@@ -11,7 +11,7 @@ use futures::FutureExt;
 use futures::future::BoxFuture;
 use pretty_assertions::assert_eq;
 
-use super::OPENAI_DEVELOPER_DOCS_MCP_CODEX_URL;
+use super::OPENAI_DEVELOPER_DOCS_MCP_BAICODE_URL;
 use super::OPENAI_DEVELOPER_DOCS_MCP_URL;
 use super::maybe_with_openai_docs_source_attribution;
 
@@ -71,7 +71,7 @@ async fn attributes_only_docs_mcp_requests() {
     assert_eq!(
         recording_client.urls.lock().unwrap().as_slice(),
         [
-            OPENAI_DEVELOPER_DOCS_MCP_CODEX_URL,
+            OPENAI_DEVELOPER_DOCS_MCP_BAICODE_URL,
             "https://developers.openai.com/.well-known/oauth-protected-resource/mcp",
         ]
     );

@@ -44,7 +44,7 @@ use crate::protocol_event::wrapped_protocol_event_type;
 /// The value is a root directory. Each independent root session gets one child
 /// bundle directory. Spawned child threads share their root session's bundle so
 /// one reduced `state.json` describes the whole multi-agent rollout tree.
-pub const CODEX_ROLLOUT_TRACE_ROOT_ENV: &str = "CODEX_ROLLOUT_TRACE_ROOT";
+pub const BAICODE_ROLLOUT_TRACE_ROOT_ENV: &str = "BAICODE_ROLLOUT_TRACE_ROOT";
 
 /// Metadata captured once at thread/session start.
 ///
@@ -106,7 +106,7 @@ impl ThreadTraceContext {
         metadata: ThreadStartedTraceMetadata,
         limits: TraceCaptureLimits,
     ) -> anyhow::Result<Self> {
-        let Some(root) = std::env::var_os(CODEX_ROLLOUT_TRACE_ROOT_ENV) else {
+        let Some(root) = std::env::var_os(BAICODE_ROLLOUT_TRACE_ROOT_ENV) else {
             return Ok(Self::disabled());
         };
         start_root_in_root(&PathBuf::from(root), metadata, limits)

@@ -13,7 +13,7 @@ use codex_extension_api::McpServerContributor;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::test_support::auth_manager_from_optional_auth;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::McpServerKey;
 use pretty_assertions::assert_eq;
 
@@ -36,7 +36,7 @@ async fn contributes_hosted_plugin_runtime_without_an_executor() -> TestResult {
 
     let servers = manager.effective_servers(&config, Some(&auth)).await;
     let server = servers
-        .get(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+        .get(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
         .ok_or("hosted plugin runtime should be contributed as a configured server")?
         .config();
     let McpServerTransportConfig::StreamableHttp { url, .. } = &server.transport else {
@@ -77,7 +77,7 @@ async fn runtime_overlay_preserves_disabled_server() -> TestResult {
     assert_eq!(
         codex_mcp::apply_http_headers_helper(
             login_client,
-            &configured[CODEX_APPS_MCP_SERVER_NAME],
+            &configured[BAICODE_APPS_MCP_SERVER_NAME],
             codex_home.path().to_path_buf(),
         )
         .err(),
@@ -85,7 +85,7 @@ async fn runtime_overlay_preserves_disabled_server() -> TestResult {
     );
     let servers = manager.effective_servers(&config, Some(&auth)).await;
     let server = servers
-        .get(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+        .get(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
         .ok_or("hosted plugin runtime should remain configured")?;
 
     assert!(!server.enabled());
@@ -115,7 +115,7 @@ async fn default_fallback_overwrites_reserved_config_without_an_extension() -> T
 
     let servers = manager.effective_servers(&config, Some(&auth)).await;
     let server = servers
-        .get(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+        .get(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
         .ok_or("default Apps MCP should be present")?
         .config();
     let McpServerTransportConfig::StreamableHttp { url, .. } = &server.transport else {
@@ -150,7 +150,7 @@ async fn later_extension_can_remove_same_name_registration() -> TestResult {
 
     let servers = manager.effective_servers(&config, Some(&auth)).await;
 
-    assert!(!servers.contains_key(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME)));
+    assert!(!servers.contains_key(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME)));
     Ok(())
 }
 
@@ -167,7 +167,7 @@ async fn hosted_apps_mcp_requires_chatgpt_auth() -> TestResult {
     let manager = installed_manager(&config, Some(auth.clone()));
 
     let servers = manager.effective_servers(&config, Some(&auth)).await;
-    assert!(!servers.contains_key(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME)));
+    assert!(!servers.contains_key(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME)));
 
     Ok(())
 }
@@ -196,7 +196,7 @@ async fn disabled_apps_remove_reserved_server_config_for_all_hosts() -> TestResu
     ];
     for manager in managers {
         let servers = manager.runtime_servers(&config).await;
-        assert!(!servers.contains_key(CODEX_APPS_MCP_SERVER_NAME));
+        assert!(!servers.contains_key(BAICODE_APPS_MCP_SERVER_NAME));
     }
     Ok(())
 }
@@ -227,7 +227,7 @@ impl McpServerContributor<Config> for RemoveCodexApps {
     ) -> codex_extension_api::ExtensionFuture<'a, Vec<McpServerContribution>> {
         Box::pin(async move {
             vec![McpServerContribution::Remove {
-                name: CODEX_APPS_MCP_SERVER_NAME.to_string(),
+                name: BAICODE_APPS_MCP_SERVER_NAME.to_string(),
             }]
         })
     }

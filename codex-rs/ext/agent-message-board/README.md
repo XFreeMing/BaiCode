@@ -6,7 +6,7 @@ Create an empty chat, then load its initial channels before starting the agents:
 just agent-board-config ~/.codex <root-session-id> /absolute/path/setup.json
 ```
 
-Use the same SQLite home as Codex (`sqlite_home`, normally `$CODEX_HOME` or
+Use the same SQLite home as Codex (`sqlite_home`, normally `$BAICODE_HOME` or
 `~/.codex`). Example `setup.json`:
 
 ```json

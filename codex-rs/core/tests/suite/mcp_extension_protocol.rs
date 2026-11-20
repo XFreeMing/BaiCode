@@ -15,7 +15,7 @@ use codex_extension_api::McpServerContribution;
 use codex_extension_api::McpServerContributionContext;
 use codex_extension_api::McpServerContributor;
 use codex_features::Feature;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::McpServerSource;
 use codex_mcp::McpToolRequestMetaHook;
 use codex_mcp::McpToolRequestMetaProvider;
@@ -414,7 +414,7 @@ async fn hosted_apps_protocol_override_preserves_native_verification() -> anyhow
     let call = AbortOnDropHandle::new(tokio::spawn(async move {
         caller
             .call_mcp_tool(
-                CODEX_APPS_MCP_SERVER_NAME,
+                BAICODE_APPS_MCP_SERVER_NAME,
                 /*environment_id*/ None,
                 "verify_action",
                 /*arguments*/ None,
@@ -429,7 +429,7 @@ async fn hosted_apps_protocol_override_preserves_native_verification() -> anyhow
     else {
         unreachable!()
     };
-    assert_eq!(request.server_name, CODEX_APPS_MCP_SERVER_NAME);
+    assert_eq!(request.server_name, BAICODE_APPS_MCP_SERVER_NAME);
     assert_eq!(
         request.request,
         ElicitationRequest::UserVerification {

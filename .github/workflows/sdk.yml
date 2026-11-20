@@ -4,8 +4,8 @@ on:
   workflow_call:
 
 env:
-  CODEX_BAZEL_GCS_BUCKET: ${{ secrets.CODEX_BAZEL_GCS_BUCKET }}
-  CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
+  BAICODE_BAZEL_GCS_BUCKET: ${{ secrets.BAICODE_BAZEL_GCS_BUCKET }}
+  BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
 
 jobs:
   python-sdk-installation:
@@ -36,7 +36,7 @@ jobs:
               /tmp/build/bin/uv build --wheel --out-dir /tmp/dist
               python -m venv /tmp/installed
               /tmp/build/bin/uv pip install --python /tmp/installed/bin/python /tmp/dist/*.whl
-              env -u PYTHONPATH -u CODEX_EXEC_PATH /tmp/installed/bin/python tests/installed_sdk_smoke.py
+              env -u PYTHONPATH -u BAICODE_EXEC_PATH /tmp/installed/bin/python tests/installed_sdk_smoke.py
             '
 
   sdks:
@@ -122,13 +122,13 @@ jobs:
           install_dir="${GITHUB_WORKSPACE}/.tmp/sdk-ci"
           mkdir -p "${install_dir}"
           install -m 755 "${bazel_output_paths[@]}" "${install_dir}"
-          echo "CODEX_EXEC_PATH=${install_dir}/baic" >> "$GITHUB_ENV"
+          echo "BAICODE_EXEC_PATH=${install_dir}/baic" >> "$GITHUB_ENV"
 
       - name: Warm up Bazel-built codex
         shell: bash
         run: |
           set -euo pipefail
-          "${CODEX_EXEC_PATH}" --version
+          "${BAICODE_EXEC_PATH}" --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

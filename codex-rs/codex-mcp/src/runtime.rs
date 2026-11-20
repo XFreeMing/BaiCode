@@ -70,7 +70,7 @@ use crate::elicitation::ElicitationLifecycle;
 use crate::elicitation::ElicitationRequestRouter;
 use crate::elicitation::ElicitationReviewerHandle;
 use crate::event_stream::McpEventStreamOpener;
-use crate::mcp::CODEX_APPS_MCP_SERVER_NAME;
+use crate::mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use crate::resource_client::McpResourceServerCacheKey;
 use crate::resource_origin::ResourceOrigins;
 use crate::server::EffectiveMcpServer;
@@ -383,7 +383,7 @@ impl McpRuntime {
             .unwrap_or_else(std::sync::PoisonError::into_inner)
             .find(call_id)?;
         let binding = self
-            .current_binding_for_call(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+            .current_binding_for_call(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
             .await
             .ok_or_else(|| anyhow::anyhow!("codex_apps MCP server is unavailable"))?;
 
@@ -496,14 +496,14 @@ impl McpRuntime {
             ))
             .await,
         );
-        let hosted_event_server_retained = connections.contains_server(CODEX_APPS_MCP_SERVER_NAME)
+        let hosted_event_server_retained = connections.contains_server(BAICODE_APPS_MCP_SERVER_NAME)
             && config
                 .mcp_server_catalog
-                .server(&McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME))
+                .server(&McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME))
                 .is_some_and(|registration| {
                     registration
                         .source()
-                        .is_host_owned_apps(CODEX_APPS_MCP_SERVER_NAME, registration.config())
+                        .is_host_owned_apps(BAICODE_APPS_MCP_SERVER_NAME, registration.config())
                 });
         let mut cancellation = self
             .event_stream_cancellation
@@ -734,7 +734,7 @@ impl McpRuntime {
     /// Callers must validate connector identity and current approval policy before dispatch.
     pub async fn prepare_app_hook_call(&self, tool: &str) -> anyhow::Result<PreparedMcpCall> {
         let current = self.current.load_full();
-        ensure_host_owned_apps_registration(&current, CODEX_APPS_MCP_SERVER_NAME)?;
+        ensure_host_owned_apps_registration(&current, BAICODE_APPS_MCP_SERVER_NAME)?;
         let config = current
             .config
             .as_ref()
@@ -1103,7 +1103,7 @@ impl McpRuntime {
         &self,
     ) -> anyhow::Result<Arc<McpConnectionSet>> {
         let current = self.current.load();
-        ensure_host_owned_apps_registration(&current, CODEX_APPS_MCP_SERVER_NAME)?;
+        ensure_host_owned_apps_registration(&current, BAICODE_APPS_MCP_SERVER_NAME)?;
         Ok(Arc::clone(&current.connections))
     }
 
@@ -1119,7 +1119,7 @@ impl McpRuntime {
             .cancel_event_streams_on_server_removal
             .subscribe();
         let current = self.current.load();
-        if server == CODEX_APPS_MCP_SERVER_NAME {
+        if server == BAICODE_APPS_MCP_SERVER_NAME {
             ensure_host_owned_apps_registration(&current, server)?;
         }
         Ok((
@@ -1431,7 +1431,7 @@ mod tests {
         connections.list_all_tools().await;
         let mut config = crate::mcp::tests::test_mcp_config(codex_home.path().to_path_buf());
         config.server_permissions.insert(
-            crate::McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+            crate::McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
             McpServerPermissions::Thread,
         );
         let published = Arc::new(PublishedMcpRuntime {
@@ -1452,7 +1452,7 @@ mod tests {
         runtime.current.store(Arc::clone(&published));
         runtime
             .latest_call_tool_without_attribution(
-                CODEX_APPS_MCP_SERVER_NAME,
+                BAICODE_APPS_MCP_SERVER_NAME,
                 /*environment_id*/ None,
                 "search",
                 /*arguments*/ None,
@@ -1488,7 +1488,7 @@ mod tests {
         assert!(!Arc::ptr_eq(&before, &refreshed));
         let call = refreshed
             .prepare_call(
-                &crate::McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME),
+                &crate::McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME),
                 "search",
             )
             .expect("refreshed call");

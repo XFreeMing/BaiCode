@@ -26,21 +26,21 @@ use winapi::um::winbase::WAIT_OBJECT_0;
 use winapi::um::winnt::PROCESS_QUERY_LIMITED_INFORMATION;
 use winapi::um::winnt::SYNCHRONIZE;
 
-const READY_MARKER: &str = "__CODEX_CHILD_READY__";
-const VALUE_MARKER: &str = "__CODEX_CHILD_VALUE__";
+const READY_MARKER: &str = "__BAICODE_CHILD_READY__";
+const VALUE_MARKER: &str = "__BAICODE_CHILD_VALUE__";
 
 #[tokio::test]
 async fn piped_child_has_no_console_with_or_without_job_containment() -> anyhow::Result<()> {
     // Nextest itself can run without a visible console. Re-execute this test
     // detached, like app-server-daemon, so children cannot inherit its console.
-    if std::env::var_os("CODEX_PTY_DETACHED_CONSOLE_PROBE").is_none() {
+    if std::env::var_os("BAICODE_PTY_DETACHED_CONSOLE_PROBE").is_none() {
         let output = std::process::Command::new(std::env::current_exe()?)
             .args([
                 "--exact",
                 "tests::windows_tests::piped_child_has_no_console_with_or_without_job_containment",
                 "--nocapture",
             ])
-            .env("CODEX_PTY_DETACHED_CONSOLE_PROBE", "1")
+            .env("BAICODE_PTY_DETACHED_CONSOLE_PROBE", "1")
             .creation_flags(winapi::um::winbase::DETACHED_PROCESS)
             .output()?;
         anyhow::ensure!(
@@ -397,7 +397,7 @@ async fn conpty_delivers_input_to_foreground_children() -> anyhow::Result<()> {
         return Ok(());
     };
     let code = format!(
-        "print('__CODEX_CHILD_'+'READY__', flush=True); value=input(); print('{VALUE_MARKER}'+value.encode('utf-8').hex(), flush=True)"
+        "print('__BAICODE_CHILD_'+'READY__', flush=True); value=input(); print('{VALUE_MARKER}'+value.encode('utf-8').hex(), flush=True)"
     );
     let expected = "cafeé 漢字";
     let expected_marker = format!("{VALUE_MARKER}{}", utf8_hex(expected));
@@ -489,7 +489,7 @@ async fn conpty_ctrl_c_interrupts_powershell_foreground_child() -> anyhow::Resul
         .ok_or_else(|| anyhow::anyhow!("Python is required for the Ctrl-C fixture"))?;
     let python = python.replace('\'', "''");
     let command = format!(
-        r#"& '{python}' -u -c "import ctypes,time; assert ctypes.windll.kernel32.SetConsoleCtrlHandler(None, False); print('__CODEX_CHILD_'+'READY__'); time.sleep(60)""#
+        r#"& '{python}' -u -c "import ctypes,time; assert ctypes.windll.kernel32.SetConsoleCtrlHandler(None, False); print('__BAICODE_CHILD_'+'READY__'); time.sleep(60)""#
     );
     writer.send(format!("{command}\n").into_bytes()).await?;
     wait_for_output_contains(&mut output_rx, READY_MARKER, /*timeout_ms*/ 10_000).await?;

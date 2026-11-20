@@ -62,8 +62,8 @@ async fn prompt_prefix_matches_release() -> Result<()> {
             // Released CLIs ignore the debug-only managed-config overrides.
             // Give both versions the same host configuration in version-skew runs.
             builder = builder.with_env_overrides(&[
-                ("CODEX_APP_SERVER_MANAGED_CONFIG_PATH", None),
-                ("CODEX_APP_SERVER_DISABLE_MANAGED_CONFIG", None),
+                ("BAICODE_APP_SERVER_MANAGED_CONFIG_PATH", None),
+                ("BAICODE_APP_SERVER_DISABLE_MANAGED_CONFIG", None),
             ]);
         }
         if let Some(program) = program {
@@ -111,7 +111,7 @@ async fn prompt_prefix_matches_release() -> Result<()> {
         for (value, replacement) in [
             (environment.cwd.as_str(), "<ENVIRONMENT_CWD>"),
             (thread.cwd.as_str(), "<CWD>"),
-            (home.path().to_string_lossy().as_ref(), "<CODEX_HOME>"),
+            (home.path().to_string_lossy().as_ref(), "<BAICODE_HOME>"),
             (thread.id.as_str(), "<THREAD_ID>"),
             (thread.session_id.as_str(), "<SESSION_ID>"),
         ] {

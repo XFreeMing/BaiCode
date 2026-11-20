@@ -44,7 +44,7 @@ async fn enabled_recording_cannot_silently_fail_to_start() -> Result<()> {
         .with_plugin_startup_tasks()
         .with_args(&["app-server"])
         .with_codex_home(home.path())
-        .with_env_overrides(&[("CODEX_ROLLOUT_TRACE_ROOT", trace_root.to_str())])
+        .with_env_overrides(&[("BAICODE_ROLLOUT_TRACE_ROOT", trace_root.to_str())])
         .build_initialized()
         .await?;
     let request_id = app
@@ -143,7 +143,7 @@ async fn accepted_output_survives_success_and_stream_failure() -> Result<()> {
             .with_plugin_startup_tasks()
             .with_args(&["app-server"])
             .with_codex_home(home.path())
-            .with_env_overrides(&[("CODEX_ROLLOUT_TRACE_ROOT", traces.path().to_str())])
+            .with_env_overrides(&[("BAICODE_ROLLOUT_TRACE_ROOT", traces.path().to_str())])
             .build_initialized()
             .await?;
         let ThreadStartResponse { thread, .. } =
@@ -258,7 +258,7 @@ async fn accepted_output_survives_interruption_and_shutdown() -> Result<()> {
         .with_plugin_startup_tasks()
         .with_args(&["app-server"])
         .with_codex_home(home.path())
-        .with_env_overrides(&[("CODEX_ROLLOUT_TRACE_ROOT", traces.path().to_str())])
+        .with_env_overrides(&[("BAICODE_ROLLOUT_TRACE_ROOT", traces.path().to_str())])
         .build_initialized()
         .await?;
     let ThreadStartResponse { thread, .. } = app.start_thread(ThreadStartParams::default()).await?;
@@ -336,7 +336,7 @@ async fn reduce_with_recording_binary(
     bundle: &Path,
 ) -> Result<RolloutTrace> {
     let reduced = tokio::process::Command::new(codex)
-        .env("CODEX_HOME", home)
+        .env("BAICODE_HOME", home)
         .args(["debug", "trace-reduce"])
         .arg(bundle)
         .output()

@@ -8,7 +8,7 @@ use codex_core::ModelClientSession;
 use codex_core::Prompt;
 use codex_core::ResponseEvent;
 use codex_core::TurnInputRequest;
-use codex_core::X_CODEX_ROUTING_HINT_HEADER;
+use codex_core::X_BAICODE_ROUTING_HINT_HEADER;
 use codex_core::X_RESPONSESAPI_INCLUDE_TIMING_METRICS_HEADER;
 use codex_core::test_support::EmptyUserInstructionsProvider;
 use codex_core::test_support::with_parent_turn;
@@ -96,7 +96,7 @@ const WS_REQUEST_HEADER_RESPONSES_LITE_CLIENT_METADATA_KEY: &str =
     "ws_request_header_x_openai_internal_codex_responses_lite";
 const TEST_INSTALLATION_ID: &str = "11111111-1111-4111-8111-111111111111";
 const TEST_WINDOW_ID: &str = "test-thread:0";
-const X_CODEX_WS_STREAM_REQUEST_START_MS_CLIENT_METADATA_KEY: &str =
+const X_BAICODE_WS_STREAM_REQUEST_START_MS_CLIENT_METADATA_KEY: &str =
     "x-codex-ws-stream-request-start-ms";
 
 fn assert_request_trace_matches(body: &serde_json::Value, expected_trace: &W3cTraceContext) {
@@ -299,7 +299,7 @@ async fn responses_websocket_streams_request() {
         Some(WS_V2_BETA_HEADER_VALUE.to_string())
     );
     assert_eq!(
-        handshake.header(X_CODEX_ROUTING_HINT_HEADER),
+        handshake.header(X_BAICODE_ROUTING_HINT_HEADER),
         Some(format!("model={MODEL}"))
     );
     assert_eq!(
@@ -323,7 +323,7 @@ async fn responses_websocket_streams_request() {
         Some(TEST_INSTALLATION_ID)
     );
     let stream_request_start_ms = body["client_metadata"]
-        [X_CODEX_WS_STREAM_REQUEST_START_MS_CLIENT_METADATA_KEY]
+        [X_BAICODE_WS_STREAM_REQUEST_START_MS_CLIENT_METADATA_KEY]
         .as_str()
         .expect("missing websocket stream request start timestamp")
         .parse::<i64>()
@@ -364,7 +364,7 @@ async fn responses_websocket_omits_routing_hint_for_provider_with_own_credential
         handshake.header("authorization"),
         Some("Bearer provider-specific-token".to_string())
     );
-    assert_eq!(handshake.header(X_CODEX_ROUTING_HINT_HEADER), None);
+    assert_eq!(handshake.header(X_BAICODE_ROUTING_HINT_HEADER), None);
 
     server.shutdown().await;
 }
@@ -583,7 +583,7 @@ async fn responses_websocket_preconnect_reuses_connection_without_replacing_turn
         Some(TEST_WINDOW_ID.to_string())
     );
     assert_eq!(handshake.header("x-codex-turn-metadata"), None);
-    assert_eq!(handshake.header(X_CODEX_ROUTING_HINT_HEADER), None);
+    assert_eq!(handshake.header(X_BAICODE_ROUTING_HINT_HEADER), None);
     assert_eq!(
         handshake.header(OPENAI_BETA_HEADER),
         Some(WS_V2_BETA_HEADER_VALUE.to_string())
@@ -1380,7 +1380,7 @@ async fn responses_websocket_prewarm_reuses_advisory_model_and_tier_routing_hint
         .expect("eager handshake should connect");
     let handshake = server.single_handshake();
     assert_eq!(
-        handshake.header(X_CODEX_ROUTING_HINT_HEADER),
+        handshake.header(X_BAICODE_ROUTING_HINT_HEADER),
         Some(match preconnect_tier {
             Some(tier) => format!("model={MODEL};tier={tier}"),
             None => format!("model={MODEL}"),

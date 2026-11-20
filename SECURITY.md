@@ -12,6 +12,6 @@ Our security program is managed through Bugcrowd, and we ask that any validated 
 
 Our Vulnerability Program Guidelines are defined on our [Bugcrowd program page](https://bugcrowd.com/engagements/openai).
 
-## How to operate CODEX safely
+## How to operate BAICODE safely
 
 For details on Codex security boundaries, including sandboxing, approvals, and network controls, see [Agent approvals & security](https://developers.openai.com/codex/agent-approvals-security).

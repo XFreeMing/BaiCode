@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 env:
-  CODEX_BAZEL_GCS_BUCKET: ${{ secrets.CODEX_BAZEL_GCS_BUCKET }}
-  CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.CODEX_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
+  BAICODE_BAZEL_GCS_BUCKET: ${{ secrets.BAICODE_BAZEL_GCS_BUCKET }}
+  BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.BAICODE_BAZEL_GCS_WORKLOAD_IDENTITY_PROVIDER }}
 
 jobs:
   # --- CI that doesn't need specific targets ---------------------------------

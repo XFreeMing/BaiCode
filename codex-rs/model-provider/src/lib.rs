@@ -43,7 +43,7 @@ pub use chatgpt_base_url::DEFAULT_CHATGPT_BASE_URL;
 pub use client_auth::ClientAuth;
 pub use codex_model_provider_info::AMAZON_BEDROCK_PROVIDER_ID;
 pub use codex_model_provider_info::AMAZON_BEDROCK_RUNTIME_PROVIDER_ID;
-pub use codex_model_provider_info::CHATGPT_CODEX_BASE_URL;
+pub use codex_model_provider_info::CHATGPT_BAICODE_BASE_URL;
 pub use codex_model_provider_info::GCP_PROVIDER_ID;
 pub use codex_model_provider_info::RemoteCompactionSupport;
 pub use codex_protocol::account::ProviderAccount;

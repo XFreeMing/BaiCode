@@ -14,11 +14,11 @@ use codex_guardian_reviewer::GuardianElicitationReview;
 use codex_guardian_reviewer::guardian_elicitation_review_request;
 use codex_guardian_reviewer::mcp_elicitation_decline_without_message;
 use codex_guardian_reviewer::mcp_elicitation_response_from_guardian_decision;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::ElicitationReviewRequest;
 use codex_mcp::ElicitationReviewer;
 use codex_mcp::ElicitationReviewerHandle;
-use codex_mcp::MCP_TOOL_CODEX_APPS_META_KEY;
+use codex_mcp::MCP_TOOL_BAICODE_APPS_META_KEY;
 use codex_mcp::McpServerKey;
 use codex_otel::auth_storage::AuthStorageOriginator;
 use codex_protocol::capabilities::CapabilityRootLocation;
@@ -473,9 +473,9 @@ impl Session {
             input
                 .mcp_servers
                 .contains_key(&codex_mcp::McpServerKey::unscoped(
-                    CODEX_APPS_MCP_SERVER_NAME
+                    BAICODE_APPS_MCP_SERVER_NAME
                 )),
-            "unknown MCP server '{CODEX_APPS_MCP_SERVER_NAME}'"
+            "unknown MCP server '{BAICODE_APPS_MCP_SERVER_NAME}'"
         );
         let refreshed = AuthStorageOriginator::from_client_name(&desired.originator)
             .scope(self.services.mcp_runtime.replace_fresh(input))
@@ -1030,7 +1030,7 @@ async fn review_guardian_mcp_elicitation(
         .elicitation
         .meta()
         .and_then(|meta| match request.server_name.as_str() {
-            CODEX_APPS_MCP_SERVER_NAME => meta.get(MCP_TOOL_CODEX_APPS_META_KEY)?.get("call_id"),
+            BAICODE_APPS_MCP_SERVER_NAME => meta.get(MCP_TOOL_BAICODE_APPS_META_KEY)?.get("call_id"),
             _ => meta.get("callId"),
         })
         .and_then(Value::as_str);
@@ -1165,7 +1165,7 @@ async fn review_guardian_mcp_elicitation(
     // A live Browser invocation can review a nested action with its own identity.
     // Other hosted connectors must still review their registered outer invocation.
     let review_outer_invocation =
-        request.server_name == CODEX_APPS_MCP_SERVER_NAME && originating_call_id.is_none();
+        request.server_name == BAICODE_APPS_MCP_SERVER_NAME && originating_call_id.is_none();
     let requested_tool = request
         .elicitation
         .meta()

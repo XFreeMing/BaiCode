@@ -1,11 +1,11 @@
 # Verified side packages, published by rust-release.yml when enabled.
 # The legacy CLI, npm, installer and DMG packages are unchanged.
 # Required secrets in the codesigning environment:
-# - CODEX_CLI_PROVISIONING_PROFILE_BASE64: profile approved for public distribution.
-# - CODEX_CLI_PROVISIONING_PROFILE_SHA256: reviewed lowercase SHA-256 of that profile.
-# - CODEX_CLI_PROVISIONING_TEAM_ID: expected ten-character Apple Team ID.
+# - BAICODE_CLI_PROVISIONING_PROFILE_BASE64: profile approved for public distribution.
+# - BAICODE_CLI_PROVISIONING_PROFILE_SHA256: reviewed lowercase SHA-256 of that profile.
+# - BAICODE_CLI_PROVISIONING_TEAM_ID: expected ten-character Apple Team ID.
 # - AKV_CODESIGN_CERTIFICATE_SHA256: required signing certificate pin.
-# Set repository variable CODEX_PROVISIONED_MACOS_CANDIDATE to true to enable
+# Set repository variable BAICODE_PROVISIONED_MACOS_CANDIDATE to true to enable
 # candidates on normal tag releases; unset it or set it to false to disable them.
 name: Provisioned macOS CLI candidate
 
@@ -21,11 +21,11 @@ permissions:
   contents: read
 
 env:
-  CODEX_REPO_ROOT: ${{ github.workspace }}
+  BAICODE_REPO_ROOT: ${{ github.workspace }}
 
 jobs:
   sign:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/rust-v') && vars.CODEX_PROVISIONED_MACOS_CANDIDATE == 'true'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/rust-v') && vars.BAICODE_PROVISIONED_MACOS_CANDIDATE == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     environment:
@@ -43,9 +43,9 @@ jobs:
       TARGET: ${{ matrix.target }}
       ARTIFACT_SUFFIX: ${{ matrix.build-system == 'bazel' && '-bazel' || '' }}
       PROVISIONED_MACOS: "true"
-      PROFILE_SHA256: ${{ secrets.CODEX_CLI_PROVISIONING_PROFILE_SHA256 }}
+      PROFILE_SHA256: ${{ secrets.BAICODE_CLI_PROVISIONING_PROFILE_SHA256 }}
       CERTIFICATE_SHA256: ${{ secrets.AKV_CODESIGN_CERTIFICATE_SHA256 }}
-      TEAM_ID: ${{ secrets.CODEX_CLI_PROVISIONING_TEAM_ID }}
+      TEAM_ID: ${{ secrets.BAICODE_CLI_PROVISIONING_TEAM_ID }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -55,7 +55,7 @@ jobs:
           python-version: "3.12"
       - name: Validate the independently approved public-distribution profile
         env:
-          PROFILE_BASE64: ${{ secrets.CODEX_CLI_PROVISIONING_PROFILE_BASE64 }}
+          PROFILE_BASE64: ${{ secrets.BAICODE_CLI_PROVISIONING_PROFILE_BASE64 }}
         run: |
           python3 - <<'PY'
           import base64
@@ -98,10 +98,10 @@ jobs:
           key-name: ${{ secrets.AKV_CODESIGN_KEY_NAME }}
           key-version: ${{ secrets.AKV_CODESIGN_KEY_VERSION || '' }}
           certificate-sha256: ${{ secrets.AKV_CODESIGN_CERTIFICATE_SHA256 }}
-          signer-service-enabled: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_ENABLED || 'false' }}
-          signer-service-endpoint: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_ENDPOINT }}
-          signer-service-purpose: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_PURPOSE }}
-          signer-service-key-id: ${{ vars.CODEX_PUBLIC_MACOS_SIGNER_SERVICE_KEY_ID }}
+          signer-service-enabled: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_ENABLED || 'false' }}
+          signer-service-endpoint: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_ENDPOINT }}
+          signer-service-purpose: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_PURPOSE }}
+          signer-service-key-id: ${{ vars.BAICODE_PUBLIC_MACOS_SIGNER_SERVICE_KEY_ID }}
       - name: Sign and notarize the provisioned bundle
         env:
           APPLE_NOTARIZATION_AKV_KEY_NAME: ${{ secrets.AKV_NOTARIZATION_KEY_NAME }}
@@ -151,9 +151,9 @@ jobs:
       TARGET: ${{ matrix.target }}
       ARTIFACT_SUFFIX: ${{ matrix.build-system == 'bazel' && '-bazel' || '' }}
       PROVISIONED_MACOS: "true"
-      PROFILE_SHA256: ${{ secrets.CODEX_CLI_PROVISIONING_PROFILE_SHA256 }}
+      PROFILE_SHA256: ${{ secrets.BAICODE_CLI_PROVISIONING_PROFILE_SHA256 }}
       CERTIFICATE_SHA256: ${{ secrets.AKV_CODESIGN_CERTIFICATE_SHA256 }}
-      TEAM_ID: ${{ secrets.CODEX_CLI_PROVISIONING_TEAM_ID }}
+      TEAM_ID: ${{ secrets.BAICODE_CLI_PROVISIONING_TEAM_ID }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -167,7 +167,7 @@ jobs:
           path: signed
       - name: Extract candidate and load independent verification profile
         env:
-          PROFILE_BASE64: ${{ secrets.CODEX_CLI_PROVISIONING_PROFILE_BASE64 }}
+          PROFILE_BASE64: ${{ secrets.BAICODE_CLI_PROVISIONING_PROFILE_BASE64 }}
         run: |
           python3 - <<'PY'
           import base64
@@ -213,9 +213,9 @@ jobs:
           # This repackaging does not change debug code. The normal release's
           # primary symbols omit app-server symbols, so skip symbol-only tests.
           uv run --frozen pytest -v --compression gzip --package-target "$TARGET" \
-            --cli-archive "$CODEX_REPO_ROOT/verified/codex-provisioned-package-$TARGET$ARTIFACT_SUFFIX.tar.gz" \
-            --app-server-archive "$CODEX_REPO_ROOT/app-server/codex-app-server-package-$TARGET$ARTIFACT_SUFFIX.tar.gz" \
-            --symbols-archive "$CODEX_REPO_ROOT/symbols/codex-symbols-$TARGET$ARTIFACT_SUFFIX.tar.gz" \
+            --cli-archive "$BAICODE_REPO_ROOT/verified/codex-provisioned-package-$TARGET$ARTIFACT_SUFFIX.tar.gz" \
+            --app-server-archive "$BAICODE_REPO_ROOT/app-server/codex-app-server-package-$TARGET$ARTIFACT_SUFFIX.tar.gz" \
+            --symbols-archive "$BAICODE_REPO_ROOT/symbols/codex-symbols-$TARGET$ARTIFACT_SUFFIX.tar.gz" \
             test_codex_package.py -k 'not debug_symbols'
       - name: Retain verified candidate only after package tests pass
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0

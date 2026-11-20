@@ -51,7 +51,7 @@ fn sandbox_available() -> Result<bool> {
     )?;
     let probe = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("baic")?)
         .args(["sandbox", "--", "/usr/bin/true"])
-        .env("CODEX_HOME", home.path())
+        .env("BAICODE_HOME", home.path())
         .output()?;
     if !probe.status.success()
         && String::from_utf8_lossy(&probe.stderr).contains("Operation not permitted")
@@ -77,7 +77,7 @@ fn spawn_launcher(home: &TempDir, stdin: Stdio, stdout: Stdio) -> Result<Child> 
     )?;
     Ok(Command::new(codex_utils_cargo_bin::cargo_bin("baic")?)
         .arg("--codex-run-as-sandbox-launcher")
-        .env("CODEX_HOME", home.path())
+        .env("BAICODE_HOME", home.path())
         .stdin(stdin)
         .stdout(stdout)
         .stderr(Stdio::inherit())

@@ -6,7 +6,7 @@ use codex_core::StartThreadOptions;
 use codex_core::TurnInputRequest;
 use codex_core::TurnStartOptions;
 use codex_features::Feature;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_model_provider::RemoteCompactionSupport;
 use core_test_support::apps_test_server::AppsTestServer;
 use core_test_support::apps_test_server::SEARCH_CALENDAR_LIST_TOOL;
@@ -64,7 +64,7 @@ async fn local_direct_connector_result_is_sent_only_on_its_originating_turn() ->
             search_capable_apps_builder(codex_model_provider::DEFAULT_CHATGPT_BASE_URL)
                 .with_config(|config| {
                     config.model_provider.base_url =
-                        Some(codex_model_provider_info::CHATGPT_CODEX_BASE_URL.to_owned());
+                        Some(codex_model_provider_info::CHATGPT_BAICODE_BASE_URL.to_owned());
                     config.model_provider.include_internal_metadata = true;
                     config.analytics_enabled = Some(true);
                     config
@@ -82,7 +82,7 @@ async fn local_direct_connector_result_is_sent_only_on_its_originating_turn() ->
         let fixture = start_mock_server().await;
         let test = builder.build(&fixture).await?;
         assert!(test.codex.analytics_enabled());
-        wait_for_mcp_server(&test.codex, CODEX_APPS_MCP_SERVER_NAME).await?;
+        wait_for_mcp_server(&test.codex, BAICODE_APPS_MCP_SERVER_NAME).await?;
         test.submit_turn("List events in [$calendar](app://calendar)")
             .await?;
         test.submit_turn("Continue").await?;
@@ -951,7 +951,7 @@ async fn direct_metadata_limit_respects_provider_support(
     // build() always selects the local test environment; all network destinations are the mock.
     let test = builder.build(&server).await?;
     assert!(test.codex.analytics_enabled());
-    wait_for_mcp_server(&test.codex, CODEX_APPS_MCP_SERVER_NAME).await?;
+    wait_for_mcp_server(&test.codex, BAICODE_APPS_MCP_SERVER_NAME).await?;
     test.submit_turn_with_approval_and_permission_profile(
         "Use [$calendar](app://calendar) to list events twice.",
         AskForApproval::OnRequest,
@@ -1064,7 +1064,7 @@ async fn direct_metadata_limit_respects_provider_support(
             rollout_path.clone(),
         )
         .await?;
-    wait_for_mcp_server(&forked.thread, CODEX_APPS_MCP_SERVER_NAME).await?;
+    wait_for_mcp_server(&forked.thread, BAICODE_APPS_MCP_SERVER_NAME).await?;
     forked
         .thread
         .start_or_steer_turn(TurnInputRequest::user_input(vec![UserInput::Text {
@@ -1091,7 +1091,7 @@ async fn direct_metadata_limit_respects_provider_support(
         .resume(&server, test.home.clone(), rollout_path)
         .await
         .expect("resume original thread");
-    wait_for_mcp_server(&resumed.codex, CODEX_APPS_MCP_SERVER_NAME)
+    wait_for_mcp_server(&resumed.codex, BAICODE_APPS_MCP_SERVER_NAME)
         .await
         .expect("start resumed MCP server");
     resumed

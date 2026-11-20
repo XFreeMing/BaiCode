@@ -441,7 +441,7 @@ type HostSandboxArgs = UnsupportedSandboxArgs;
 #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
 #[derive(Debug, Parser)]
 struct UnsupportedSandboxArgs {
-    /// Layer $CODEX_HOME/<name>.config.toml on top of the base user config.
+    /// Layer $BAICODE_HOME/<name>.config.toml on top of the base user config.
     #[arg(long = "profile", short = 'p')]
     pub config_profile: Option<ProfileV2Name>,
 
@@ -3438,7 +3438,7 @@ enabled = true
                 });
                 Ok(exit_info)
             },
-            Some("CODEX_REMOTE_TOKEN"),
+            Some("BAICODE_REMOTE_TOKEN"),
         )
         .await
         .unwrap();
@@ -3447,8 +3447,8 @@ enabled = true
             vec![
                 "Disconnected from this task. Any running work continues.",
                 "To reconnect, run:",
-                "  baic --remote wss://example.com:443/ --remote-auth-token-env CODEX_REMOTE_TOKEN resume 123e4567-e89b-12d3-a456-426614174000",
-                "Stop the current turn: run baic --remote wss://example.com:443/ --remote-auth-token-env CODEX_REMOTE_TOKEN agents, select this task, and press ctrl + x.",
+                "  baic --remote wss://example.com:443/ --remote-auth-token-env BAICODE_REMOTE_TOKEN resume 123e4567-e89b-12d3-a456-426614174000",
+                "Stop the current turn: run baic --remote wss://example.com:443/ --remote-auth-token-env BAICODE_REMOTE_TOKEN agents, select this task, and press ctrl + x.",
                 "Token usage so far: total=2 input=0 output=2",
             ]
         );
@@ -4016,14 +4016,14 @@ enabled = true
         let cli = MultitoolCli::try_parse_from([
             "baic",
             "--remote-auth-token-env",
-            "CODEX_REMOTE_AUTH_TOKEN",
+            "BAICODE_REMOTE_AUTH_TOKEN",
             "--remote",
             "ws://127.0.0.1:4500",
         ])
         .expect("parse");
         assert_eq!(
             cli.remote.remote_auth_token_env.as_deref(),
-            Some("CODEX_REMOTE_AUTH_TOKEN")
+            Some("BAICODE_REMOTE_AUTH_TOKEN")
         );
     }
 
@@ -4048,7 +4048,7 @@ enabled = true
             "--remote",
             "ws://127.0.0.1:4500",
             "--remote-auth-token-env",
-            "CODEX_REMOTE_AUTH_TOKEN",
+            "BAICODE_REMOTE_AUTH_TOKEN",
             "--cd",
             "/workspace",
             "--no-alt-screen",
@@ -4064,7 +4064,7 @@ enabled = true
         );
         assert_eq!(
             options.remote.remote_auth_token_env.as_deref(),
-            Some("CODEX_REMOTE_AUTH_TOKEN")
+            Some("BAICODE_REMOTE_AUTH_TOKEN")
         );
         assert_eq!(
             options.cwd.as_deref(),
@@ -4091,7 +4091,7 @@ enabled = true
     fn reject_remote_auth_token_env_for_non_interactive_subcommands() {
         let err = reject_remote_mode_for_subcommand(
             /*remote*/ None,
-            Some("CODEX_REMOTE_AUTH_TOKEN"),
+            Some("BAICODE_REMOTE_AUTH_TOKEN"),
             "exec",
         )
         .expect_err("non-interactive subcommands should reject --remote-auth-token-env");
@@ -4109,7 +4109,7 @@ enabled = true
             });
         let err = reject_remote_mode_for_app_server_subcommand(
             /*remote*/ None,
-            Some("CODEX_REMOTE_AUTH_TOKEN"),
+            Some("BAICODE_REMOTE_AUTH_TOKEN"),
             Some(&subcommand),
         )
         .expect_err("non-interactive app-server subcommands should reject --remote-auth-token-env");
@@ -4355,7 +4355,7 @@ enabled = true
         let subcommand = AppServerSubcommand::Proxy(AppServerProxyCommand { socket_path: None });
         let err = reject_remote_mode_for_app_server_subcommand(
             /*remote*/ None,
-            Some("CODEX_REMOTE_AUTH_TOKEN"),
+            Some("BAICODE_REMOTE_AUTH_TOKEN"),
             Some(&subcommand),
         )
         .expect_err("app-server proxy should reject --remote-auth-token-env");
@@ -4369,7 +4369,7 @@ enabled = true
         });
         let err = reject_remote_mode_for_app_server_subcommand(
             /*remote*/ None,
-            Some("CODEX_REMOTE_AUTH_TOKEN"),
+            Some("BAICODE_REMOTE_AUTH_TOKEN"),
             Some(&subcommand),
         )
         .expect_err("app-server daemon version should reject --remote-auth-token-env");

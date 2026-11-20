@@ -219,8 +219,8 @@ impl Drop for WsStream {
     }
 }
 
-const X_CODEX_TURN_STATE_HEADER: &str = "x-codex-turn-state";
-const X_CODEX_WEBSOCKET_MAX_MESSAGE_BYTES_HEADER: &str = "x-codex-websocket-max-message-bytes";
+const X_BAICODE_TURN_STATE_HEADER: &str = "x-codex-turn-state";
+const X_BAICODE_WEBSOCKET_MAX_MESSAGE_BYTES_HEADER: &str = "x-codex-websocket-max-message-bytes";
 const X_MODELS_ETAG_HEADER: &str = "x-models-etag";
 const X_REASONING_INCLUDED_HEADER: &str = "x-reasoning-included";
 const OPENAI_MODEL_HEADER: &str = "openai-model";
@@ -686,7 +686,7 @@ async fn connect_websocket(
 
     let max_message_bytes = response
         .headers()
-        .get(X_CODEX_WEBSOCKET_MAX_MESSAGE_BYTES_HEADER)
+        .get(X_BAICODE_WEBSOCKET_MAX_MESSAGE_BYTES_HEADER)
         .and_then(|value| value.to_str().ok())
         .and_then(|value| value.parse::<usize>().ok());
     let reasoning_included = response.headers().contains_key(X_REASONING_INCLUDED_HEADER);
@@ -698,7 +698,7 @@ async fn connect_websocket(
     if let Some(turn_state) = turn_state
         && let Some(header_value) = response
             .headers()
-            .get(X_CODEX_TURN_STATE_HEADER)
+            .get(X_BAICODE_TURN_STATE_HEADER)
             .and_then(|value| value.to_str().ok())
     {
         let _ = turn_state.set(header_value.to_string());

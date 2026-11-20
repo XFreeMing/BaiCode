@@ -50,7 +50,7 @@ impl Fixture {
             // Translate the fixture before the timed diagnostic command.
             anyhow::ensure!(
                 std::process::Command::new(&program)
-                    .env("CODEX_HOME", &home)
+                    .env("BAICODE_HOME", &home)
                     .arg("--version")
                     .output()?
                     .status
@@ -89,13 +89,13 @@ wire_api = "responses"
                 let executable = bin.join(name);
                 codex_utils_cargo_bin::write_executable(
                     &executable,
-                    "#!/bin/sh\nprintf 'helper ran\\n' >> \"$CODEX_TEST_HELPER_MARKER\"\nexit 0\n",
+                    "#!/bin/sh\nprintf 'helper ran\\n' >> \"$BAICODE_TEST_HELPER_MARKER\"\nexit 0\n",
                 )?;
             }
             #[cfg(windows)]
             std::fs::write(
                 bin.join(format!("{name}.cmd")),
-                "@echo helper ran>>\"%CODEX_TEST_HELPER_MARKER%\"\r\n@exit /b 0\r\n",
+                "@echo helper ran>>\"%BAICODE_TEST_HELPER_MARKER%\"\r\n@exit /b 0\r\n",
             )?;
         }
         // Windows selects rg.exe explicitly, so rg.cmd cannot satisfy discovery.
@@ -119,17 +119,17 @@ wire_api = "responses"
         let mut command = assert_cmd::Command::new(&self.program);
         command
             .current_dir(&self.workspace)
-            .env("CODEX_HOME", &self.home)
+            .env("BAICODE_HOME", &self.home)
             .env("HOME", self.root.path())
             .env("PATH", &self.path)
-            .env("CODEX_TEST_HELPER_MARKER", &self.marker)
-            .env("CODEX_MANAGED_BY_NPM", "1")
+            .env("BAICODE_TEST_HELPER_MARKER", &self.marker)
+            .env("BAICODE_MANAGED_BY_NPM", "1")
             .env(
-                "CODEX_MANAGED_PACKAGE_ROOT",
+                "BAICODE_MANAGED_PACKAGE_ROOT",
                 self.workspace.join("node_modules/@openai/codex"),
             )
             .env(
-                "CODEX_APP_SERVER_MANAGED_CONFIG_PATH",
+                "BAICODE_APP_SERVER_MANAGED_CONFIG_PATH",
                 self.home.join("managed_config.toml"),
             )
             .env("HTTPS_PROXY", "http://127.0.0.1:9")
@@ -529,7 +529,7 @@ async fn interactive_tmux_startup_does_not_execute_workspace_helpers() -> Result
     env.insert("TERM_PROGRAM".to_string(), "tmux".to_string());
     env.insert("TMUX".to_string(), "test-tmux".to_string());
     env.insert(
-        "CODEX_TUI_DISABLE_KEYBOARD_ENHANCEMENT".to_string(),
+        "BAICODE_TUI_DISABLE_KEYBOARD_ENHANCEMENT".to_string(),
         "0".to_string(),
     );
     env.insert(
@@ -646,9 +646,9 @@ async fn feedback_with_logs_does_not_execute_path_helpers() -> Result<()> {
         .with_env_overrides(&[
             ("PATH", Some(path.as_ref())),
             ("HOME", Some(home.as_ref())),
-            ("CODEX_TEST_HELPER_MARKER", Some(marker.as_ref())),
-            ("CODEX_MANAGED_BY_NPM", Some("1")),
-            ("CODEX_MANAGED_PACKAGE_ROOT", Some(package_root.as_ref())),
+            ("BAICODE_TEST_HELPER_MARKER", Some(marker.as_ref())),
+            ("BAICODE_MANAGED_BY_NPM", Some("1")),
+            ("BAICODE_MANAGED_PACKAGE_ROOT", Some(package_root.as_ref())),
             ("ZELLIJ", Some("0")),
             ("ZELLIJ_VERSION", None),
             ("TMUX", None),

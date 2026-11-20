@@ -40,7 +40,7 @@ use codex_app_server_protocol::TurnStartResponse;
 use codex_app_server_protocol::TurnStatus;
 use codex_app_server_protocol::UserInput as V2UserInput;
 use codex_config::types::AuthCredentialsStoreMode;
-use codex_mcp::MCP_TOOL_CODEX_APPS_META_KEY;
+use codex_mcp::MCP_TOOL_BAICODE_APPS_META_KEY;
 use codex_protocol::mcp::OPENAI_STANDARD_FORM_INPUT_EXTENSION_ID;
 use codex_protocol::mcp_approval_meta as approval_meta;
 use core_test_support::assert_regex_match;
@@ -1099,7 +1099,7 @@ impl ServerHandler for ElicitationAppsMcpServer {
         meta.0
             .insert("connector_name".to_string(), json!(CONNECTOR_NAME));
         meta.0.insert(
-            MCP_TOOL_CODEX_APPS_META_KEY.to_string(),
+            MCP_TOOL_BAICODE_APPS_META_KEY.to_string(),
             json!({ "connected_account_email": CONNECTED_ACCOUNT_EMAIL }),
         );
         tool.meta = Some(meta);
@@ -1137,14 +1137,14 @@ impl ServerHandler for ElicitationAppsMcpServer {
                         } else {
                             TOOL_NAME
                         };
-                        let apps_meta = context.meta.0.0.get(MCP_TOOL_CODEX_APPS_META_KEY);
+                        let apps_meta = context.meta.0.0.get(MCP_TOOL_BAICODE_APPS_META_KEY);
                         let mut meta = MetaObject(
                             json!({
                                 (approval_meta::REQUEST_TYPE_KEY): approval_meta::REQUEST_TYPE_APPROVAL_REQUEST,
                                 (approval_meta::APPROVAL_KIND_KEY): approval_meta::APPROVAL_KIND_MCP_TOOL_CALL,
                                 (approval_meta::STRICT_AUTO_REVIEW_KEY): true,
                                 (approval_meta::CONNECTOR_ID_KEY): connector_id,
-                                (MCP_TOOL_CODEX_APPS_META_KEY): apps_meta
+                                (MCP_TOOL_BAICODE_APPS_META_KEY): apps_meta
                                     .filter(|_| strict != Review::AppReviewerMissingCallId),
                                 (approval_meta::TOOL_NAME_KEY): tool_name,
                                 (approval_meta::TOOL_PARAMS_KEY): {

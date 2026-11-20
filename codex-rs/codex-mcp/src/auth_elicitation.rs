@@ -6,7 +6,7 @@
 use codex_protocol::mcp::CallToolResult;
 use serde::Serialize;
 
-pub const MCP_TOOL_CODEX_APPS_META_KEY: &str = "_codex_apps";
+pub const MCP_TOOL_BAICODE_APPS_META_KEY: &str = "_codex_apps";
 pub const CONNECTOR_AUTH_FAILURE_META_KEY: &str = "connector_auth_failure";
 pub const CONNECTOR_AUTH_FAILURE_IS_AUTH_FAILURE_KEY: &str = "is_auth_failure";
 pub const CONNECTOR_AUTH_FAILURE_AUTH_REASON_KEY: &str = "auth_reason";
@@ -118,7 +118,7 @@ fn connector_auth_failure_metadata<'a>(
         .meta
         .as_ref()?
         .as_object()?
-        .get(MCP_TOOL_CODEX_APPS_META_KEY)?
+        .get(MCP_TOOL_BAICODE_APPS_META_KEY)?
         .as_object()?
         .get(CONNECTOR_AUTH_FAILURE_META_KEY)?
         .as_object()?;
@@ -161,7 +161,7 @@ pub fn build_auth_elicitation(
 ) -> CodexAppsAuthElicitation {
     CodexAppsAuthElicitation {
         meta: serde_json::json!({
-            MCP_TOOL_CODEX_APPS_META_KEY: {
+            MCP_TOOL_BAICODE_APPS_META_KEY: {
                 CONNECTOR_AUTH_FAILURE_META_KEY: CodexAppsConnectorAuthFailureMeta {
                     is_auth_failure: true,
                     connector_id: &auth_failure.connector_id,
@@ -250,7 +250,7 @@ mod tests {
             structured_content: None,
             is_error: Some(true),
             meta: Some(serde_json::json!({
-                MCP_TOOL_CODEX_APPS_META_KEY: {
+                MCP_TOOL_BAICODE_APPS_META_KEY: {
                     CONNECTOR_AUTH_FAILURE_META_KEY: {
                         CONNECTOR_AUTH_FAILURE_IS_AUTH_FAILURE_KEY: true,
                         CONNECTOR_AUTH_FAILURE_AUTH_REASON_KEY: "reauthentication_required",
@@ -343,7 +343,7 @@ mod tests {
         );
 
         let mut ordinary_error = result.clone();
-        ordinary_error.meta.as_mut().expect("auth metadata")[MCP_TOOL_CODEX_APPS_META_KEY]
+        ordinary_error.meta.as_mut().expect("auth metadata")[MCP_TOOL_BAICODE_APPS_META_KEY]
             [CONNECTOR_AUTH_FAILURE_META_KEY][CONNECTOR_AUTH_FAILURE_IS_AUTH_FAILURE_KEY] =
             serde_json::Value::Bool(false);
         assert_eq!(
@@ -370,7 +370,7 @@ mod tests {
             "reauthentication_required",
         ] {
             let mut result = auth_failure_result();
-            result.meta.as_mut().expect("auth metadata")[MCP_TOOL_CODEX_APPS_META_KEY]
+            result.meta.as_mut().expect("auth metadata")[MCP_TOOL_BAICODE_APPS_META_KEY]
                 [CONNECTOR_AUTH_FAILURE_META_KEY][CONNECTOR_AUTH_FAILURE_AUTH_REASON_KEY] =
                 serde_json::Value::String(auth_reason.to_string());
 
@@ -395,7 +395,7 @@ mod tests {
             build_auth_elicitation("call_123", &auth_failure),
             CodexAppsAuthElicitation {
                 meta: serde_json::json!({
-                    MCP_TOOL_CODEX_APPS_META_KEY: {
+                    MCP_TOOL_BAICODE_APPS_META_KEY: {
                         CONNECTOR_AUTH_FAILURE_META_KEY: {
                             CONNECTOR_AUTH_FAILURE_IS_AUTH_FAILURE_KEY: true,
                             CONNECTOR_AUTH_FAILURE_CONNECTOR_ID_KEY: "connector_calendar",

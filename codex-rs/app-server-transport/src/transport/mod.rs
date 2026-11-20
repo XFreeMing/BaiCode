@@ -38,7 +38,7 @@ pub enum RemoteControlStartupMode {
 
 /// Internal marker used by the daemon to disable remote control without requiring a new CLI flag.
 pub const REMOTE_CONTROL_DISABLED_ENV_VAR: &str =
-    "CODEX_INTERNAL_APP_SERVER_REMOTE_CONTROL_DISABLED";
+    "BAICODE_INTERNAL_APP_SERVER_REMOTE_CONTROL_DISABLED";
 
 /// Reads and removes the daemon's internal disabled-start marker before worker threads start.
 pub fn take_remote_control_disabled_env() -> bool {
@@ -141,7 +141,7 @@ impl AppServerTransport {
                 let codex_home = find_codex_home().map_err(|err| {
                     AppServerTransportParseError::InvalidUnixSocketPath {
                         listen_url: listen_url.to_string(),
-                        message: format!("failed to resolve CODEX_HOME: {err}"),
+                        message: format!("failed to resolve BAICODE_HOME: {err}"),
                     }
                 })?;
                 app_server_control_socket_path(&codex_home).map_err(|err| {

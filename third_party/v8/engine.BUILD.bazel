@@ -331,7 +331,7 @@ alias(
     actual = ":is_v8_windows_msvc_profile",
 )
 
-# @CODEX_V8_UPSTREAM_FILEGROUPS@
+# @BAICODE_V8_UPSTREAM_FILEGROUPS@
 
 filegroup(
     name = "windows_x64_stack_assembly",

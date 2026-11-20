@@ -34,7 +34,7 @@ use codex_model_provider::ProviderAuthRecoveryMessages;
 use codex_model_provider::ProviderUnauthorizedRecovery;
 use codex_model_provider::SharedModelProvider;
 use codex_model_provider::create_model_provider;
-use codex_model_provider_info::CHATGPT_CODEX_BASE_URL;
+use codex_model_provider_info::CHATGPT_BAICODE_BASE_URL;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_model_provider_info::WireApi;
 use codex_model_provider_info::create_oss_provider_with_base_url;
@@ -452,7 +452,7 @@ async fn client_setup_rebuilds_chatgpt_refresh_but_rejects_account_switches() {
                 sampling_result_destination(&setup, /*include_internal*/ true, &empty),
                 None
             );
-            setup.api_provider.base_url = codex_model_provider_info::CHATGPT_CODEX_BASE_URL.into();
+            setup.api_provider.base_url = codex_model_provider_info::CHATGPT_BAICODE_BASE_URL.into();
             for (internal, response_headers, owner) in [
                 (true, &empty, setup.auth_owner.clone()),
                 (false, &empty, None),
@@ -2092,7 +2092,7 @@ fn model_client_with_counting_attestation(
             Some(AuthManager::from_auth_for_testing(
                 CodexAuth::create_dummy_chatgpt_auth_for_testing(),
             )),
-            ModelProviderInfo::create_openai_provider(Some(CHATGPT_CODEX_BASE_URL.to_string())),
+            ModelProviderInfo::create_openai_provider(Some(CHATGPT_BAICODE_BASE_URL.to_string())),
         )
     } else {
         (

@@ -1767,7 +1767,7 @@ async fn mcp_server_status_keeps_same_named_environment_inventory_separate() -> 
         )?;
         let home_value = toml::Value::String(home.path().to_string_lossy().into_owned());
         environment_config.push_str(&format!(
-            "\n[[environments]]\nid = \"{id}\"\nprogram = {program}\nargs = [\"exec-server\", \"--listen\", \"stdio\"]\n[environments.env]\nCODEX_HOME = {home_value}\n"
+            "\n[[environments]]\nid = \"{id}\"\nprogram = {program}\nargs = [\"exec-server\", \"--listen\", \"stdio\"]\n[environments.env]\nBAICODE_HOME = {home_value}\n"
         ));
         environments.push(TurnEnvironmentParams {
             environment_id: (*id).to_string(),

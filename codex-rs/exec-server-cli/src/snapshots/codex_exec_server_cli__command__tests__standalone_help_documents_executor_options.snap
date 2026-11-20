@@ -1,6 +1,6 @@
 ---
 source: exec-server-cli/src/exec_server_args_tests.rs
-assertion_line: 338
+assertion_line: 352
 expression: help
 ---
 [EXPERIMENTAL] Run the standalone exec-server service
@@ -14,9 +14,9 @@ Commands:
 Options:
   -c, --config <key=value>
           Override a configuration value that would otherwise be loaded from
-          `~/.BaiCode/config.toml`. Use a dotted path (`foo.bar.baz`) to override
-          nested values. The `value` portion is parsed as TOML. If it fails to
-          parse as TOML, the raw string is used as a literal.
+          `~/.BaiCode/config.toml`. Use a dotted path (`foo.bar.baz`) to
+          override nested values. The `value` portion is parsed as TOML. If it
+          fails to parse as TOML, the raw string is used as a literal.
 
           Examples: - `-c model="o3"` - `-c
           'sandbox_permissions=["disk-full-read-access"]'` - `-c
@@ -46,7 +46,7 @@ Options:
           connect directly. Loopback stays local. This flag does not require
           upstream routing
 
-          [env: CODEX_EXEC_SERVER_PROXY_PRIVATE_IPS_VIA_UPSTREAM]
+          [env: BAICODE_EXEC_SERVER_PROXY_PRIVATE_IPS_VIA_UPSTREAM]
 
       --concurrent-requests <COUNT>
           Maximum number of requests to process concurrently on each connection
@@ -97,7 +97,7 @@ Options:
           Human-readable environment name
 
       --use-agent-identity-auth
-          Use Agent Identity auth from CODEX_ACCESS_TOKEN for remote
+          Use Agent Identity auth from BAICODE_ACCESS_TOKEN for remote
           registration
 
       --registration-bearer-stdin
@@ -131,7 +131,7 @@ Options:
       --exit-on-stdin-close
           Exit when the parent-owned standard-input pipe closes
 
-          [env: CODEX_EXEC_SERVER_EXIT_ON_STDIN_CLOSE]
+          [env: BAICODE_EXEC_SERVER_EXIT_ON_STDIN_CLOSE]
 
   -h, --help
           Print help (see a summary with '-h')

@@ -17,10 +17,10 @@ use codex_utils_string::to_ascii_json_string;
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::client::X_CODEX_INSTALLATION_ID_HEADER;
-use crate::client::X_CODEX_PARENT_THREAD_ID_HEADER;
-use crate::client::X_CODEX_TURN_METADATA_HEADER;
-use crate::client::X_CODEX_WINDOW_ID_HEADER;
+use crate::client::X_BAICODE_INSTALLATION_ID_HEADER;
+use crate::client::X_BAICODE_PARENT_THREAD_ID_HEADER;
+use crate::client::X_BAICODE_TURN_METADATA_HEADER;
+use crate::client::X_BAICODE_WINDOW_ID_HEADER;
 use crate::client::X_OPENAI_SUBAGENT_HEADER;
 use codex_history::HistoryInitialization;
 
@@ -66,7 +66,7 @@ const RESERVED_METADATA_KEYS: &[&str] = &[
     "guardian_credits_requested",
     "guardian_recorded_items",
     INSTALLATION_ID_KEY,
-    X_CODEX_INSTALLATION_ID_HEADER,
+    X_BAICODE_INSTALLATION_ID_HEADER,
     SESSION_ID_KEY,
     THREAD_ID_KEY,
     AGENT_NAME_KEY,
@@ -74,9 +74,9 @@ const RESERVED_METADATA_KEYS: &[&str] = &[
     WINDOW_ID_KEY,
     WINDOW_NUMBER_KEY,
     CONTEXT_WINDOW_ID_KEY,
-    X_CODEX_WINDOW_ID_HEADER,
-    X_CODEX_TURN_METADATA_HEADER,
-    X_CODEX_PARENT_THREAD_ID_HEADER,
+    X_BAICODE_WINDOW_ID_HEADER,
+    X_BAICODE_TURN_METADATA_HEADER,
+    X_BAICODE_PARENT_THREAD_ID_HEADER,
     X_OPENAI_SUBAGENT_HEADER,
     REQUEST_KIND_KEY,
     COMPACTION_KEY,

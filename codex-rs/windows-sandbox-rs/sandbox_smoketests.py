@@ -53,8 +53,8 @@ def _resolve_codex_cmd() -> List[str]:
     )
 
 
-CODEX_CMD = _resolve_codex_cmd()
-print(CODEX_CMD)
+BAICODE_CMD = _resolve_codex_cmd()
+print(BAICODE_CMD)
 TIMEOUT_SEC = 20
 
 WS_ROOT = Path(os.environ["USERPROFILE"]) / "sbx_ws_tests"
@@ -101,7 +101,7 @@ def run_sbx(
         ]
 
     argv = [
-        *CODEX_CMD,
+        *BAICODE_CMD,
         "sandbox",
         "windows",
         *policy_flags,
@@ -511,7 +511,7 @@ def main() -> int:
             proxy_home.mkdir(parents=True, exist_ok=True)
             proxy_url = f"http://127.0.0.1:{proxy_port}"
             proxy_env = {
-                "CODEX_HOME": str(proxy_home),
+                "BAICODE_HOME": str(proxy_home),
                 "HTTP_PROXY": proxy_url,
                 "http_proxy": proxy_url,
                 "ALL_PROXY": proxy_url,
@@ -555,7 +555,7 @@ def main() -> int:
                 "workspace-write",
                 direct_cmd,
                 WS_ROOT,
-                env_extra={"CODEX_HOME": str(proxy_home)},
+                env_extra={"BAICODE_HOME": str(proxy_home)},
             )
             add(
                 "WS: direct loopback blocked",

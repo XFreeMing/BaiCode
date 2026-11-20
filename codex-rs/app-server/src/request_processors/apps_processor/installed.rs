@@ -5,8 +5,8 @@ use codex_connectors::connector_runtime_context_key;
 use codex_connectors::connector_tool_is_synthetic;
 use codex_connectors::installed_connector_runtime;
 use codex_extension_api::McpServerContributionContext;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
-use codex_mcp::MCP_TOOL_CODEX_APPS_META_KEY;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
+use codex_mcp::MCP_TOOL_BAICODE_APPS_META_KEY;
 use codex_mcp::McpRuntime;
 use codex_mcp::McpRuntimeInput;
 use codex_mcp::McpStartupPolicy;
@@ -82,12 +82,12 @@ impl AppsRequestProcessor {
                     }
                     let mcp_config = mcp_manager.runtime_config(McpServerContributionContext::global(&config)).await;
                     let mut mcp_servers = effective_mcp_servers(&mcp_config, auth.as_ref());
-                    let codex_apps_server = codex_mcp::McpServerKey::unscoped(CODEX_APPS_MCP_SERVER_NAME);
+                    let codex_apps_server = codex_mcp::McpServerKey::unscoped(BAICODE_APPS_MCP_SERVER_NAME);
                     mcp_servers.retain(|key, _| key == &codex_apps_server);
                     let mcp_config = Arc::new(mcp_config.for_threadless_operations(&mcp_servers));
                     anyhow::ensure!(
                         !mcp_servers.is_empty(),
-                        "host-owned MCP server '{CODEX_APPS_MCP_SERVER_NAME}' is not enabled"
+                        "host-owned MCP server '{BAICODE_APPS_MCP_SERVER_NAME}' is not enabled"
                     );
                     let startup_timeout = mcp_servers
                         .get(&codex_apps_server)
@@ -127,7 +127,7 @@ impl AppsRequestProcessor {
 
                     let result = if runtime
                         .latest_wait_for_server_ready(
-                            CODEX_APPS_MCP_SERVER_NAME,
+                            BAICODE_APPS_MCP_SERVER_NAME,
                             startup_timeout,
                         )
                         .await
@@ -142,7 +142,7 @@ impl AppsRequestProcessor {
                             })
                     } else {
                         Err(anyhow::anyhow!(
-                            "failed to refresh tools for MCP server '{CODEX_APPS_MCP_SERVER_NAME}'"
+                            "failed to refresh tools for MCP server '{BAICODE_APPS_MCP_SERVER_NAME}'"
                         ))
                     };
                     cancellation_token.cancel();
@@ -232,7 +232,7 @@ fn connector_runtime_tool(tool: &ToolInfo) -> ConnectorRuntimeTool<'_> {
             tool.tool
                 .meta
                 .as_deref()
-                .and_then(|meta| meta.get(MCP_TOOL_CODEX_APPS_META_KEY)),
+                .and_then(|meta| meta.get(MCP_TOOL_BAICODE_APPS_META_KEY)),
         ),
         model_visible: tool_is_model_visible(tool),
     }

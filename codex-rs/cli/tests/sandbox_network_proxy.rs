@@ -61,7 +61,7 @@ mode = "full"
 
     let url = format!("http://{LOOPBACK}:{port}/");
     let output = std::process::Command::new(codex_utils_cargo_bin::cargo_bin("baic")?)
-        .env("CODEX_HOME", codex_home.path())
+        .env("BAICODE_HOME", codex_home.path())
         .args([
             "sandbox",
             "--permission-profile",
@@ -134,7 +134,7 @@ allow_local_binding = false
 
     let url = format!("http://{LOOPBACK}:{port}/");
     let output = tokio::process::Command::new(codex_utils_cargo_bin::cargo_bin("baic")?)
-        .env("CODEX_HOME", codex_home.path())
+        .env("BAICODE_HOME", codex_home.path())
         .args([
             "sandbox",
             "--permission-profile",

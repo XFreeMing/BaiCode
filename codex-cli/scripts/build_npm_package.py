@@ -11,15 +11,15 @@ import tempfile
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-CODEX_CLI_ROOT = SCRIPT_DIR.parent
-REPO_ROOT = CODEX_CLI_ROOT.parent
-CODEX_SDK_ROOT = REPO_ROOT / "sdk" / "typescript"
-CODEX_NPM_NAME = "@openai/codex"
-CODEX_PACKAGE_COMPONENT = "codex-package"
+BAICODE_CLI_ROOT = SCRIPT_DIR.parent
+REPO_ROOT = BAICODE_CLI_ROOT.parent
+BAICODE_SDK_ROOT = REPO_ROOT / "sdk" / "typescript"
+BAICODE_NPM_NAME = "@openai/codex"
+BAICODE_PACKAGE_COMPONENT = "codex-package"
 
 # `npm_name` is the local optional-dependency alias consumed by `bin/baic.js`.
 # The underlying package published to npm is always `@openai/codex`.
-CODEX_PLATFORM_PACKAGES: dict[str, dict[str, str]] = {
+BAICODE_PLATFORM_PACKAGES: dict[str, dict[str, str]] = {
     "codex-linux-x64": {
         "npm_name": "@openai/codex-linux-x64",
         "npm_tag": "linux-x64",
@@ -65,23 +65,23 @@ CODEX_PLATFORM_PACKAGES: dict[str, dict[str, str]] = {
 }
 
 PACKAGE_EXPANSIONS: dict[str, list[str]] = {
-    "codex": ["codex", *CODEX_PLATFORM_PACKAGES],
+    "codex": ["codex", *BAICODE_PLATFORM_PACKAGES],
 }
 
 PACKAGE_NATIVE_COMPONENTS: dict[str, list[str]] = {
     "codex": [],
-    "codex-linux-x64": [CODEX_PACKAGE_COMPONENT],
-    "codex-linux-arm64": [CODEX_PACKAGE_COMPONENT],
-    "codex-darwin-x64": [CODEX_PACKAGE_COMPONENT],
-    "codex-darwin-arm64": [CODEX_PACKAGE_COMPONENT],
-    "codex-win32-x64": [CODEX_PACKAGE_COMPONENT],
-    "codex-win32-arm64": [CODEX_PACKAGE_COMPONENT],
+    "codex-linux-x64": [BAICODE_PACKAGE_COMPONENT],
+    "codex-linux-arm64": [BAICODE_PACKAGE_COMPONENT],
+    "codex-darwin-x64": [BAICODE_PACKAGE_COMPONENT],
+    "codex-darwin-arm64": [BAICODE_PACKAGE_COMPONENT],
+    "codex-win32-x64": [BAICODE_PACKAGE_COMPONENT],
+    "codex-win32-arm64": [BAICODE_PACKAGE_COMPONENT],
     "codex-sdk": [],
 }
 
 PACKAGE_TARGET_FILTERS: dict[str, str] = {
     package_name: package_config["target_triple"]
-    for package_name, package_config in CODEX_PLATFORM_PACKAGES.items()
+    for package_name, package_config in BAICODE_PLATFORM_PACKAGES.items()
 }
 
 PACKAGE_CHOICES = tuple(PACKAGE_NATIVE_COMPONENTS)
@@ -182,7 +182,7 @@ def main() -> int:
                     f"    node {staging_dir_str}/bin/baic.js --version\n"
                     f"    node {staging_dir_str}/bin/baic.js --help\n\n"
                 )
-            elif package in CODEX_PLATFORM_PACKAGES:
+            elif package in BAICODE_PLATFORM_PACKAGES:
                 print(
                     f"Staged version {version} for release in {staging_dir_str}\n\n"
                     "Verify native payload contents:\n"
@@ -228,15 +228,15 @@ def stage_sources(staging_dir: Path, version: str, package: str) -> None:
     if package == "codex":
         bin_dir = staging_dir / "bin"
         bin_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(CODEX_CLI_ROOT / "bin" / "baic.js", bin_dir / "baic.js")
+        shutil.copy2(BAICODE_CLI_ROOT / "bin" / "baic.js", bin_dir / "baic.js")
 
         readme_src = REPO_ROOT / "README.md"
         if readme_src.exists():
             shutil.copy2(readme_src, staging_dir / "README.md")
 
-        package_json_path = CODEX_CLI_ROOT / "package.json"
-    elif package in CODEX_PLATFORM_PACKAGES:
-        platform_package = CODEX_PLATFORM_PACKAGES[package]
+        package_json_path = BAICODE_CLI_ROOT / "package.json"
+    elif package in BAICODE_PLATFORM_PACKAGES:
+        platform_package = BAICODE_PLATFORM_PACKAGES[package]
         platform_npm_tag = platform_package["npm_tag"]
         platform_version = compute_platform_package_version(version, platform_npm_tag)
 
@@ -244,11 +244,11 @@ def stage_sources(staging_dir: Path, version: str, package: str) -> None:
         if readme_src.exists():
             shutil.copy2(readme_src, staging_dir / "README.md")
 
-        with open(CODEX_CLI_ROOT / "package.json", "r", encoding="utf-8") as fh:
+        with open(BAICODE_CLI_ROOT / "package.json", "r", encoding="utf-8") as fh:
             codex_package_json = json.load(fh)
 
         package_json = {
-            "name": CODEX_NPM_NAME,
+            "name": BAICODE_NPM_NAME,
             "version": platform_version,
             "license": codex_package_json.get("license", "Apache-2.0"),
             "os": [platform_package["os"]],
@@ -265,7 +265,7 @@ def stage_sources(staging_dir: Path, version: str, package: str) -> None:
         if isinstance(package_manager, str):
             package_json["packageManager"] = package_manager
     elif package == "codex-sdk":
-        package_json_path = CODEX_SDK_ROOT / "package.json"
+        package_json_path = BAICODE_SDK_ROOT / "package.json"
         stage_codex_sdk_sources(staging_dir)
     else:
         raise RuntimeError(f"Unknown package '{package}'.")
@@ -278,9 +278,9 @@ def stage_sources(staging_dir: Path, version: str, package: str) -> None:
     if package == "codex":
         package_json["files"] = ["bin/baic.js"]
         package_json["optionalDependencies"] = {
-            CODEX_PLATFORM_PACKAGES[platform_package]["npm_name"]: (
-                f"npm:{CODEX_NPM_NAME}@"
-                f"{compute_platform_package_version(version, CODEX_PLATFORM_PACKAGES[platform_package]['npm_tag'])}"
+            BAICODE_PLATFORM_PACKAGES[platform_package]["npm_name"]: (
+                f"npm:{BAICODE_NPM_NAME}@"
+                f"{compute_platform_package_version(version, BAICODE_PLATFORM_PACKAGES[platform_package]['npm_tag'])}"
             )
             for platform_package in PACKAGE_EXPANSIONS["codex"]
             if platform_package != "codex"
@@ -294,7 +294,7 @@ def stage_sources(staging_dir: Path, version: str, package: str) -> None:
         dependencies = package_json.get("dependencies")
         if not isinstance(dependencies, dict):
             dependencies = {}
-        dependencies[CODEX_NPM_NAME] = version
+        dependencies[BAICODE_NPM_NAME] = version
         package_json["dependencies"] = dependencies
 
     with open(staging_dir / "package.json", "w", encoding="utf-8") as out:
@@ -314,7 +314,7 @@ def run_command(cmd: list[str], cwd: Path | None = None) -> None:
 
 
 def stage_codex_sdk_sources(staging_dir: Path) -> None:
-    package_root = CODEX_SDK_ROOT
+    package_root = BAICODE_SDK_ROOT
 
     run_command(["pnpm", "install", "--frozen-lockfile"], cwd=package_root)
     run_command(["pnpm", "run", "build"], cwd=package_root)
@@ -366,7 +366,7 @@ def copy_native_binaries(
 
         dest_target_dir = vendor_dest / target_dir.name
 
-        if CODEX_PACKAGE_COMPONENT in components_set:
+        if BAICODE_PACKAGE_COMPONENT in components_set:
             if dest_target_dir.exists():
                 shutil.rmtree(dest_target_dir)
             shutil.copytree(target_dir, dest_target_dir)
@@ -383,7 +383,7 @@ def copy_native_binaries(
         else:
             dest_target_dir.mkdir(parents=True, exist_ok=True)
 
-        for component in sorted(components_set - {CODEX_PACKAGE_COMPONENT}):
+        for component in sorted(components_set - {BAICODE_PACKAGE_COMPONENT}):
             src_component_dir = target_dir / component
             if not src_component_dir.exists():
                 raise RuntimeError(

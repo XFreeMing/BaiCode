@@ -488,7 +488,7 @@ async fn inherited_terminal_preserves_native_linux_helper_and_uses_its_dispatch_
     use std::os::unix::fs::symlink;
 
     let dir = tempfile::tempdir()?;
-    let alias = OsStr::new(crate::linux::CODEX_LINUX_SANDBOX_ARG0);
+    let alias = OsStr::new(crate::linux::BAICODE_LINUX_SANDBOX_ARG0);
     let alias_path = dir.path().join(alias);
     for (helper, expected_arg0) in [
         (alias_path.clone(), alias_path.as_os_str()),
@@ -596,7 +596,7 @@ async fn native_launch_preserves_borrowed_proxy_credentials() -> anyhow::Result<
         ("GH_ENTERPRISE_TOKEN".into(), token.clone()),
         (CREDENTIAL_BROKER_ACTIVE_ENV_KEY.into(), "1".into()),
         (
-            "CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS".into(),
+            "BAICODE_NETWORK_PROXY_BROKERED_CREDENTIALS".into(),
             "[]".into(),
         ),
     ]);
@@ -607,7 +607,7 @@ async fn native_launch_preserves_borrowed_proxy_credentials() -> anyhow::Result<
     let mut stale = prepared.env.clone();
     stale.insert("GH_HOST".into(), "https://bad.example/path".into());
     stale.insert(
-        "CODEX_NETWORK_PROXY_BROKERED_CREDENTIALS".into(),
+        "BAICODE_NETWORK_PROXY_BROKERED_CREDENTIALS".into(),
         "[]".into(),
     );
     let mut powershell = prepared.env.clone();
@@ -916,16 +916,16 @@ fn windows_wrapper_preserves_only_setup_environment() {
 #[test]
 fn wrapper_runtime_selection_uses_the_parent_not_environment_overrides() {
     for registered_core in [false, true] {
-        let mut env = HashMap::from([("codex_windows_registered_core".into(), "1".into())]);
+        let mut env = HashMap::from([("baicode_windows_registered_core".into(), "1".into())]);
         super::add_windows_sandbox_wrapper_setup_env_from_vars(
             &mut env,
-            [("CODEX_WINDOWS_REGISTERED_CORE".into(), "0".into())],
+            [("BAICODE_WINDOWS_REGISTERED_CORE".into(), "0".into())],
             registered_core,
         );
         assert_eq!(
             env,
             if registered_core {
-                HashMap::from([("CODEX_WINDOWS_REGISTERED_CORE".into(), "1".into())])
+                HashMap::from([("BAICODE_WINDOWS_REGISTERED_CORE".into(), "1".into())])
             } else {
                 HashMap::new()
             }

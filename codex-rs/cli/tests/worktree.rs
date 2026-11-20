@@ -239,7 +239,7 @@ trust_level = "trusted"
     #[cfg(all(target_os = "macos", target_arch = "x86_64"))]
     anyhow::ensure!(
         Command::new(&program)
-            .env("CODEX_HOME", &home)
+            .env("BAICODE_HOME", &home)
             .arg("--version")
             .output()?
             .status
@@ -247,8 +247,8 @@ trust_level = "trusted"
         "failed to prepare CLI test executable"
     );
     let mut env: HashMap<String, String> = std::env::vars().collect();
-    env.insert("CODEX_HOME".into(), home.display().to_string());
-    env.insert("CODEX_SQLITE_HOME".into(), home.display().to_string());
+    env.insert("BAICODE_HOME".into(), home.display().to_string());
+    env.insert("BAICODE_SQLITE_HOME".into(), home.display().to_string());
     env.insert("NO_PROXY".into(), "127.0.0.1,localhost".into());
     env.insert("no_proxy".into(), "127.0.0.1,localhost".into());
     env.insert("TERM".into(), "xterm-256color".into());
@@ -259,10 +259,10 @@ trust_level = "trusted"
         "delta".into(),
     );
     for key in [
-        "CODEX_EXEC_SERVER_URL",
-        "CODEX_ACCESS_TOKEN",
+        "BAICODE_EXEC_SERVER_URL",
+        "BAICODE_ACCESS_TOKEN",
         "OPENAI_API_KEY",
-        "CODEX_API_KEY",
+        "BAICODE_API_KEY",
         "TMUX",
         "TMUX_PANE",
         "ZELLIJ",

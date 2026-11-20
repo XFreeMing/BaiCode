@@ -1840,7 +1840,7 @@ mod tests {
         use tokio::io::BufReader;
         use tokio::process::Command;
 
-        const CHILD_ENV: &str = "CODEX_TEST_INBOUND_CONNECT_ATTRIBUTION";
+        const CHILD_ENV: &str = "BAICODE_TEST_INBOUND_CONNECT_ATTRIBUTION";
         const TARGET: &str = "same.example:443";
         const HEADER: &str = "x-openai-internal-tool-call-id";
         const CALL_ID: &str = "controller-call";
@@ -1916,7 +1916,7 @@ mod tests {
             ])
             .env(CHILD_ENV, "1")
             .env("HTTPS_PROXY", &upstream)
-            .env("CODEX_TOOL_CALL_ATTRIBUTION_PROXY", &upstream)
+            .env("BAICODE_TOOL_CALL_ATTRIBUTION_PROXY", &upstream)
             .kill_on_drop(true);
         let capture = async {
             let (stream, _) = listener.accept().await.unwrap();

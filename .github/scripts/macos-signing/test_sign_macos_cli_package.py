@@ -33,7 +33,7 @@ if name == "codesign":
     if "--entitlements" in args:
         target = Path(args[-1]).name
         if target == "CodexCLI.app":
-            source = Path(os.environ["CODEX_REPO_ROOT"]) / "signing-verification/codex-provisioned-entitlements.plist"
+            source = Path(os.environ["BAICODE_REPO_ROOT"]) / "signing-verification/codex-provisioned-entitlements.plist"
         elif target == "baic":
             source = Path(os.environ["MOCK_SIGNING_SCRIPTS"]) / "codex.entitlements.plist"
         elif target in ("codex-code-mode-host", "codex-exec-server"):
@@ -79,12 +79,12 @@ class MacosSigningTests(ProvisioningTestCase):
         )
         for name in ("sign_macos_code.sh", "notarize_macos_binary_with_akv.sh"):
             (scripts / name).write_text(
-                'python3 "$CODEX_REPO_ROOT/record.py" "$(basename "$0")" "$@"\n'
+                'python3 "$BAICODE_REPO_ROOT/record.py" "$(basename "$0")" "$@"\n'
             )
         (scripts / "notarize_with_akv.py").write_text(
             "import os, runpy, sys\n"
             "sys.argv.insert(1, 'notarize_with_akv.py')\n"
-            "runpy.run_path(os.environ['CODEX_REPO_ROOT'] + '/record.py')\n"
+            "runpy.run_path(os.environ['BAICODE_REPO_ROOT'] + '/record.py')\n"
         )
         for name in ("rcodesign", "codesign", "lipo", "plutil"):
             path = root / name
@@ -113,10 +113,10 @@ class MacosSigningTests(ProvisioningTestCase):
         env = {
             key: value
             for key, value in os.environ.items()
-            if key not in ("GITHUB_WORKSPACE", "CODEX_PROVISIONING_HELPER")
+            if key not in ("GITHUB_WORKSPACE", "BAICODE_PROVISIONING_HELPER")
         }
         env.update(
-            CODEX_REPO_ROOT=str(root),
+            BAICODE_REPO_ROOT=str(root),
             RUNNER_TEMP=str(root),
             TARGET=target,
             PATH=f"{root}{os.pathsep}{os.environ['PATH']}",

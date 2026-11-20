@@ -22,7 +22,7 @@ use codex_extension_api::ToolStartInput;
 use codex_features::Feature;
 use codex_login::AuthHeaders;
 use codex_login::CodexAuth;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_protocol::mcp::CallToolResult;
 use codex_protocol::models::ContentItem;
 use codex_protocol::protocol::EventMsg;
@@ -94,7 +94,7 @@ impl McpServerContributor<Config> for ExtensionOwnedAppsServer {
             let config = serde_json::from_value(json!({ "url": self.url }))
                 .expect("test Apps MCP server config should be valid");
             vec![McpServerContribution::Set {
-                name: CODEX_APPS_MCP_SERVER_NAME.to_string(),
+                name: BAICODE_APPS_MCP_SERVER_NAME.to_string(),
                 config: Box::new(config),
             }]
         })
@@ -277,7 +277,7 @@ async fn tool_start_receives_executed_mcp_call_for_connector(
         .with_extensions(Arc::new(extensions.build()))
         .build_with_auto_env(&server)
         .await?;
-    wait_for_mcp_server(&test.codex, CODEX_APPS_MCP_SERVER_NAME).await?;
+    wait_for_mcp_server(&test.codex, BAICODE_APPS_MCP_SERVER_NAME).await?;
 
     test.submit_text_turn("List my calendar events.").await?;
 
@@ -293,7 +293,7 @@ async fn tool_start_receives_executed_mcp_call_for_connector(
         assert_eq!(
             history.mcp_tool,
             Some((
-                CODEX_APPS_MCP_SERVER_NAME.to_string(),
+                BAICODE_APPS_MCP_SERVER_NAME.to_string(),
                 Some("calendar".to_string()),
                 expected_source,
             )),
@@ -448,7 +448,7 @@ async fn mcp_result_processing_precedes_completion(
         })
         .build_with_auto_env(&server)
         .await?;
-    wait_for_mcp_server(&test.codex, CODEX_APPS_MCP_SERVER_NAME).await?;
+    wait_for_mcp_server(&test.codex, BAICODE_APPS_MCP_SERVER_NAME).await?;
 
     let call_id = "mcp-result-call";
     let call = match mode {

@@ -20,8 +20,8 @@ use codex_network_proxy::is_managed_mitm_ca_trust_bundle_path;
 use codex_network_proxy::strip_managed_proxy_env;
 use codex_protocol::config_types::ShellEnvironmentPolicyInherit;
 use codex_protocol::shell_environment;
-use codex_protocol::shell_environment::CODEX_THREAD_ID_ENV_VAR;
-use codex_protocol::shell_environment::CODEX_TOOL_CALL_ID_ENV_VAR;
+use codex_protocol::shell_environment::BAICODE_THREAD_ID_ENV_VAR;
+use codex_protocol::shell_environment::BAICODE_TOOL_CALL_ID_ENV_VAR;
 use codex_sandboxing::WrappedSandboxCommand;
 use codex_shell_command::shell_detect::ShellType;
 use codex_shell_command::shell_snapshot::CapturedSnapshot;
@@ -357,7 +357,7 @@ impl ShellSnapshotCache {
                     end -= 1;
                 }
                 let (chunk, remaining) = state.split_at(end);
-                let name = format!("__CODEX_SHELL_SNAPSHOT_STATE_{}", state_variables.len());
+                let name = format!("__BAICODE_SHELL_SNAPSHOT_STATE_{}", state_variables.len());
                 env.insert(name.clone(), chunk.to_string());
                 state_variables.push(name);
                 state = remaining;
@@ -450,7 +450,7 @@ done
     } else {
         MAX_SNAPSHOT_CAPTURE_BYTES
     };
-    const SOURCE_MARKER: &str = "CODEX_SNAPSHOT_SOURCE";
+    const SOURCE_MARKER: &str = "BAICODE_SNAPSHOT_SOURCE";
     script = if let Some(probe) = &probe {
         let fd = probe.as_raw_fd();
         // Automatic startup has already run: do not call exec/unset here,
@@ -472,7 +472,7 @@ done
         })?;
     let mut command = Command::from(command);
     command
-        .env_remove(CODEX_TOOL_CALL_ID_ENV_VAR)
+        .env_remove(BAICODE_TOOL_CALL_ID_ENV_VAR)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null());
@@ -636,8 +636,8 @@ fn parse_snapshot(
         }
         None => environment,
     };
-    environment.remove(CODEX_THREAD_ID_ENV_VAR);
-    environment.remove(CODEX_TOOL_CALL_ID_ENV_VAR);
+    environment.remove(BAICODE_THREAD_ID_ENV_VAR);
+    environment.remove(BAICODE_TOOL_CALL_ID_ENV_VAR);
     environment.remove("PWD");
     environment.remove("OLDPWD");
     environment.retain(|name, _| !shell_environment::is_non_inheritable_env_var(name));

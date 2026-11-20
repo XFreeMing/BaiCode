@@ -13,7 +13,7 @@ use tokio_rustls::TlsAcceptor;
 use tokio_rustls::rustls;
 use wiremock::MockServer;
 
-pub const PROBE_SERVER: &str = "CODEX_RUNTIME_AUTH_TEST_SERVER";
+pub const PROBE_SERVER: &str = "BAICODE_RUNTIME_AUTH_TEST_SERVER";
 
 /// Run one test in an isolated subprocess with first-party HTTP routed to the mock server.
 /// An optional Realtime target receives public and synthetic private observer upgrades.
@@ -158,7 +158,7 @@ pub async fn run_harness_through_proxy_until(
         .env(PROBE_SERVER, server.uri())
         .env("HTTPS_PROXY", proxy_url)
         .env("NO_PROXY", codex_network_proxy::DEFAULT_NO_PROXY_VALUE)
-        .env("CODEX_CA_CERTIFICATE", ca_path);
+        .env("BAICODE_CA_CERTIFICATE", ca_path);
     for (key, value) in environment {
         match value {
             Some(value) => command.env(key, value),

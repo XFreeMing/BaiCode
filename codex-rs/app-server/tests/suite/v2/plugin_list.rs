@@ -57,7 +57,7 @@ use wiremock::matchers::query_param_is_missing;
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(30);
 const TEST_CURATED_PLUGIN_SHA: &str = "0123456789abcdef0123456789abcdef01234567";
 const TEST_ALLOW_HTTP_REMOTE_PLUGIN_BUNDLE_DOWNLOADS: &str =
-    "CODEX_TEST_ALLOW_HTTP_REMOTE_PLUGIN_BUNDLE_DOWNLOADS";
+    "BAICODE_TEST_ALLOW_HTTP_REMOTE_PLUGIN_BUNDLE_DOWNLOADS";
 const ALTERNATE_MARKETPLACE_RELATIVE_PATH: &str = ".claude-plugin/marketplace.json";
 const ALTERNATE_PLUGIN_MANIFEST_RELATIVE_PATH: &str = ".claude-plugin/plugin.json";
 type RemoteInstalledPluginFixtures = BTreeMap<String, BTreeMap<String, Vec<serde_json::Value>>>;

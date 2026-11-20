@@ -49,8 +49,8 @@ async fn resume_preserves_prefix_and_appends_changed_tool_declaration() -> Resul
             .with_plugin_startup_tasks()
             .without_managed_config()
             .with_env_overrides(&[
-                ("CODEX_APP_SERVER_MANAGED_CONFIG_PATH", None),
-                ("CODEX_APP_SERVER_DISABLE_MANAGED_CONFIG", None),
+                ("BAICODE_APP_SERVER_MANAGED_CONFIG_PATH", None),
+                ("BAICODE_APP_SERVER_DISABLE_MANAGED_CONFIG", None),
             ])
     };
     let mut old_builder = builder();

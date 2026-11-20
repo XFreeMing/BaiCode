@@ -1725,7 +1725,7 @@ description: Visible only for ChatGPT
         plugin_root.join("skills/thread-summarizer/agents/openai.yaml"),
         r#"policy:
   products:
-    - CODEX
+    - BAICODE
 "#,
     )?;
     std::fs::create_dir_all(plugin_root.join("skills/chatgpt-only/agents"))?;
@@ -2195,8 +2195,8 @@ async fn plugin_read_hides_apps_for_api_key_auth() -> Result<()> {
         .with_codex_home(codex_home.path())
         .without_auto_env()
         .with_env_overrides(&[
-            ("CODEX_ACCESS_TOKEN", None),
-            ("CODEX_API_KEY", None),
+            ("BAICODE_ACCESS_TOKEN", None),
+            ("BAICODE_API_KEY", None),
             ("OPENAI_API_KEY", None),
         ])
         .build_initialized_with_timeout(DEFAULT_TIMEOUT)

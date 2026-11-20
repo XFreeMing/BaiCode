@@ -100,7 +100,8 @@ fn admission_accepts_package_family_casing() {
         let mut record = record();
         record.runtime_mut().unwrap().package_family = stored.into();
         let expected = record.clone();
-        for requested in ["OpenAI.Codex_publisher", "OPENAI.CODEX_PUBLISHER"] {
+        let uppercase = stored.to_ascii_uppercase();
+        for requested in ["OpenAI.Codex_publisher", uppercase.as_str()] {
             record.admit_owner(&record.clone(), requested).unwrap();
             assert_eq!(record, expected);
         }

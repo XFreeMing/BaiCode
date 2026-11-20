@@ -15,7 +15,7 @@ use codex_config::RequirementSource;
 use codex_protocol::mcp_policy::EnvironmentMcpPolicy;
 use codex_utils_path_uri::PathUri;
 
-use crate::CODEX_APPS_MCP_SERVER_NAME;
+use crate::BAICODE_APPS_MCP_SERVER_NAME;
 use crate::McpProtocolMode;
 use crate::McpServerKey;
 use crate::server::McpCredentialPolicy;
@@ -118,7 +118,7 @@ impl McpServerSource {
     }
 
     pub(crate) fn is_host_owned_apps(&self, name: &str, config: &McpServerConfig) -> bool {
-        name == CODEX_APPS_MCP_SERVER_NAME
+        name == BAICODE_APPS_MCP_SERVER_NAME
             && config.is_local_environment()
             && matches!(
                 self,
@@ -288,7 +288,7 @@ impl McpServerRegistration {
     ) -> Self {
         let host_owned_apps = config.is_local_environment();
         Self::new(
-            CODEX_APPS_MCP_SERVER_NAME.to_string(),
+            BAICODE_APPS_MCP_SERVER_NAME.to_string(),
             McpServerSource::Extension {
                 id: id.into(),
                 host_owned_apps,

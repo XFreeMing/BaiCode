@@ -66,7 +66,7 @@ pub use catalog::McpServerSource;
 pub use catalog::ResolvedMcpCatalog;
 pub use catalog::ResolvedMcpServer;
 
-pub use mcp::CODEX_APPS_MCP_SERVER_NAME;
+pub use mcp::BAICODE_APPS_MCP_SERVER_NAME;
 pub use mcp::DEFAULT_OPTIONAL_MCP_STARTUP_GRACE;
 pub use mcp::McpClientConfig;
 pub use mcp::McpConfig;
@@ -77,7 +77,7 @@ pub use server::EffectiveMcpServer;
 pub use auth_elicitation::CodexAppsAuthElicitation;
 pub use auth_elicitation::CodexAppsAuthElicitationPlan;
 pub use auth_elicitation::CodexAppsConnectorAuthFailure;
-pub use auth_elicitation::MCP_TOOL_CODEX_APPS_META_KEY;
+pub use auth_elicitation::MCP_TOOL_BAICODE_APPS_META_KEY;
 pub use auth_elicitation::auth_elicitation_completed_result;
 pub use auth_elicitation::auth_elicitation_id;
 pub use auth_elicitation::build_auth_elicitation;

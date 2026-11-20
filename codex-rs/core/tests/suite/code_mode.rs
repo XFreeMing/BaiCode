@@ -40,7 +40,7 @@ use codex_http_client::DestinationPolicy;
 use codex_http_client::NetworkPolicyController;
 use codex_login::AuthHeaders;
 use codex_login::CodexAuth;
-use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
+use codex_mcp::BAICODE_APPS_MCP_SERVER_NAME;
 use codex_mcp::codex_apps_mcp_server_config;
 use codex_models_manager::bundled_models_response;
 use codex_protocol::auth::AuthMode;
@@ -2476,7 +2476,7 @@ impl ResultBodyCase {
             Self::AppsEnvHeader(name) => {
                 *env_http_headers = Some(HashMap::from([(
                     name.into(),
-                    "CODEX_TEST_APPS_TOKEN".into(),
+                    "BAICODE_TEST_APPS_TOKEN".into(),
                 )]))
             }
             Self::AppsHeaderHelper => {
@@ -2876,7 +2876,7 @@ async fn result_metadata_follows_call_binding(
         let mut extensions = ExtensionRegistryBuilder::<Config>::new();
         extensions.mcp_server_contributor(Arc::new(ResultMetadataTestControl {
             server: Mutex::new(McpServerContribution::Set {
-                name: CODEX_APPS_MCP_SERVER_NAME.to_string(),
+                name: BAICODE_APPS_MCP_SERVER_NAME.to_string(),
                 config: Box::new(codex_apps_mcp_server_config(
                     &apps_server.chatgpt_base_url,
                     /*apps_mcp_product_sku*/ None,
@@ -3182,7 +3182,7 @@ async fn code_mode_result_metadata_keeps_prepared_call_binding_across_runtime_re
     );
     // The next call uses an extension-owned binding, but the held call keeps its host proof.
     *control.server.lock().unwrap() = McpServerContribution::Set {
-        name: CODEX_APPS_MCP_SERVER_NAME.to_string(),
+        name: BAICODE_APPS_MCP_SERVER_NAME.to_string(),
         config: Box::new(codex_apps_mcp_server_config(
             &refreshed_apps.chatgpt_base_url,
             /*apps_mcp_product_sku*/ None,

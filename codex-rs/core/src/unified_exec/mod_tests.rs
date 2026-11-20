@@ -361,7 +361,7 @@ async fn unified_exec_persists_across_requests() -> anyhow::Result<()> {
         &session,
         &turn,
         process_id,
-        "export CODEX_INTERACTIVE_SHELL_VAR=codex\n",
+        "export BAICODE_INTERACTIVE_SHELL_VAR=codex\n",
         /*yield_time_ms*/ 2_500,
     )
     .await?;
@@ -370,7 +370,7 @@ async fn unified_exec_persists_across_requests() -> anyhow::Result<()> {
         &session,
         &turn,
         process_id,
-        "echo $CODEX_INTERACTIVE_SHELL_VAR\n",
+        "echo $BAICODE_INTERACTIVE_SHELL_VAR\n",
         /*yield_time_ms*/ 2_500,
     )
     .await?;
@@ -404,7 +404,7 @@ async fn multi_unified_exec_sessions() -> anyhow::Result<()> {
         &session,
         &turn,
         session_a,
-        "export CODEX_INTERACTIVE_SHELL_VAR=codex\n",
+        "export BAICODE_INTERACTIVE_SHELL_VAR=codex\n",
         /*yield_time_ms*/ 2_500,
     )
     .await?;
@@ -412,7 +412,7 @@ async fn multi_unified_exec_sessions() -> anyhow::Result<()> {
     let out_2 = exec_command(
         &session,
         &turn,
-        "echo $CODEX_INTERACTIVE_SHELL_VAR",
+        "echo $BAICODE_INTERACTIVE_SHELL_VAR",
         /*yield_time_ms*/ 2_500,
         /*workdir*/ None,
     )
@@ -433,7 +433,7 @@ async fn multi_unified_exec_sessions() -> anyhow::Result<()> {
         &session,
         &turn,
         shell_a.process_id.expect("expected process id"),
-        "echo $CODEX_INTERACTIVE_SHELL_VAR\n",
+        "echo $BAICODE_INTERACTIVE_SHELL_VAR\n",
         /*yield_time_ms*/ 2_500,
     )
     .await?;
@@ -465,7 +465,7 @@ async fn unified_exec_timeouts() -> anyhow::Result<()> {
         &session,
         &turn,
         process_id,
-        format!("export CODEX_INTERACTIVE_SHELL_VAR={TEST_VAR_VALUE}\n").as_str(),
+        format!("export BAICODE_INTERACTIVE_SHELL_VAR={TEST_VAR_VALUE}\n").as_str(),
         /*yield_time_ms*/ 2_500,
     )
     .await?;
@@ -474,7 +474,7 @@ async fn unified_exec_timeouts() -> anyhow::Result<()> {
         &session,
         &turn,
         process_id,
-        "sleep 5 && echo $CODEX_INTERACTIVE_SHELL_VAR\n",
+        "sleep 5 && echo $BAICODE_INTERACTIVE_SHELL_VAR\n",
         /*yield_time_ms*/ 10,
     )
     .await?;

@@ -1,4 +1,4 @@
-// Run with CODEX_TEST_BINARY=/absolute/path/to/codex node --test codex-cli/tests/exit-status.test.mjs.
+// Run with BAICODE_TEST_BINARY=/absolute/path/to/codex node --test codex-cli/tests/exit-status.test.mjs.
 import assert from "node:assert/strict";
 import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { once } from "node:events";
@@ -66,8 +66,8 @@ test(
   },
   async () => {
     assert.ok(
-      process.env.CODEX_TEST_BINARY,
-      "Set CODEX_TEST_BINARY to a built Codex binary",
+      process.env.BAICODE_TEST_BINARY,
+      "Set BAICODE_TEST_BINARY to a built Codex binary",
     );
     const directory = await mkdtemp(path.join(tmpdir(), "codex-npm-exit-"));
     let child;
@@ -75,11 +75,11 @@ test(
     try {
       const wrapper = await installWrapper(
         directory,
-        path.resolve(process.env.CODEX_TEST_BINARY),
+        path.resolve(process.env.BAICODE_TEST_BINARY),
       );
       const home = path.join(directory, "home");
       await mkdir(home);
-      const env = { ...process.env, CODEX_HOME: home, CODEX_SQLITE_HOME: home };
+      const env = { ...process.env, BAICODE_HOME: home, BAICODE_SQLITE_HOME: home };
 
       // A normal CLI argument error must retain its numeric exit status.
       const invalid = spawnSync(

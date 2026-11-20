@@ -7,7 +7,7 @@ use tokio::process::Command;
 
 #[tokio::test]
 async fn git_remote_urls_keep_filtered_fetch_remotes() {
-    const CHILD_ENV: &str = "CODEX_GIT_UTILS_FILTERED_REMOTES_CHILD";
+    const CHILD_ENV: &str = "BAICODE_GIT_UTILS_FILTERED_REMOTES_CHILD";
     let temp_dir = tempfile::tempdir().expect("create temp dir");
     let root = temp_dir.path();
     if std::env::var_os(CHILD_ENV).is_none() {
@@ -226,7 +226,7 @@ async fn git_remote_urls_keep_filtered_fetch_remotes() {
 
 #[tokio::test]
 async fn git_remote_urls_ignore_git_config_file_override() {
-    const CHILD_REPO: &str = "CODEX_GIT_UTILS_REMOTE_CONFIG_CHILD_REPO";
+    const CHILD_REPO: &str = "BAICODE_GIT_UTILS_REMOTE_CONFIG_CHILD_REPO";
     if let Some(repo) = std::env::var_os(CHILD_REPO) {
         assert_eq!(
             get_git_remote_urls_assume_git_repo(Path::new(&repo)).await,
