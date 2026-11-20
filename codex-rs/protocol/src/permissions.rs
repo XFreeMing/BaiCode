@@ -51,6 +51,7 @@ pub(crate) enum LegacySandboxPolicyProjection<'a> {
 const PROTECTED_METADATA_GIT_PATH_NAME: &str = ".git";
 const PROTECTED_METADATA_AGENTS_PATH_NAME: &str = ".agents";
 const PROTECTED_METADATA_CODEX_PATH_NAME: &str = ".codex";
+const PROTECTED_METADATA_BAICODE_PATH_NAME: &str = ".BaiCode";
 const PROTECTED_METADATA_AWS_PATH_NAME: &str = ".aws";
 
 /// Top-level workspace metadata paths that stay protected under writable roots.
@@ -59,6 +60,7 @@ pub const PROTECTED_METADATA_PATH_NAMES: &[&str] = &[
     PROTECTED_METADATA_AGENTS_PATH_NAME,
     PROTECTED_METADATA_CODEX_PATH_NAME,
     PROTECTED_METADATA_AWS_PATH_NAME,
+    PROTECTED_METADATA_BAICODE_PATH_NAME,
 ];
 
 /// Returns true when a path basename is one of the protected workspace metadata names.
@@ -888,10 +890,9 @@ impl FileSystemSandboxPolicy {
                 .map(|path| FileSystemSandboxEntry::new(path.into(), FileSystemAccessMode::Write)),
         );
 
-        append_default_read_only_project_root_subpath_if_no_explicit_rule(&mut entries, ".git");
-        append_default_read_only_project_root_subpath_if_no_explicit_rule(&mut entries, ".agents");
-        append_default_read_only_project_root_subpath_if_no_explicit_rule(&mut entries, ".codex");
-        append_default_read_only_project_root_subpath_if_no_explicit_rule(&mut entries, ".aws");
+        for &name in PROTECTED_METADATA_PATH_NAMES {
+            append_default_read_only_project_root_subpath_if_no_explicit_rule(&mut entries, name);
+        }
         Self::restricted(entries)
     }
 
@@ -2432,6 +2433,11 @@ pub(crate) fn default_read_only_subpaths_for_writable_root(
     let top_level_aws = writable_root.join(PROTECTED_METADATA_AWS_PATH_NAME);
     if top_level_aws.as_path().is_dir() {
         subpaths.push(top_level_aws);
+    }
+
+    let baicode_home = writable_root.join(PROTECTED_METADATA_BAICODE_PATH_NAME);
+    if baicode_home.as_path().is_dir() {
+        subpaths.push(baicode_home);
     }
 
     dedup_absolute_paths(subpaths, /*normalize_effective_paths*/ false)

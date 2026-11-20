@@ -1897,7 +1897,12 @@ async fn discover_project_layers(
 
     let mut layers = Vec::new();
     let mut startup_warnings = Vec::new();
+    // The user's ~/.codex belongs to Codex even when HOME is the working directory.
+    let user_home = AbsolutePathBufGuard::home_directory();
     for dir in dirs {
+        if user_home.as_deref() == Some(dir.as_path()) {
+            continue;
+        }
         let dot_codex_abs = dir.join(".codex");
         let dot_codex_uri = PathUri::from_abs_path(&dot_codex_abs);
         if !fs

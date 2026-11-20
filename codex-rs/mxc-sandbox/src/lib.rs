@@ -100,7 +100,7 @@ pub fn create_command_args(args: CreateMxcCommandArgsParams<'_>) -> Result<Vec<S
         Ok(home) if !home.is_empty() => std::fs::canonicalize(home)
             .ok()
             .filter(|home| home.is_dir()),
-        _ => AbsolutePathBufGuard::home_directory().map(|home| home.join(".codex")),
+        _ => AbsolutePathBufGuard::home_directory().map(|home| home.join(".BaiCode")),
     }
     .and_then(|home| AbsolutePathBuf::from_absolute_path(home).ok());
     #[cfg(not(windows))]

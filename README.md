@@ -21,14 +21,9 @@ baicode --version
 
 ## 使用本机模型
 
-启动具备 Responses API 的本机推理服务，准备已安装且支持工具调用的模型。建议为 BaiCode 使用独立的配置目录，以免读取已有的 Codex 账号和项目设置。
+启动具备 Responses API 的本机推理服务，准备已安装且支持工具调用的模型。BaiCode 首次启动时会在当前用户的主目录创建 `~/.BaiCode`，用于保存配置、会话和运行数据。若需指定其他已有目录，可设置环境变量 `CODEX_HOME`。
 
-```sh
-export CODEX_HOME="$HOME/.baicode"
-mkdir -p "$CODEX_HOME"
-```
-
-使用 Ollama 时，在 `$CODEX_HOME/config.toml` 中写入：
+使用 Ollama 时，在 `~/.BaiCode/config.toml` 中写入：
 
 ```toml
 model_provider = "ollama"
@@ -48,7 +43,7 @@ model = "gpt-oss:20b"
   --port 18367 --ctx-size 32768
 ```
 
-在运行 BaiCode 的终端设置 `CODEX_HOME="$HOME/.baicode"` 并导出，把该目录下 `config.toml` 的模型配置设为以下值。
+在 `~/.BaiCode/config.toml` 中配置本机 BaiInf。
 
 ```toml
 model_provider = "baiinf"

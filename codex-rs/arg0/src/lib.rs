@@ -177,7 +177,7 @@ fn prepare_path_env_var_with_aliases(
 /// `codex-linux-sandbox` we *directly* execute
 /// [`codex_linux_sandbox::run_main`] (which never returns). Otherwise we:
 ///
-/// 1.  Load `.env` values from `~/.codex/.env` before creating any threads.
+/// 1.  Load `.env` values from `~/.BaiCode/.env` before creating any threads.
 /// 2.  Spawn a main runtime thread with a controlled stack size.
 /// 3.  Construct a Tokio multi-thread runtime.
 /// 4.  Capture the current executable path and derive the
@@ -269,7 +269,7 @@ fn build_runtime() -> anyhow::Result<tokio::runtime::Runtime> {
 
 const ILLEGAL_ENV_VAR_PREFIX: &str = "CODEX_";
 
-/// Load env vars from ~/.codex/.env.
+/// Load env vars from ~/.BaiCode/.env.
 ///
 /// Security: Do not allow `.env` files to create or modify any variables
 /// with names starting with `CODEX_`.
@@ -342,7 +342,11 @@ fn prepare_aliases_in_home(
     codex_home: &Path,
     existing_path: Option<OsString>,
 ) -> std::io::Result<(Arg0PathEntryGuard, OsString)> {
-    std::fs::create_dir_all(codex_home)?;
+    let mut home_dir = std::fs::DirBuilder::new();
+    home_dir.recursive(true);
+    #[cfg(unix)]
+    std::os::unix::fs::DirBuilderExt::mode(&mut home_dir, 0o700);
+    home_dir.create(codex_home)?;
     // Windows and WSL can share CODEX_HOME without sharing a lock namespace.
     // Keep each OS outside the legacy `tmp/arg0` root so older clients cannot
     // delete these helpers while their owning process is still running.

@@ -255,11 +255,13 @@ fn native_grants_preserve_denies_and_read_only_carveouts() -> Result<()> {
     let request = build_request(&command(&profile, root), root, Vec::new(), &[], &[])?;
     let request = request.filesystem.unwrap();
     let mut expected_read = [
+        root.join(".BaiCode"),
         root.join(".agents"),
         root.join(".aws"),
         root.join(".codex"),
         root.join(".git"),
         readonly,
+        writable_child.join(".BaiCode"),
         writable_child.join(".agents"),
         writable_child.join(".aws"),
         writable_child.join(".codex"),
@@ -330,6 +332,7 @@ fn volume_expansion_does_not_turn_read_only_child_writable() -> Result<()> {
     assert_eq!(
         request.readonly_paths,
         vec![
+            root.join(".BaiCode").to_str().unwrap(),
             root.join(".agents").to_str().unwrap(),
             root.join(".aws").to_str().unwrap(),
             root.join(".codex").to_str().unwrap(),
@@ -659,7 +662,7 @@ fn root_deny_keeps_only_narrow_explicit_grants() -> Result<()> {
             FileSystemAccessMode::Read => (Vec::new(), allowed),
             FileSystemAccessMode::Write => (
                 allowed,
-                [".agents", ".aws", ".codex", ".git"]
+                [".BaiCode", ".agents", ".aws", ".codex", ".git"]
                     .map(|name| child.join(name).to_str().unwrap().to_owned())
                     .to_vec(),
             ),
@@ -830,7 +833,7 @@ fn symbolic_root_preserves_equal_path_precedence_and_denies() -> Result<()> {
         volumes[..2]
             .iter()
             .flat_map(
-                |volume| [".agents", ".aws", ".codex", ".git"].map(|name| volume
+                |volume| [".BaiCode", ".agents", ".aws", ".codex", ".git"].map(|name| volume
                     .join(name)
                     .to_str()
                     .unwrap()

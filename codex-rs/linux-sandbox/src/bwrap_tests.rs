@@ -537,6 +537,7 @@ fn missing_read_only_subpath_uses_empty_file_bind_data() {
             workspace.join(".agents"),
             workspace.join(".codex"),
             workspace.join(".aws"),
+            workspace.join(".BaiCode"),
         ]
     );
     assert!(
@@ -575,6 +576,7 @@ fn transient_empty_preserved_file_uses_empty_file_bind_data() {
             workspace.join(".agents"),
             workspace.join(".codex"),
             workspace.join(".aws"),
+            workspace.join(".BaiCode"),
         ]
     );
     assert!(
@@ -621,6 +623,7 @@ fn missing_child_git_under_parent_repo_is_mounted_read_only() {
             dot_git,
             workspace.join(".agents"),
             workspace.join(".aws"),
+            workspace.join(".BaiCode"),
         ],
     );
 }
@@ -659,6 +662,7 @@ fn symlinked_missing_child_git_under_parent_repo_mounts_effective_path_read_only
             dot_git,
             workspace.join(".agents"),
             workspace.join(".aws"),
+            workspace.join(".BaiCode"),
         ],
     );
 }
@@ -811,6 +815,7 @@ fn mounts_dev_before_writable_dev_binds() {
         synthetic_mount_target_paths(&args),
         vec![
             PathBuf::from("/.aws"),
+            PathBuf::from("/.BaiCode"),
             PathBuf::from("/.git"),
             PathBuf::from("/.agents"),
             PathBuf::from("/.codex"),
@@ -818,6 +823,7 @@ fn mounts_dev_before_writable_dev_binds() {
             PathBuf::from("/dev/.agents"),
             PathBuf::from("/dev/.codex"),
             PathBuf::from("/dev/.aws"),
+            PathBuf::from("/dev/.BaiCode"),
         ]
     );
     let dev_mounts = args
@@ -1039,7 +1045,7 @@ fn split_policy_reenables_nested_writable_subpaths_after_read_only_parent() {
         FileSystemSandboxEntry::new(docs.clone().into(), FileSystemAccessMode::Read),
         FileSystemSandboxEntry::new(docs_public.clone().into(), FileSystemAccessMode::Write),
     ];
-    for name in [".git", ".agents", ".codex", ".aws"] {
+    for name in [".git", ".agents", ".codex", ".aws", ".BaiCode"] {
         entries.push(FileSystemSandboxEntry::skip_missing_path(
             docs_public.join(name).into(),
             FileSystemAccessMode::Read,
@@ -1067,7 +1073,7 @@ fn split_policy_reenables_nested_writable_subpaths_after_read_only_parent() {
         "expected read-only parent remount before nested writable bind: {:#?}",
         args.args
     );
-    for name in [".git", ".agents", ".codex", ".aws"] {
+    for name in [".git", ".agents", ".codex", ".aws", ".BaiCode"] {
         let metadata_path = path_to_string(docs_public.join(name).as_path());
         let mount_indices = args
             .args
