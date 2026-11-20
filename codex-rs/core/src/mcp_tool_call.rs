@@ -26,7 +26,6 @@ use crate::tools::hook_names::HookToolName;
 use crate::tools::lifecycle::process_mcp_tool_result;
 use crate::tools::sandboxing::ApprovalAction;
 use crate::tools::sandboxing::ToolError;
-use crate::turn_metadata::ExecutionMetadata;
 use codex_analytics::AppInvocation;
 use codex_analytics::ElicitationType;
 use codex_analytics::InvocationType;
@@ -485,7 +484,7 @@ async fn handle_approved_mcp_tool_call(
     sess: &Arc<Session>,
     step_context: &StepContext,
     call_id: &str,
-    originating_call: Option<&ToolCallOrigin>,
+    _originating_call: Option<&ToolCallOrigin>,
     invocation: McpInvocation,
     prepared_call: PreparedMcpCall,
     metadata: &McpToolApprovalMetadata,
@@ -612,32 +611,13 @@ async fn handle_approved_mcp_tool_call(
                     if let Some(rewritten_arguments) = rewritten_arguments.as_ref() {
                         tool_input = rewritten_arguments.clone();
                     }
-                    let mut request_meta = build_mcp_tool_call_request_meta(
+                    let request_meta = build_mcp_tool_call_request_meta(
                         step_context,
                         &server,
                         call_id,
                         Some(metadata),
                         prepared_call.is_host_owned_apps(),
                     );
-                    if let Some(recipient) = sess
-                        .services
-                        .thread_extension_data
-                        .get::<crate::AgentMcpMetadataRecipient>()
-                        && recipient.matches(
-                            prepared_call.server_key(),
-                            &prepared_call.config().mcp_server_catalog,
-                        )
-                        && let Some(JsonValue::Object(meta)) = &mut request_meta
-                    {
-                        meta.insert(
-                            "x-codex-root-turn-id".into(),
-                            serde_json::json!(turn_context.turn_metadata_state.root_turn_id()),
-                        );
-                        meta.insert(
-                            "x-codex-cyber-access-program".into(),
-                            serde_json::json!(turn_context.cyber_access_program),
-                        );
-                    }
                     let request_meta = if let Some(crate::model_search::ModelSearch::Hosted {
                         binding,
                         context,
@@ -664,12 +644,6 @@ async fn handle_approved_mcp_tool_call(
                     } else {
                         request_meta
                     };
-                    let request_meta = with_mcp_tool_call_ids_meta(
-                        request_meta,
-                        &sess.thread_id.to_string(),
-                        &sess.session_id().to_string(),
-                        originating_call,
-                    );
                     let request_meta = augment_mcp_tool_request_meta_with_sandbox_state(
                         step_context,
                         &prepared_call,
@@ -691,7 +665,7 @@ async fn handle_approved_mcp_tool_call(
                         .services
                         .rollout_thread_trace
                         .start_mcp_call_trace(call_id);
-                    let mut request_meta = mcp_call_trace.add_request_meta(request_meta);
+                    let mut request_meta = request_meta;
                     if let Some(hook) = sess
                         .services
                         .thread_extension_data
@@ -1451,10 +1425,6 @@ const MCP_TOOL_UI_RESOURCE_URI_META_KEY: &str = "ui/resourceUri";
 const MCP_TOOL_LINK_ID_META_KEY: &str = "link_id";
 const MCP_TOOL_LINK_IS_IMPLICIT_META_KEY: &str = "link_is_implicit";
 const MCP_TOOL_PLUGIN_ID_META_KEY: &str = "plugin_id";
-const MCP_TOOL_ITEM_ID_META_KEY: &str = "itemId";
-const MCP_TOOL_SESSION_ID_META_KEY: &str = "sessionId";
-const MCP_TOOL_WINDOW_ID_META_KEY: &str = "windowId";
-const MCP_TOOL_THREAD_ID_META_KEY: &str = "threadId";
 const MCP_TOOL_CONNECTED_ACCOUNT_EMAIL_META_KEY: &str = "connected_account_email";
 const MCP_TOOL_RESOURCE_URI_META_KEY: &str = "resource_uri";
 
@@ -1513,37 +1483,13 @@ fn build_mcp_tool_call_request_meta(
     server: &str,
     call_id: &str,
     metadata: Option<&McpToolApprovalMetadata>,
-    is_host_owned_apps: bool,
+    _is_host_owned_apps: bool,
 ) -> Option<serde_json::Value> {
     let mut request_meta = serde_json::Map::new();
     request_meta.insert(
         "callId".to_string(),
         serde_json::Value::String(call_id.to_string()),
     );
-
-    if let Some(serde_json::Value::Object(mut turn_metadata)) = step_context
-        .turn
-        .turn_metadata_state
-        .current_meta_value_for_mcp_request(ExecutionMetadata::from_settings(
-            &step_context.settings,
-        ))
-    {
-        // Attribute trusted browser/REPL telemetry from this turn's configuration,
-        // without forwarding internal product identity to unrelated MCP servers.
-        turn_metadata.remove("product_sku");
-        if is_node_repl_backed_connector(
-            server,
-            metadata.and_then(|metadata| metadata.connector_id.as_deref()),
-        ) && let Some(sku) = codex_otel::bounded_product_sku(
-            step_context.turn.config.apps_mcp_product_sku.as_deref(),
-        ) {
-            turn_metadata.insert("product_sku".to_string(), serde_json::json!(sku));
-        }
-        request_meta.insert(
-            crate::X_CODEX_TURN_METADATA_HEADER.to_string(),
-            serde_json::Value::Object(turn_metadata),
-        );
-    }
 
     if server == CODEX_APPS_MCP_SERVER_NAME {
         let mut codex_apps_meta = metadata
@@ -1553,16 +1499,7 @@ fn build_mcp_tool_call_request_meta(
             "call_id".to_string(),
             serde_json::Value::String(call_id.to_string()),
         );
-        // Only the captured host-owned Apps registration receives Core lineage.
         codex_apps_meta.remove("root_turn_id");
-        if is_host_owned_apps
-            && let Some(root_turn_id) = step_context.turn.turn_metadata_state.root_turn_id()
-        {
-            codex_apps_meta.insert(
-                "root_turn_id".to_string(),
-                serde_json::Value::String(root_turn_id),
-            );
-        }
         request_meta.insert(
             MCP_TOOL_CODEX_APPS_META_KEY.to_string(),
             serde_json::Value::Object(codex_apps_meta),
@@ -1617,40 +1554,6 @@ fn build_confirmation_policies_request_meta(
         }
     }
     Some(serde_json::Value::Object(policies))
-}
-
-fn with_mcp_tool_call_ids_meta(
-    meta: Option<serde_json::Value>,
-    thread_id: &str,
-    session_id: &str,
-    originating_call: Option<&ToolCallOrigin>,
-) -> Option<serde_json::Value> {
-    let mut map = match meta {
-        Some(serde_json::Value::Object(map)) => map,
-        None => serde_json::Map::new(),
-        other => return other,
-    };
-    map.insert(
-        MCP_TOOL_THREAD_ID_META_KEY.to_string(),
-        serde_json::Value::String(thread_id.to_string()),
-    );
-    map.insert(
-        MCP_TOOL_SESSION_ID_META_KEY.to_string(),
-        serde_json::Value::String(session_id.to_string()),
-    );
-    if let Some(origin) = originating_call {
-        map.insert(
-            MCP_TOOL_WINDOW_ID_META_KEY.to_string(),
-            serde_json::Value::String(origin.window_id.clone()),
-        );
-    }
-    if let Some(item_id) = originating_call.and_then(|origin| origin.item_id.as_ref()) {
-        map.insert(
-            MCP_TOOL_ITEM_ID_META_KEY.to_string(),
-            serde_json::Value::String(item_id.to_string()),
-        );
-    }
-    Some(serde_json::Value::Object(map))
 }
 
 #[derive(Clone, Copy)]

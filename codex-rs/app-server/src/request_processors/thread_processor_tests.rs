@@ -1454,7 +1454,6 @@ mod thread_processor_behavior_tests {
                 thread_watch_manager,
                 codex_home: test.config.codex_home.to_path_buf(),
                 skills_watcher: skills_watcher.clone(),
-                turn_cost_worker: None,
             },
             thread_id,
             connection_id,

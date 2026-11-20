@@ -1,6 +1,6 @@
 use codex_protocol::RequestCountry;
+use http::HeaderValue;
 use std::collections::BTreeMap;
-use std::collections::HashMap;
 
 use codex_analytics::CompactionImplementation;
 use codex_analytics::CompactionPhase;
@@ -14,8 +14,6 @@ use codex_protocol::protocol::SessionSource;
 use codex_protocol::protocol::SubAgentSource;
 use codex_protocol::protocol::ThreadSource;
 use codex_utils_string::to_ascii_json_string;
-use http::HeaderMap as ApiHeaderMap;
-use http::HeaderValue;
 use serde::Serialize;
 use serde_json::Value;
 
@@ -358,75 +356,6 @@ impl CodexResponsesMetadata {
         serde_json::to_value(self.turn_metadata_payload()).ok()
     }
 
-    pub(crate) fn client_metadata(&self, include_internal: bool) -> HashMap<String, String> {
-        let mut client_metadata = HashMap::from([
-            (
-                X_CODEX_INSTALLATION_ID_HEADER.to_string(),
-                self.installation_id.clone(),
-            ),
-            (SESSION_ID_KEY.to_string(), self.session_id.clone()),
-            (THREAD_ID_KEY.to_string(), self.thread_id.clone()),
-            (X_CODEX_WINDOW_ID_HEADER.to_string(), self.window_id.clone()),
-        ]);
-        if let Some(turn_id) = &self.turn_id {
-            client_metadata.insert(TURN_ID_KEY.to_string(), turn_id.clone());
-        }
-        if let Some(subagent_header) = &self.subagent_header {
-            client_metadata.insert(
-                X_OPENAI_SUBAGENT_HEADER.to_string(),
-                subagent_header.clone(),
-            );
-        }
-        if let Some(parent_thread_id) = self.parent_thread_id {
-            client_metadata.insert(
-                X_CODEX_PARENT_THREAD_ID_HEADER.to_string(),
-                parent_thread_id.to_string(),
-            );
-        }
-        if let Some(parent_turn_id) = &self.parent_turn_id {
-            client_metadata.insert(PARENT_TURN_ID_KEY.to_string(), parent_turn_id.clone());
-        }
-        if let Some(root_turn_id) = &self.root_turn_id {
-            client_metadata.insert(ROOT_TURN_ID_KEY.to_string(), root_turn_id.clone());
-        }
-        if self.has_turn_metadata()
-            && let Some(turn_metadata_json) = self.turn_metadata_json()
-        {
-            client_metadata.insert(X_CODEX_TURN_METADATA_HEADER.to_string(), turn_metadata_json);
-        }
-        client_metadata
-    }
-
-    pub(crate) fn compatibility_headers(&self) -> ApiHeaderMap {
-        let mut headers = ApiHeaderMap::new();
-        insert_header(&mut headers, X_CODEX_WINDOW_ID_HEADER, &self.window_id);
-        // Direct x-codex-turn-metadata is compatibility output. Keep the unbounded tool inventory
-        // in client_metadata only so HTTP and WebSocket compatibility headers remain bounded.
-        if self.has_turn_metadata()
-            && let Ok(turn_metadata_json) = bounded_turn_metadata_json(CodexTurnMetadataPayload {
-                tool_namespaces_info: None,
-                ..self.turn_metadata_payload()
-            })
-        {
-            insert_header(
-                &mut headers,
-                X_CODEX_TURN_METADATA_HEADER,
-                &turn_metadata_json,
-            );
-        }
-        if let Some(parent_thread_id) = self.parent_thread_id {
-            insert_header(
-                &mut headers,
-                X_CODEX_PARENT_THREAD_ID_HEADER,
-                &parent_thread_id.to_string(),
-            );
-        }
-        if let Some(subagent_header) = &self.subagent_header {
-            insert_header(&mut headers, X_OPENAI_SUBAGENT_HEADER, subagent_header);
-        }
-        headers
-    }
-
     fn turn_metadata_payload(&self) -> CodexTurnMetadataPayload<'_> {
         let request_kind = self.request_kind;
         let (request_kind_value, compaction) = request_kind.map_or((None, None), |request_kind| {
@@ -511,12 +440,6 @@ pub(crate) fn subagent_metadata_kind(session_source: &SessionSource) -> Option<S
         | SessionSource::Custom(_)
         | SessionSource::Internal(_)
         | SessionSource::Unknown => None,
-    }
-}
-
-fn insert_header(headers: &mut ApiHeaderMap, name: &'static str, value: &str) {
-    if let Ok(header_value) = HeaderValue::from_str(value) {
-        headers.insert(name, header_value);
     }
 }
 

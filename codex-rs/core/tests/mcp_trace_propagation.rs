@@ -1,4 +1,4 @@
-//! Verifies request-local trace ancestry through real RMCP queues and HTTP headers.
+//! Checks that local spans stay local across real MCP requests and continuations.
 
 use std::time::Duration;
 
@@ -30,8 +30,7 @@ use wiremock::ResponseTemplate;
 use wiremock::matchers::method;
 
 #[tokio::test(flavor = "current_thread")]
-async fn mcp_requests_preserve_trace_context_across_workers_and_continuations() -> anyhow::Result<()>
-{
+async fn mcp_requests_do_not_publish_trace_context() -> anyhow::Result<()> {
     let exported = InMemorySpanExporter::default();
     let telemetry = SdkTracerProvider::builder()
         .with_simple_exporter(exported.clone())
@@ -93,11 +92,9 @@ async fn mcp_requests_preserve_trace_context_across_workers_and_continuations() 
 
         let first = tracing::info_span!(parent: None, "first_page");
         let second = tracing::info_span!(parent: None, "second_page");
-        let first_trace = codex_otel::span_w3c_trace_context(&first).unwrap();
-        let second_trace = codex_otel::span_w3c_trace_context(&second).unwrap();
         let mut first_params = PaginatedRequestParams::default();
         first_params.meta = Some(RequestMetaObject::from(
-            json!({"application":"preserved", "traceparent":"invalid", "tracestate":"stale=value"})
+            json!({"application":"preserved"})
                 .as_object()
                 .unwrap()
                 .clone(),
@@ -116,7 +113,6 @@ async fn mcp_requests_preserve_trace_context_across_workers_and_continuations() 
         second_result?;
 
         let tool = tracing::info_span!(parent: None, "tool");
-        let tool_trace = codex_otel::span_w3c_trace_context(&tool).unwrap();
         client
             .call_tool(
                 "test".to_string(),
@@ -127,12 +123,16 @@ async fn mcp_requests_preserve_trace_context_across_workers_and_continuations() 
             .instrument(tool)
             .await?;
         let custom = tracing::info_span!(parent: None, "custom");
-        let custom_trace = codex_otel::span_w3c_trace_context(&custom).unwrap();
-        client.send_custom_request("test/custom", Some(json!({"argument":"preserved", "_meta":{"application":"custom-meta", "traceparent":"invalid", "tracestate":"stale=value"}})))
-            .instrument(custom).await?;
+        client
+            .send_custom_request(
+                "test/custom",
+                Some(json!({"argument":"preserved", "_meta":{"application":"custom-meta"}})),
+            )
+            .instrument(custom)
+            .await?;
         client.shutdown().await;
         telemetry.force_flush()?;
-        let spans = exported.get_finished_spans()?;
+        assert!(!exported.get_finished_spans()?.is_empty());
         let requests = server.received_requests().await.unwrap();
         let requests = requests
             .iter()
@@ -150,55 +150,19 @@ async fn mcp_requests_preserve_trace_context_across_workers_and_continuations() 
             if matches!(body["method"].as_str(), Some("tools/list" | "tools/call")) {
                 assert_eq!(body["params"]["_meta"]["openai/readOnly"], true);
             }
-            let expected = if body["method"] == "test/custom" {
-                assert_eq!(body["params"]["_meta"]["application"], "custom-meta");
+            let meta = &body["params"]["_meta"];
+            if body["method"] == "test/custom" {
+                assert_eq!(meta["application"], "custom-meta");
                 assert_eq!(body["params"]["argument"], "preserved");
-                assert!(body["params"]["_meta"].get("tracestate").is_none());
-                &custom_trace
             } else if body["method"] == "tools/call" {
-                assert_eq!(body["params"]["_meta"]["application"], "tool-meta");
-                &tool_trace
-            } else if body["params"]["cursor"] == "page2" {
-                &second_trace
-            } else {
-                assert_eq!(body["params"]["_meta"]["application"], "preserved");
-                assert!(body["params"]["_meta"].get("tracestate").is_none());
-                &first_trace
-            };
-            let parent = expected
-                .traceparent
-                .as_deref()
-                .unwrap()
-                .split('-')
-                .collect::<Vec<_>>();
-            let metadata_parent = body["params"]["_meta"]["traceparent"]
-                .as_str()
-                .unwrap()
-                .split('-')
-                .collect::<Vec<_>>();
-            assert_eq!(metadata_parent[1], parent[1]);
-            if metadata_parent[2] != parent[2] {
-                let caller = spans
-                    .iter()
-                    .find(|span| span.span_context.span_id().to_string() == metadata_parent[2])
-                    .unwrap();
-                assert_eq!(caller.name, "list_tools_with_connector_ids");
-                assert_eq!(caller.parent_span_id.to_string(), parent[2]);
+                assert_eq!(meta["application"], "tool-meta");
+            } else if body["params"]["cursor"] != "page2" {
+                assert_eq!(meta["application"], "preserved");
             }
-            let header = request.headers.get("traceparent").unwrap().to_str()?;
-            let header = header.split('-').collect::<Vec<_>>();
-            assert_eq!(header[1], parent[1]);
-            let http = spans
-                .iter()
-                .find(|span| span.span_context.span_id().to_string() == header[2])
-                .unwrap();
-            assert_eq!(http.name, "codex.exec_server.http_request");
-            let bridge = spans
-                .iter()
-                .find(|span| span.span_context.span_id() == http.parent_span_id)
-                .unwrap();
-            assert_eq!(bridge.name, "mcp.http.request");
-            assert_eq!(bridge.parent_span_id.to_string(), metadata_parent[2]);
+            for key in ["traceparent", "tracestate"] {
+                assert!(meta.get(key).is_none());
+                assert!(request.headers.get(key).is_none());
+            }
         }
     }
     Ok(())

@@ -13,7 +13,6 @@ use serde::Deserialize;
 use std::time::Duration;
 use url::Url;
 
-pub const DEFAULT_REGISTRATION_URL: &str = "https://auth.openai.com/agent/register";
 const MAX_BODY_BYTES: usize = 64 * 1024;
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
 
@@ -25,14 +24,8 @@ pub struct RuntimeRegistrationClient {
 
 impl RuntimeRegistrationClient {
     pub fn new(factory: HttpClientFactory, url: Url) -> Result<Self, RegistrationError> {
-        let loopback = url.host_str().is_some_and(|host| {
-            host == "localhost"
-                || host == "[::1]"
-                || host
-                    .parse::<std::net::IpAddr>()
-                    .is_ok_and(|ip| ip.is_loopback())
-        });
-        if !(url.scheme() == "https" || (url.scheme() == "http" && loopback))
+        if !codex_http_client::is_loopback_network_url(&url)
+            || !matches!(url.scheme(), "http" | "https")
             || !url.username().is_empty()
             || url.password().is_some()
             || url.query().is_some()
@@ -42,7 +35,7 @@ impl RuntimeRegistrationClient {
         }
         Ok(Self {
             http: RouteAwareClientPool::with_chatgpt_cloudflare_cookies_without_redirects_or_request_logging(
-                factory,
+                factory.clone().with_network_policy(factory.network_policy().clone().with_loopback_only()),
                 ClientRouteClass::Auth,
             ),
             url,
@@ -104,7 +97,7 @@ impl RuntimeRegistrationClient {
 #[derive(Clone, Debug, thiserror::Error)]
 pub enum RegistrationError {
     #[error(
-        "runtime registration requires a secure endpoint without credentials or query parameters"
+        "runtime registration requires a loopback endpoint without credentials or query parameters"
     )]
     InvalidEndpoint,
     #[error("invalid runtime registration request")]

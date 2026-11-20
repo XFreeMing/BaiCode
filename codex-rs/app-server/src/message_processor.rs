@@ -61,7 +61,6 @@ use crate::startup_warnings::StartupWarnings;
 use crate::thread_state::ConnectionCapabilities;
 use crate::thread_state::ThreadStateManager;
 use crate::transport::AppServerTransport;
-use crate::turn_cost_worker::TurnCostWorker;
 use codex_analytics::AnalyticsEventsClient;
 use codex_analytics::AppServerRpcTransport;
 use codex_app_server_protocol::ClientNotification;
@@ -156,7 +155,6 @@ pub(crate) struct MessageProcessor {
     outgoing: Arc<OutgoingMessageSender>,
     startup_warnings: StartupWarnings,
     models_refresh_worker: ModelsRefreshWorker,
-    turn_cost_worker: Option<TurnCostWorker>,
     skills_watcher: Arc<SkillsWatcher>,
     account_processor: Arc<AccountRequestProcessor>,
     apps_processor: AppsRequestProcessor,
@@ -435,11 +433,6 @@ impl MessageProcessor {
             Arc::clone(&thread_manager),
         ));
         let models_refresh_worker = crate::models_refresh_worker::spawn(&model_catalog);
-        let turn_cost_worker = TurnCostWorker::spawn(
-            Arc::clone(&config),
-            Arc::clone(&auth_manager),
-            runtime_auth.map(|runtime| (runtime, config.runtime_auth_mode)),
-        );
         thread_manager
             .plugins_manager()
             .set_analytics_events_client(analytics_events_client.clone());
@@ -568,7 +561,6 @@ impl MessageProcessor {
             state_db.clone(),
             log_db,
             Arc::clone(&skills_watcher),
-            turn_cost_worker.as_ref().map(TurnCostWorker::handle),
             config_warnings.clone(),
             sample_responses,
         );
@@ -583,7 +575,6 @@ impl MessageProcessor {
             thread_state_manager,
             thread_watch_manager,
             Arc::clone(&skills_watcher),
-            turn_cost_worker.as_ref().map(TurnCostWorker::handle),
         );
         if let Some(startup_config) = plugin_startup_tasks {
             let reload_config = match startup_config {
@@ -645,7 +636,6 @@ impl MessageProcessor {
                 config: config_warnings,
             },
             models_refresh_worker,
-            turn_cost_worker,
             skills_watcher,
             account_processor,
             apps_processor,
@@ -914,9 +904,6 @@ impl MessageProcessor {
 
     pub(crate) async fn drain_background_tasks(&self) {
         self.models_refresh_worker.shutdown();
-        if let Some(worker) = &self.turn_cost_worker {
-            worker.shutdown();
-        }
         self.thread_processor.drain_background_tasks().await;
     }
 

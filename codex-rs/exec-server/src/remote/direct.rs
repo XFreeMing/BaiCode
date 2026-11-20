@@ -28,7 +28,6 @@ use crate::client_transport::connect_websocket_request;
 use crate::connection::JsonRpcConnection;
 use crate::server::ConnectionProcessor;
 use crate::telemetry::ConnectionTransport;
-use crate::trace_context::current_trace_context_headers;
 
 const DIRECT_TRANSPORT: &str = "direct_jsonrpc_v1";
 
@@ -108,7 +107,6 @@ impl EnvironmentRegistryClient {
                 .http
                 .request(request.method, request.url)
                 .headers(prepared.headers)
-                .headers(current_trace_context_headers())
                 .body(prepared.body.unwrap_or_default())
                 .timeout(self.connect_timeout)
                 .send()
@@ -273,9 +271,6 @@ async fn connect_direct(
                 url: websocket_diagnostic_url(url),
                 source,
             })?;
-    request
-        .headers_mut()
-        .extend(current_trace_context_headers());
     authenticate_websocket_request(&mut request, auth_provider)
         .await
         .map_err(direct_auth_error)?;

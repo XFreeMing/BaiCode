@@ -108,7 +108,6 @@ async fn interrupt_reply_waits_for_the_requested_turn(queued: bool) -> anyhow::R
         ThreadStateManager::new(),
         ThreadWatchManager::new(),
         watcher.clone(),
-        /*turn_cost_worker*/ None,
     );
     let request_id = |id| ConnectionRequestId {
         connection_id,

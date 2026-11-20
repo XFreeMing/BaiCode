@@ -281,6 +281,15 @@ impl TurnMetadataState {
         }
     }
 
+    /// Search discovery consumes only the host's explicit MCP search settings.
+    pub(crate) fn search_request_metadata(&self) -> Option<String> {
+        self.responsesapi_client_metadata
+            .read()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .get("mcp_request_meta")
+            .cloned()
+    }
+
     pub(crate) fn current_meta_value_for_mcp_request(
         &self,
         execution: ExecutionMetadata<'_>,

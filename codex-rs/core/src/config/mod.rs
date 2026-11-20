@@ -4251,15 +4251,15 @@ impl Config {
             })?
             .clone();
 
-        let local_base_url = model_provider
+        let valid_base_url = model_provider
             .base_url
             .as_deref()
             .and_then(|url| url::Url::parse(url).ok())
             .is_some_and(|url| {
                 matches!(url.scheme(), "http" | "https")
-                    && codex_http_client::is_loopback_network_url(&url)
+                    && url.host().is_some() && url.username().is_empty() && url.password().is_none() && url.fragment().is_none()
             });
-        if !local_base_url
+        if !valid_base_url
             || model_provider.requires_openai_auth
             || model_provider.is_amazon_bedrock()
             || model_provider.is_gcp()
@@ -4267,7 +4267,7 @@ impl Config {
         {
             return Err(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
-                format!("Model provider `{model_provider_id}` must use a local HTTP endpoint without cloud authentication"),
+                format!("Model provider `{model_provider_id}` requires an explicit HTTP(S) endpoint and provider-specific credentials"),
             ));
         }
         if let Some(catalog_url) = model_provider.model_catalog_url.as_deref()

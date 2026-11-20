@@ -210,3 +210,26 @@ async fn unsupported_sdk_work_is_denied_and_running_work_is_cancelled() {
         Err(NetworkPolicyDenied::Revoked)
     );
 }
+
+#[test]
+fn model_permission_is_scoped_to_the_exact_endpoint() {
+    let model = Url::parse("https://model.example/v1/responses").unwrap();
+    let reports = model.join("analytics/turn-costs").unwrap();
+    let other_host = Url::parse("https://other.example/v1/responses").unwrap();
+    let local = NetworkPolicy::default().with_loopback_only();
+    let policy = local
+        .clone()
+        .for_model_endpoints(BTreeSet::from([model.clone()]));
+    assert!(policy.acquire(&model).is_ok());
+    assert!(policy.is_managed());
+    for denied in [&reports, &other_host] {
+        assert_eq!(
+            policy.acquire(denied).unwrap_err(),
+            NetworkPolicyDenied::Destination
+        );
+    }
+    assert_eq!(
+        local.acquire(&model).unwrap_err(),
+        NetworkPolicyDenied::Destination
+    );
+}

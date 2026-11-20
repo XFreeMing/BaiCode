@@ -53,6 +53,10 @@ impl TraceWebSocket {
             .with_context(|| {
                 format!("invalid --otel-trace-listen URL '{listen_url}'; expected 'ws://IP:PORT'")
             })?;
+        anyhow::ensure!(
+            bind_address.ip().is_loopback(),
+            "trace listeners require a loopback address"
+        );
         let websocket_listener = TcpListener::bind(bind_address)
             .await
             .with_context(|| format!("failed to bind OTEL trace websocket to {bind_address}"))?;

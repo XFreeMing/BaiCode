@@ -24,7 +24,6 @@ use serde_json::json;
 use crate::session::step_settings::ResolvedStepSettings;
 use crate::session::turn_context::TurnContext;
 use crate::state::SessionServices;
-use crate::turn_metadata::ExecutionMetadata;
 
 #[derive(Clone)]
 pub(crate) enum ModelSearch {
@@ -375,10 +374,10 @@ pub(crate) async fn resolve(
         );
         Some(decision)
     };
-    let mut turn_meta = turn
-        .turn_metadata_state
-        .current_meta_value_for_mcp_request(ExecutionMetadata::from_settings(settings))
-        .unwrap_or_else(|| json!({}));
+    let mut turn_meta = json!({});
+    if let Some(value) = turn.turn_metadata_state.search_request_metadata() {
+        turn_meta["mcp_request_meta"] = json!(value);
+    }
     let Some(mut request) = object(turn_meta.get("mcp_request_meta")) else {
         return observe(ModelSearch::Disabled, "invalid_request_metadata");
     };

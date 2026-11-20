@@ -781,7 +781,7 @@ impl RmcpClient {
         params: Option<PaginatedRequestParams>,
         timeout: Option<Duration>,
     ) -> Result<ListToolsResult> {
-        let mut params = crate::trace_context::traced_pagination(params);
+        let mut params = params;
         self.refresh_oauth_if_needed().await?;
         if self.requires_read_only_tools {
             self.apply_read_only_tools_meta(&mut params.get_or_insert_default().meta);
@@ -888,7 +888,6 @@ impl RmcpClient {
         params: Option<PaginatedRequestParams>,
         timeout: Option<Duration>,
     ) -> Result<ListResourcesResult> {
-        let params = crate::trace_context::traced_pagination(params);
         self.refresh_oauth_if_needed().await?;
         let cancellation = self.request_cancellation();
         let result = self
@@ -926,7 +925,6 @@ impl RmcpClient {
         params: Option<PaginatedRequestParams>,
         timeout: Option<Duration>,
     ) -> Result<ListResourceTemplatesResult> {
-        let params = crate::trace_context::traced_pagination(params);
         self.refresh_oauth_if_needed().await?;
         let cancellation = self.request_cancellation();
         let result = self
@@ -967,7 +965,6 @@ impl RmcpClient {
         timeout: Option<Duration>,
     ) -> Result<ReadResourceResult> {
         let mut params = params;
-        params.meta = crate::trace_context::with_current_trace(params.meta);
         self.refresh_oauth_if_needed().await?;
         let cancellation = self.request_cancellation();
         let requested_modern = self.protocol_mode != McpProtocolMode::Legacy;
@@ -1004,11 +1001,10 @@ impl RmcpClient {
     /// Reads a resource with inputs and timeout pauses owned by the calling chat.
     pub async fn read_resource_with_elicitation(
         &self,
-        mut params: ReadResourceRequestParams,
+        params: ReadResourceRequestParams,
         timeout: Option<Duration>,
         send_elicitation: Arc<SendElicitation>,
     ) -> Result<ReadResourceResult> {
-        params.meta = crate::trace_context::with_current_trace(params.meta);
         self.refresh_oauth_if_needed().await?;
         let cancellation = self.request_cancellation();
         let pause_state = ElicitationPauseState::new();
@@ -1169,7 +1165,7 @@ impl RmcpClient {
                                 None => None,
                             };
                             self.apply_read_only_tools_meta(&mut meta);
-                            Ok(crate::trace_context::with_current_trace(meta))
+                            Ok(meta)
                         })();
                         let meta = match meta {
                             Ok(meta) => meta,
@@ -1300,7 +1296,7 @@ impl RmcpClient {
             .run_service_operation("requests/custom", timeout, move |service| {
                 let params = params.clone();
                 async move {
-                    let request = crate::trace_context::traced_custom_request(method, params);
+                    let request = rmcp::model::CustomRequest::new(method, params);
                     cancellation
                         .send(
                             service.peer(),
@@ -1323,7 +1319,7 @@ impl RmcpClient {
     ) -> Result<CancellableEventStreamRequest> {
         let service = self.service().await?;
         let (sender, notifications) = event_notification_channel();
-        let mut request = crate::trace_context::traced_custom_request("events/stream", params);
+        let mut request = rmcp::model::CustomRequest::new("events/stream", params);
         request.extensions.insert(sender);
         let handle = service
             .peer()

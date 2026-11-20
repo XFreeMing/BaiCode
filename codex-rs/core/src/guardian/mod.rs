@@ -74,7 +74,6 @@ pub use review_session::GuardianReviewState;
 pub use review_session::PreparedGuardianContext;
 pub use review_session::prepare_review_prewarm;
 
-pub(crate) use codex_guardian_reviewer::prompt_cache_key_override_for_review_session;
 pub(crate) use runtime::ReviewAction;
 pub(crate) use runtime::from_approval_action;
 

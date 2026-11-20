@@ -184,15 +184,6 @@ async fn detached_memory_responses_metadata_starts_an_independent_root_turn() {
     let turn_id = parsed["turn_id"].as_str().expect("memory turn ID");
     uuid::Uuid::parse_str(turn_id).expect("memory turn ID is a UUID");
     assert_eq!(parsed[ROOT_TURN_ID_KEY], parsed["turn_id"]);
-    let client_metadata = metadata.client_metadata(/*include_internal*/ true);
-    assert_eq!(
-        client_metadata.get("turn_id").map(String::as_str),
-        Some(turn_id)
-    );
-    assert_eq!(
-        client_metadata.get(ROOT_TURN_ID_KEY).map(String::as_str),
-        Some(turn_id)
-    );
     assert!(parsed.get(WINDOW_ID_KEY).is_none());
 
     let expected_repo_path = repo_path.to_string_lossy().into_owned();
@@ -766,12 +757,6 @@ async fn guardian_affinity_requires_the_captured_parent_and_stays_out_of_metadat
                 .unwrap()
                 .contains("private-parent-pin")
         );
-        assert!(
-            !serde_json::to_string(&metadata.client_metadata(/*include_internal*/ true))
-                .unwrap()
-                .contains("private-parent-pin")
-        );
-        assert!(!format!("{:?}", metadata.compatibility_headers()).contains("private-parent-pin"));
     }
 }
 
@@ -1143,27 +1128,6 @@ fn turn_metadata_state_merges_client_metadata_without_replacing_reserved_fields(
     assert_eq!(
         model_request_json[WINDOW_ID_KEY].as_str(),
         Some("thread-a:1")
-    );
-
-    let compatibility_headers =
-        test_turn_responses_metadata(&state, "thread-a:1").compatibility_headers();
-    let compatibility_metadata: Value = serde_json::from_str(
-        compatibility_headers
-            .get("x-codex-turn-metadata")
-            .expect("compatibility turn metadata header")
-            .to_str()
-            .expect("valid compatibility header"),
-    )
-    .expect("compatibility metadata json");
-    assert!(
-        compatibility_metadata
-            .get(LEGACY_CODE_MODE_TOOL_NAMES_KEY)
-            .is_none()
-    );
-    assert!(
-        compatibility_metadata
-            .get(TOOL_NAMESPACES_INFO_KEY)
-            .is_none()
     );
 
     let meta = state

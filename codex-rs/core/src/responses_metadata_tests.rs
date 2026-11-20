@@ -70,16 +70,9 @@ fn turn_metadata_keeps_the_exact_boundary_and_omits_an_overlong_remote() {
     assert_eq!(boundary.turn_metadata_json().unwrap(), expected);
 
     let over = metadata_with_remote(&format!("{boundary_url}x"));
-    let body = over.client_metadata(/*include_internal*/ false);
-    let canonical = &body[X_CODEX_TURN_METADATA_HEADER];
+    let canonical = over.turn_metadata_json().unwrap();
     assert_eq!(
-        canonical,
-        over.compatibility_headers()[X_CODEX_TURN_METADATA_HEADER]
-            .to_str()
-            .unwrap()
-    );
-    assert_eq!(
-        serde_json::from_str::<Value>(canonical).unwrap()["workspaces"]["/workspace/東京"],
+        serde_json::from_str::<Value>(&canonical).unwrap()["workspaces"]["/workspace/東京"],
         json!({"latest_git_commit_hash":"abc123","has_changes":false})
     );
 }
@@ -107,20 +100,14 @@ fn oversized_remote_preserves_other_metadata_and_short_remote_urls() {
             functions: BTreeMap::new(),
         },
     )]));
-    let body = metadata.client_metadata(/*include_internal*/ true);
-    let canonical = &body[X_CODEX_TURN_METADATA_HEADER];
+    let canonical = metadata.turn_metadata_json().unwrap();
     assert!(canonical.len() <= MAX_TURN_METADATA_BYTES);
     assert!(canonical.is_ascii());
-    let actual: Value = serde_json::from_str(canonical).unwrap();
+    let actual: Value = serde_json::from_str(&canonical).unwrap();
     let mut expected = metadata.turn_metadata_value().unwrap();
     expected["workspaces"]["/workspace/東京"]["associated_remote_urls"]
         .as_object_mut()
         .unwrap()
         .remove("large");
     assert_eq!(actual, expected);
-    let header = metadata.compatibility_headers();
-    let header: Value =
-        serde_json::from_str(header[X_CODEX_TURN_METADATA_HEADER].to_str().unwrap()).unwrap();
-    assert_eq!(header["workspaces"], expected["workspaces"]);
-    assert!(header.get("tool_namespaces_info").is_none());
 }

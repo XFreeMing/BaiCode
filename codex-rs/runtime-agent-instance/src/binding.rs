@@ -9,7 +9,6 @@ use crate::RuntimeAuth;
 use crate::RuntimeRegistration;
 use crate::RuntimeRegistrationClient;
 use crate::RuntimeRegistrationMetadata;
-use codex_agent_identity::ChatGptEnvironment;
 use codex_http_client::HttpClientFactory;
 use codex_http_client::NetworkPolicyDenied;
 use codex_login::AuthChangeState;
@@ -39,7 +38,6 @@ pub(crate) enum RegistrationTarget {
     },
     ChatGpt {
         installation_id: String,
-        base_url: String,
     },
 }
 
@@ -60,15 +58,7 @@ impl RegistrationTarget {
     fn url(&self) -> Result<Url, RegistrationError> {
         match self {
             Self::Explicit { url, .. } => Ok(url.clone()),
-            Self::ChatGpt { base_url, .. } => {
-                let url = match ChatGptEnvironment::from_chatgpt_base_url(base_url)
-                    .map_err(|_| RegistrationError::InvalidEndpoint)?
-                {
-                    ChatGptEnvironment::Production => crate::DEFAULT_REGISTRATION_URL,
-                    ChatGptEnvironment::Staging => "https://auth.api.openai.org/agent/register",
-                };
-                url.parse().map_err(|_| RegistrationError::InvalidEndpoint)
-            }
+            Self::ChatGpt { .. } => Err(RegistrationError::InvalidEndpoint),
         }
     }
 }

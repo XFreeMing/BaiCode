@@ -23,7 +23,6 @@ use codex_exec_server::HttpHeader;
 use codex_exec_server::HttpRedirectPolicy;
 use codex_exec_server::HttpRequestParams;
 use codex_exec_server::HttpResponseBodyStream;
-use codex_protocol::protocol::W3cTraceContext;
 use futures::StreamExt;
 use futures::stream;
 use futures::stream::BoxStream;
@@ -55,7 +54,6 @@ use rmcp::transport::streamable_http_client::StreamableHttpPostResponse;
 use sse_stream::Sse;
 use sse_stream::SseStream;
 use tokio::sync::oneshot;
-use tracing::Instrument;
 
 use crate::bounded_stdio_transport::MAX_MCP_STDIO_LINE_BYTES;
 use crate::event_notification_transport::MAX_EVENT_NOTIFICATION_BYTES;
@@ -86,7 +84,6 @@ pub(crate) struct StreamableHttpClientAdapter {
     redirect_mode: StreamableHttpRedirectMode,
     initialize_deadline: Arc<Mutex<Option<Instant>>>,
     // The SDK sends handshakes on its worker without request metadata.
-    handshake_trace: Option<W3cTraceContext>,
 }
 
 struct EventStreamCancellation {
@@ -134,7 +131,6 @@ impl StreamableHttpClientAdapter {
             has_configured_headers,
             redirect_mode,
             initialize_deadline,
-            handshake_trace: crate::trace_context::current_w3c_trace_context(),
         }
     }
 
@@ -238,34 +234,19 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
             None
         };
 
-        let body = serde_json::to_value(&message).map_err(StreamableHttpError::Deserialize)?;
-        let handshake_trace = if is_discovery_request || mcp_method.as_deref() == Some("initialize")
-        {
-            self.handshake_trace.as_ref()
-        } else {
-            None
-        };
-        let request_span = crate::trace_context::request_span_and_trace_headers(
-            &body,
-            &mut headers,
-            handshake_trace,
-        );
-        let body = serde_json::to_vec(&body).map_err(StreamableHttpError::Deserialize)?;
+        let body = serde_json::to_vec(&message).map_err(StreamableHttpError::Deserialize)?;
         let has_authorization_header = headers.contains_key(AUTHORIZATION);
 
-        let request = self
-            .http_client
-            .http_request_stream(HttpRequestParams {
-                method: "POST".to_string(),
-                url: uri.to_string(),
-                headers: protocol_headers(&headers),
-                body: Some(body.into()),
-                timeout_ms,
-                redirect_policy,
-                request_id: "buffered-request".to_string(),
-                stream_response: true,
-            })
-            .instrument(request_span);
+        let request = self.http_client.http_request_stream(HttpRequestParams {
+            method: "POST".to_string(),
+            url: uri.to_string(),
+            headers: protocol_headers(&headers),
+            body: Some(body.into()),
+            timeout_ms,
+            redirect_policy,
+            request_id: "buffered-request".to_string(),
+            stream_response: true,
+        });
         let response = if is_event_stream_request {
             tokio::time::timeout(EVENT_STREAM_RESPONSE_TIMEOUT, request)
                 .await

@@ -11,7 +11,6 @@ use tokio::time::timeout_at;
 
 use super::EnvironmentRegistryClient;
 use super::RegistryAuthMode;
-use super::current_trace_context_headers;
 use crate::ExecServerError;
 
 pub(super) fn registry_auth_error(error: codex_api::AuthError) -> ExecServerError {
@@ -58,7 +57,6 @@ impl EnvironmentRegistryClient {
                     .http_for_auth()
                     .request(authenticated.method, authenticated.url)
                     .headers(prepared.headers)
-                    .headers(current_trace_context_headers())
                     .body(prepared.body.unwrap_or_default());
                 if let Some(timeout) = authenticated.timeout {
                     outgoing = outgoing.timeout(timeout);

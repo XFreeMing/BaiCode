@@ -32,7 +32,6 @@ use crate::tools::context::McpToolOutput;
 use super::app_tool_policy;
 use super::mcp_tool_metadata;
 use super::requires_mcp_tool_approval_for_mode;
-use super::with_mcp_tool_call_ids_meta;
 
 /// Exposes only history search/read. The caller owns exposure and the maximum output budget;
 /// each invocation resolves the parent's live client, account, and app/tool policy again.
@@ -150,12 +149,7 @@ impl<'call> ToolExecutor<ToolCall<'call>> for HistoryTool {
                 );
                 let mut apps_meta = metadata.codex_apps_meta.unwrap_or_default();
                 apps_meta.insert("call_id".to_owned(), json!(call.call_id));
-                let meta = with_mcp_tool_call_ids_meta(
-                    Some(json!({"callId": call.call_id, "_codex_apps": apps_meta})),
-                    &parent.thread_id.to_string(),
-                    &parent.session_id().to_string(),
-                    /*originating_call*/ None,
-                );
+                let meta = Some(json!({"callId": call.call_id, "_codex_apps": apps_meta}));
                 let limit = prepared
                     .output_token_limit()
                     .unwrap_or(self.max_output_tokens)

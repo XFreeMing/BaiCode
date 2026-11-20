@@ -70,7 +70,7 @@ async fn account_runtime_auth_signs_each_request_and_strips_credentials_on_redir
             .expect(2)
             .mount(&destination)
             .await;
-        Mock::given(path("/turn-costs"))
+        Mock::given(path("/auth-probe"))
             .respond_with(
                 ResponseTemplate::new(200).set_body_json(serde_json::json!({"turns": []})),
             )
@@ -124,16 +124,12 @@ async fn account_runtime_auth_signs_each_request_and_strips_credentials_on_redir
             ),
         ]);
         client
-            .query_api_key_turn_costs_at(
-                &format!("{}/turn-costs", server.uri()),
-                &[],
-                &stale_headers,
-            )
+            .post_probe(&format!("{}/auth-probe", server.uri()), &stale_headers)
             .await
             .unwrap();
         assert!(
             client
-                .query_api_key_turn_costs_at(&destination.uri(), &[], &stale_headers)
+                .post_probe(&destination.uri(), &stale_headers)
                 .await
                 .is_err()
         );
@@ -146,7 +142,7 @@ async fn account_runtime_auth_signs_each_request_and_strips_credentials_on_redir
         let requests = server.received_requests().await.unwrap();
         let cost_request = requests
             .iter()
-            .find(|request| request.url.path() == "/turn-costs")
+            .find(|request| request.url.path() == "/auth-probe")
             .unwrap();
         assert_eq!(cost_request.headers["openai-organization"], "org-b");
         let proofs: Vec<_> = requests
@@ -201,7 +197,7 @@ async fn client_registers_in_requested_organization_when_default_is_denied() {
             .mount(&server)
             .await;
         Mock::given(method("POST"))
-            .and(path("/turn-costs"))
+            .and(path("/auth-probe"))
             .respond_with(
                 ResponseTemplate::new(200).set_body_json(serde_json::json!({"turns": []})),
             )
@@ -250,12 +246,12 @@ async fn client_registers_in_requested_organization_when_default_is_denied() {
         .await
         .unwrap();
         client
-            .query_api_key_turn_costs_at(&format!("{}/turn-costs", server.uri()), &[], &headers)
+            .post_probe(&format!("{}/auth-probe", server.uri()), &headers)
             .await
             .unwrap();
         let requests = server.received_requests().await.unwrap();
         assert_eq!(requests.len(), 2);
-        assert_eq!(requests[1].url.path(), "/turn-costs");
+        assert_eq!(requests[1].url.path(), "/auth-probe");
         assert_eq!(requests[1].headers["openai-organization"], "org-b");
         let authorization = requests[1].headers["authorization"].to_str().unwrap();
         match mode {
@@ -384,7 +380,7 @@ async fn unsupported_openai_backend_rejects_runtime_auth_before_registration() {
 async fn custom_backend_keeps_its_credential_without_registering_a_runtime() {
     for mode in [RuntimeAuthMode::DualHeader, RuntimeAuthMode::AssertionOnly] {
         let server = MockServer::start().await;
-        Mock::given(path("/turn-costs"))
+        Mock::given(path("/auth-probe"))
             .respond_with(
                 ResponseTemplate::new(200).set_body_json(serde_json::json!({"turns": []})),
             )
@@ -407,11 +403,7 @@ async fn custom_backend_keeps_its_credential_without_registering_a_runtime() {
         .await
         .unwrap();
         client
-            .query_api_key_turn_costs_at(
-                &format!("{}/turn-costs", server.uri()),
-                &[],
-                &HeaderMap::new(),
-            )
+            .post_probe(&format!("{}/auth-probe", server.uri()), &HeaderMap::new())
             .await
             .unwrap();
         let requests = server.received_requests().await.unwrap();
@@ -434,7 +426,7 @@ async fn reusable_runtime_client_keeps_the_selected_accounts_transport_policy() 
             "actor": {"kind": "platform", "user_id": "user-a", "organization_id": "org-a", "project_id": null},
         })))
         .expect(1).mount(&server).await;
-    Mock::given(path("/turn-costs"))
+    Mock::given(path("/auth-probe"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"turns": []})))
         .expect(2)
         .mount(&server)
@@ -478,16 +470,13 @@ async fn reusable_runtime_client_keeps_the_selected_accounts_transport_policy() 
     )
     .await
     .unwrap();
-    let url = format!("{}/turn-costs", server.uri());
-    client
-        .query_api_key_turn_costs_at(&url, &[], &HeaderMap::new())
-        .await
-        .unwrap();
+    let url = format!("{}/auth-probe", server.uri());
+    client.post_probe(&url, &HeaderMap::new()).await.unwrap();
 
     policy.invalidate();
     assert!(controller.publish(policy.revision(), DestinationPolicy::Unrestricted));
     let error = client
-        .query_api_key_turn_costs_at(&url, &[], &HeaderMap::new())
+        .post_probe(&url, &HeaderMap::new())
         .await
         .unwrap_err();
     assert!(matches!(
@@ -505,10 +494,7 @@ async fn reusable_runtime_client_keeps_the_selected_accounts_transport_policy() 
     )
     .await
     .unwrap();
-    fresh
-        .query_api_key_turn_costs_at(&url, &[], &HeaderMap::new())
-        .await
-        .unwrap();
+    fresh.post_probe(&url, &HeaderMap::new()).await.unwrap();
 
     policy.invalidate();
     assert!(controller.publish(
@@ -521,10 +507,7 @@ async fn reusable_runtime_client_keeps_the_selected_accounts_transport_policy() 
         HeaderName::from_static("openai-organization"),
         HeaderValue::from_static("org-b"),
     )]);
-    let error = fresh
-        .query_api_key_turn_costs_at(&url, &[], &selectors)
-        .await
-        .unwrap_err();
+    let error = fresh.post_probe(&url, &selectors).await.unwrap_err();
     assert!(
         matches!(
             error,
@@ -669,5 +652,15 @@ async fn reusable_runtime_client_refreshes_credentials_without_accepting_a_new_s
 
         *source.0.write().unwrap() = oauth("another-login", "replacement");
         assert!(client.get_rate_limits().await.is_err());
+    }
+}
+
+impl Client {
+    async fn post_probe(&self, url: &str, headers: &HeaderMap) -> Result<(), RequestError> {
+        let request = self
+            .request(Method::POST, url)
+            .headers(self.headers_with(headers.clone()).await?);
+        self.exec_request_detailed(request, "POST", url).await?;
+        Ok(())
     }
 }

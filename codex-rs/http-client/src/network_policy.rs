@@ -208,6 +208,12 @@ impl NetworkPolicy {
         self
     }
 
+    /// Grant this inference transport only the explicitly selected model request URLs.
+    pub fn for_model_endpoints(mut self, endpoints: BTreeSet<Url>) -> Self {
+        self.loopback_only = false;
+        self.restrict_to_endpoints(endpoints)
+    }
+
     pub fn is_loopback_only(&self) -> bool {
         self.loopback_only
     }
@@ -256,7 +262,7 @@ impl NetworkPolicy {
 
     /// Whether this transport participates in the application policy lifecycle.
     pub fn is_managed(&self) -> bool {
-        self.loopback_only || self.state.is_some()
+        self.loopback_only || self.endpoints.is_some() || self.state.is_some()
     }
 
     /// Watches effective changes; unmanaged callers have no application policy owner.

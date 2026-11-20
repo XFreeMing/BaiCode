@@ -43,10 +43,9 @@ fn pending() -> RuntimeRegistration {
 }
 
 fn client(server: &MockServer) -> RuntimeRegistrationClient {
-    let registration_url = Url::parse(DEFAULT_REGISTRATION_URL).unwrap();
     let endpoint = Url::parse(&server.uri())
         .unwrap()
-        .join(registration_url.path())
+        .join("/agent/register")
         .unwrap();
     RuntimeRegistrationClient::new(
         HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
@@ -257,6 +256,7 @@ async fn registration_never_forwards_credentials_through_a_redirect() {
 #[test]
 fn registration_rejects_unsafe_endpoints() {
     for endpoint in [
+        "https://auth.example.com/register",
         "http://auth.example.com/register",
         "https://user:secret@auth.example.com/register",
         "https://auth.example.com/register?token=secret",

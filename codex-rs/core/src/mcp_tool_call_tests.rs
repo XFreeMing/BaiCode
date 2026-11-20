@@ -9,13 +9,11 @@ use crate::session::tests::make_session_and_context;
 use crate::session::tests::make_session_and_context_with_rx;
 use crate::session::tests::mcp_config_for_test;
 use crate::session::tests::test_environment_id;
-use crate::session::tests::update_selected_settings_for_test;
 use crate::session::tests::update_turn_settings_for_test;
 use crate::session::turn_context::TurnEnvironment;
 use crate::state::ActiveTurn;
 use crate::test_support::models_manager_with_provider;
 use crate::tools::hook_names::HookToolName;
-use crate::turn_metadata::ExecutionMetadata;
 use codex_app_server_protocol as app_server_protocol;
 use codex_config::CONFIG_TOML_FILE;
 use codex_config::config_toml::ConfigToml;
@@ -30,7 +28,6 @@ use codex_features::Features;
 use codex_hooks::HooksConfig;
 use codex_mcp::McpServerKey;
 use codex_model_provider::create_model_provider;
-use codex_protocol::ResponseItemId;
 use codex_protocol::models::PermissionProfile;
 use codex_protocol::openai_models::ReasoningEffort as ReasoningEffortConfig;
 use codex_protocol::protocol::AskForApproval;
@@ -271,26 +268,6 @@ fn non_apps_tool_does_not_require_account_metadata(meta: JsonValue) {
             .map(|metadata| metadata.link_id),
         Ok(None),
     );
-}
-
-fn mcp_turn_metadata_context(turn_context: &TurnContext) -> ExecutionMetadata<'_> {
-    ExecutionMetadata {
-        model: turn_context.model_info().slug.as_str(),
-        reasoning_effort: turn_context.effective_reasoning_effort(),
-        node_repl_disabled: turn_context.model_info().node_repl_disabled,
-        auto_review_enabled: crate::guardian::routes_approval_policy_to_guardian(
-            turn_context.approval_policy(),
-            turn_context.config.approvals_reviewer,
-        ),
-        node_repl_auto_review_required: turn_context.model_info().node_repl_auto_review_required,
-    }
-}
-
-fn expected_mcp_turn_metadata(turn_context: &TurnContext) -> serde_json::Value {
-    turn_context
-        .turn_metadata_state
-        .current_meta_value_for_mcp_request(mcp_turn_metadata_context(turn_context))
-        .expect("turn metadata")
 }
 
 fn write_sample_plugin_mcp(codex_home: &std::path::Path) {
@@ -1226,8 +1203,8 @@ fn truncate_mcp_tool_result_for_event_bounds_large_error() {
 }
 
 #[tokio::test]
-async fn mcp_tool_call_request_meta_attributes_only_repl_calls_to_configured_product() {
-    for (server, connector, configured, expected) in [
+async fn mcp_tool_call_request_meta_omits_product_sku() {
+    for (server, connector, configured, _old_sku) in [
         ("node_repl", None, Some("codex"), Some("codex")),
         (
             "codex_apps",
@@ -1278,14 +1255,14 @@ async fn mcp_tool_call_request_meta_attributes_only_repl_calls_to_configured_pro
         .expect("request metadata");
         assert_eq!(
             meta[crate::X_CODEX_TURN_METADATA_HEADER].get("product_sku"),
-            expected.map(serde_json::Value::from).as_ref(),
+            None,
             "{server}, {connector:?}, {configured:?}",
         );
     }
 }
 
 #[tokio::test]
-async fn mcp_tool_call_request_meta_includes_turn_metadata_for_custom_server() {
+async fn mcp_tool_call_request_meta_omits_turn_metadata_for_custom_server() {
     let (_, turn_context) = make_session_and_context().await;
     let turn_context = Arc::new(turn_context);
     let step_context = StepContext::for_test(Arc::clone(&turn_context));
@@ -1302,123 +1279,14 @@ async fn mcp_tool_call_request_meta_includes_turn_metadata_for_custom_server() {
             replacement: Some(client_metadata),
             ..Default::default()
         });
-    let expected_turn_metadata = expected_mcp_turn_metadata(&turn_context);
-
     let meta = build_mcp_tool_call_request_meta(
         &step_context,
         "custom_server",
         "call-custom",
-        /*metadata*/ None,
-        /*is_host_owned_apps*/ false,
-    )
-    .expect("custom servers should receive turn metadata");
-    let turn_metadata = meta
-        .get(crate::X_CODEX_TURN_METADATA_HEADER)
-        .expect("turn metadata should be present");
-
-    assert_eq!(
-        turn_metadata
-            .get("model")
-            .and_then(serde_json::Value::as_str),
-        Some(step_context.settings.model_info.slug.as_str())
+        None,
+        false,
     );
-    assert_eq!(
-        turn_metadata["node_repl_auto_review_required"],
-        serde_json::Value::Bool(
-            step_context
-                .settings
-                .model_info
-                .node_repl_auto_review_required
-        ),
-    );
-    assert_eq!(
-        turn_metadata["node_repl_disabled"],
-        serde_json::Value::Bool(step_context.settings.model_info.node_repl_disabled),
-    );
-    assert_eq!(
-        turn_metadata
-            .get("reasoning_effort")
-            .and_then(serde_json::Value::as_str),
-        step_context
-            .settings
-            .effective_reasoning_effort()
-            .map(|effort| effort.to_string())
-            .as_deref()
-    );
-
-    assert_eq!(
-        meta,
-        serde_json::json!({
-            "callId": "call-custom",
-            crate::X_CODEX_TURN_METADATA_HEADER: expected_turn_metadata,
-        })
-    );
-}
-
-#[test_case::test_case(Some(ReasoningEffortConfig::Low), "low"; "configured effort")]
-#[test_case::test_case(None, "high"; "pinned model default")]
-#[tokio::test]
-async fn mcp_tool_call_request_meta_uses_the_issuing_step(
-    effort: Option<ReasoningEffortConfig>,
-    expected_effort: &str,
-) {
-    let (_, turn_context) = make_session_and_context().await;
-    let turn_context = Arc::new(turn_context);
-    let step_a = StepContext::for_test(Arc::clone(&turn_context));
-    let original_meta = build_mcp_tool_call_request_meta(
-        &step_a,
-        "node_repl",
-        "call-a",
-        /*metadata*/ None,
-        /*is_host_owned_apps*/ false,
-    );
-    let mut step_b = StepContext::for_test(Arc::clone(&turn_context));
-    let settings = Arc::make_mut(&mut Arc::get_mut(&mut step_b).expect("unique step").settings);
-    update_selected_settings_for_test(settings, |selected| {
-        selected.collaboration_mode = selected.collaboration_mode.with_updates(
-            Some("model-b".to_string()),
-            Some(effort),
-            /*developer_instructions*/ None,
-        );
-    });
-    let model = Arc::make_mut(&mut settings.model_info);
-    model.slug = "model-b".to_string();
-    model.default_reasoning_level = Some(ReasoningEffortConfig::High);
-    model.node_repl_disabled = true;
-    // Node review requirements are captured with the issuing step.
-    model.node_repl_auto_review_required =
-        !turn_context.model_info().node_repl_auto_review_required;
-
-    let mut expected = expected_mcp_turn_metadata(&turn_context);
-    expected["model"] = serde_json::json!("model-b");
-    expected["reasoning_effort"] = serde_json::json!(expected_effort);
-    expected["node_repl_disabled"] = serde_json::json!(true);
-    expected["node_repl_auto_review_required"] =
-        serde_json::json!(step_b.settings.model_info.node_repl_auto_review_required);
-    assert_eq!(
-        build_mcp_tool_call_request_meta(
-            &step_b,
-            "node_repl",
-            "call-b",
-            /*metadata*/ None,
-            /*is_host_owned_apps*/ false
-        ),
-        Some(serde_json::json!({
-            "callId": "call-b",
-            crate::X_CODEX_TURN_METADATA_HEADER: expected,
-            CONFIRMATION_POLICIES_META_KEY: {},
-        })),
-    );
-    assert_eq!(
-        build_mcp_tool_call_request_meta(
-            &step_a,
-            "node_repl",
-            "call-a",
-            /*metadata*/ None,
-            /*is_host_owned_apps*/ false
-        ),
-        original_meta,
-    );
+    assert_eq!(meta, Some(serde_json::json!({"callId": "call-custom"})));
 }
 
 #[tokio::test]
@@ -1444,7 +1312,6 @@ async fn guardian_mcp_tool_call_request_meta_excludes_actor_confirmation_policy(
         });
         let expected = Some(serde_json::json!({
             "callId": "call-guardian",
-            crate::X_CODEX_TURN_METADATA_HEADER: expected_mcp_turn_metadata(&turn_context),
         }));
         let step_context = StepContext::for_test(Arc::new(turn_context));
 
@@ -1466,7 +1333,7 @@ async fn guardian_mcp_tool_call_request_meta_excludes_actor_confirmation_policy(
 }
 
 #[tokio::test]
-async fn mcp_tool_call_request_meta_includes_turn_started_at_unix_ms() {
+async fn mcp_tool_call_request_meta_omits_turn_started_at_unix_ms() {
     let (_, turn_context) = make_session_and_context().await;
     let turn_context = Arc::new(turn_context);
     let step_context = StepContext::for_test(Arc::clone(&turn_context));
@@ -1481,17 +1348,8 @@ async fn mcp_tool_call_request_meta_includes_turn_started_at_unix_ms() {
         /*metadata*/ None,
         /*is_host_owned_apps*/ false,
     )
-    .expect("custom servers should receive turn metadata");
-    let turn_metadata = meta
-        .get(crate::X_CODEX_TURN_METADATA_HEADER)
-        .expect("turn metadata should be present");
-
-    assert_eq!(
-        turn_metadata
-            .get("turn_started_at_unix_ms")
-            .and_then(serde_json::Value::as_i64),
-        Some(1_700_000_000_123)
-    );
+    .expect("call metadata");
+    assert!(meta.get(crate::X_CODEX_TURN_METADATA_HEADER).is_none());
 }
 
 #[tokio::test]
@@ -1560,7 +1418,6 @@ async fn plugin_mcp_tool_call_request_meta_includes_plugin_id() {
     let (_, turn_context) = make_session_and_context().await;
     let turn_context = Arc::new(turn_context);
     let step_context = StepContext::for_test(Arc::clone(&turn_context));
-    let expected_turn_metadata = expected_mcp_turn_metadata(&turn_context);
     let mut metadata = approval_metadata(
         /*connector_id*/ None, /*connector_name*/ None,
         /*connector_description*/ None, /*tool_title*/ None,
@@ -1578,7 +1435,6 @@ async fn plugin_mcp_tool_call_request_meta_includes_plugin_id() {
         ),
         Some(serde_json::json!({
             "callId": "call-plugin",
-            crate::X_CODEX_TURN_METADATA_HEADER: expected_turn_metadata,
             MCP_TOOL_PLUGIN_ID_META_KEY: "sample@test",
         }))
     );
@@ -1691,7 +1547,7 @@ async fn mcp_tool_call_item_includes_app_identity() {
 #[test_case::test_case(false; "user configured Apps name")]
 #[test_case::test_case(true; "host owned Apps")]
 #[tokio::test]
-async fn codex_apps_tool_call_request_meta_includes_turn_metadata_and_codex_apps_meta(
+async fn codex_apps_tool_call_request_meta_includes_only_the_call_and_app_metadata(
     is_host_owned_apps: bool,
 ) {
     let (_, turn_context) = make_session_and_context().await;
@@ -1700,7 +1556,6 @@ async fn codex_apps_tool_call_request_meta_includes_turn_metadata_and_codex_apps
         .set_root_turn_id("causal-root".to_string());
     let turn_context = Arc::new(turn_context);
     let step_context = StepContext::for_test(Arc::clone(&turn_context));
-    let expected_turn_metadata = expected_mcp_turn_metadata(&turn_context);
     let metadata = McpToolApprovalMetadata {
         annotations: None,
         connector_id: Some("calendar".to_string()),
@@ -1727,15 +1582,12 @@ async fn codex_apps_tool_call_request_meta_includes_turn_metadata_and_codex_apps
         openai_file_input_optional_fields: None,
     };
 
-    let mut expected_apps_meta = serde_json::json!({
+    let expected_apps_meta = serde_json::json!({
         "call_id": "call_abc123xyz789",
         "resource_uri": "connector://calendar/tools/calendar_create_event",
         "contains_mcp_source": true,
         "connector_id": "calendar",
     });
-    if is_host_owned_apps {
-        expected_apps_meta["root_turn_id"] = serde_json::json!("causal-root");
-    }
 
     assert_eq!(
         build_mcp_tool_call_request_meta(
@@ -1747,7 +1599,6 @@ async fn codex_apps_tool_call_request_meta_includes_turn_metadata_and_codex_apps
         ),
         Some(serde_json::json!({
             "callId": "call_abc123xyz789",
-            crate::X_CODEX_TURN_METADATA_HEADER: expected_turn_metadata,
             MCP_TOOL_CODEX_APPS_META_KEY: expected_apps_meta,
         }))
     );
@@ -1758,7 +1609,6 @@ async fn codex_apps_tool_call_request_meta_includes_call_id_without_existing_cod
     let (_, turn_context) = make_session_and_context().await;
     let turn_context = Arc::new(turn_context);
     let step_context = StepContext::for_test(Arc::clone(&turn_context));
-    let expected_turn_metadata = expected_mcp_turn_metadata(&turn_context);
 
     assert_eq!(
         build_mcp_tool_call_request_meta(
@@ -1770,7 +1620,6 @@ async fn codex_apps_tool_call_request_meta_includes_call_id_without_existing_cod
         ),
         Some(serde_json::json!({
             "callId": "call_abc123xyz789",
-            crate::X_CODEX_TURN_METADATA_HEADER: expected_turn_metadata,
             MCP_TOOL_CODEX_APPS_META_KEY: {
                 "call_id": "call_abc123xyz789",
             },
@@ -1994,59 +1843,6 @@ async fn codex_apps_auth_elicitation_enabled_by_default_requests_elicitation(
             "type": "text",
             "text": "Authentication for Google Calendar was requested and accepted. Retry this tool call now.",
         })]
-    );
-}
-
-#[test]
-fn mcp_tool_call_ids_are_added_to_request_meta() {
-    let origin = crate::tools::context::ToolCallOrigin {
-        item_id: Some(ResponseItemId::from_server("fc-live".to_string())),
-        window_id: "thread-live:2".to_string(),
-    };
-
-    assert_eq!(
-        with_mcp_tool_call_ids_meta(
-            Some(serde_json::json!({
-                "source": "test-client",
-                "threadId": "stale-thread",
-                "sessionId": "stale-session",
-                "windowId": "stale-window",
-                "itemId": "stale-item",
-            })),
-            "thread-live",
-            "session-live",
-            Some(&origin),
-        ),
-        Some(serde_json::json!({
-            "source": "test-client",
-            "threadId": "thread-live",
-            "sessionId": "session-live",
-            "itemId": "fc-live",
-            "windowId": "thread-live:2",
-        }))
-    );
-
-    assert_eq!(
-        with_mcp_tool_call_ids_meta(
-            /*meta*/ None,
-            "thread-live",
-            "session-live",
-            /*originating_call*/ None,
-        ),
-        Some(serde_json::json!({
-            "threadId": "thread-live",
-            "sessionId": "session-live",
-        }))
-    );
-
-    assert_eq!(
-        with_mcp_tool_call_ids_meta(
-            Some(serde_json::json!("invalid-meta")),
-            "thread-live",
-            "session-live",
-            /*originating_call*/ None,
-        ),
-        Some(serde_json::json!("invalid-meta"))
     );
 }
 

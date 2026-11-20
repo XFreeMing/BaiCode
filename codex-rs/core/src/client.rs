@@ -71,9 +71,7 @@ use codex_api::StreamOptions;
 use codex_api::TransportError;
 use codex_api::WebsocketTelemetry;
 use codex_api::auth_header_telemetry;
-use codex_api::build_session_headers;
 use codex_api::create_text_param_for_request;
-use codex_api::response_create_client_metadata;
 use codex_http_client::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
@@ -82,8 +80,6 @@ use codex_login::UnauthorizedRecovery;
 use codex_login::default_client::add_originator_header;
 use codex_otel::SessionTelemetry;
 use codex_otel::WEBSOCKET_CONTINUATION_COUNT_METRIC;
-use codex_otel::current_span_w3c_trace_context;
-use codex_otel::inject_span_w3c_trace_headers;
 use codex_protocol::ResponseItemId;
 use codex_protocol::auth::AuthMode;
 
@@ -100,7 +96,6 @@ use codex_protocol::protocol::EventMsg;
 use codex_protocol::protocol::InternalSessionSource;
 use codex_protocol::protocol::SessionSource;
 use codex_protocol::protocol::SubAgentSource;
-use codex_protocol::protocol::W3cTraceContext;
 use codex_rollout_trace::InferenceTraceAttempt;
 use codex_rollout_trace::InferenceTraceContext;
 use codex_tools::ToolSpec;
@@ -176,8 +171,6 @@ pub const X_OPENAI_MEMGEN_REQUEST_HEADER: &str = "x-openai-memgen-request";
 pub const X_OPENAI_SUBAGENT_HEADER: &str = "x-openai-subagent";
 pub const X_RESPONSESAPI_INCLUDE_TIMING_METRICS_HEADER: &str =
     "x-responsesapi-include-timing-metrics";
-const X_CODEX_WS_STREAM_REQUEST_START_MS_CLIENT_METADATA_KEY: &str =
-    "x-codex-ws-stream-request-start-ms";
 const WS_REQUEST_HEADER_RESPONSES_LITE_CLIENT_METADATA_KEY: &str =
     "ws_request_header_x_openai_internal_codex_responses_lite";
 const RESPONSES_WEBSOCKETS_V2_BETA_HEADER_VALUE: &str = "responses_websockets=2026-02-06";
@@ -357,7 +350,6 @@ pub struct ModelClient {
     state: Arc<ModelClientState>,
     agent_identity_policy: AgentIdentityAuthPolicy,
     prompt_cache_key_policy: PromptCacheKey,
-    session_id_override: Option<String>,
     codex_responses_headers: Option<Arc<CodexResponsesHeaders>>,
     event_sender: Option<Sender<ProtocolEvent>>,
     http_client_factory: HttpClientFactory,
@@ -706,7 +698,6 @@ impl ModelClient {
             }),
             agent_identity_policy,
             prompt_cache_key_policy: PromptCacheKey::default(),
-            session_id_override: None,
             codex_responses_headers: None,
             event_sender: None,
             http_client_factory,
@@ -747,7 +738,6 @@ impl ModelClient {
     pub(crate) fn with_session_context(
         mut self,
         prompt_cache_key: PromptCacheKey,
-        session_id_override: Option<String>,
         event_sender: Sender<ProtocolEvent>,
         codex_responses_headers: Option<Arc<CodexResponsesHeaders>>,
         api_key_cyber_access_programs: cyber_access_program::ApiKeyCyberAccessPrograms,
@@ -756,7 +746,6 @@ impl ModelClient {
         >,
     ) -> Self {
         self.prompt_cache_key_policy = prompt_cache_key;
-        self.session_id_override = session_id_override;
         self.event_sender = Some(event_sender);
         self.codex_responses_headers = codex_responses_headers;
         self.api_key_cyber_access_programs = api_key_cyber_access_programs;
@@ -785,36 +774,12 @@ impl ModelClient {
         self.prompt_cache_key_policy.clone()
     }
 
-    /// The caller's policy controls the request body independently of the session-id header.
-    fn prompt_cache_key(&self, metadata: &CodexResponsesMetadata) -> Option<String> {
+    /// Only an explicitly supplied cache key is sent to the model provider.
+    fn prompt_cache_key(&self) -> Option<String> {
         match &self.prompt_cache_key_policy {
-            PromptCacheKey::SessionDerived => Some(self.session_derived_cache_key(metadata)),
+            PromptCacheKey::SessionDerived => None,
             PromptCacheKey::Custom(key) => Some(key.clone()),
             PromptCacheKey::Omit => None,
-        }
-    }
-
-    fn session_derived_cache_key(&self, metadata: &CodexResponsesMetadata) -> String {
-        if let Some(session_id) = &self.session_id_override {
-            return session_id.clone();
-        }
-
-        if let SessionSource::Internal(source) = &self.state.session_source
-            && let Some(parent_thread_id) = metadata.parent_thread_id
-        {
-            return format!("{source}:{parent_thread_id}");
-        }
-
-        metadata.session_id.clone()
-    }
-
-    // ChatGPT derives cache affinity from the Responses session-id header. Keep the
-    // actual session identity in turn metadata, hooks, and history/notes requests.
-    fn responses_session_id(&self, metadata: &CodexResponsesMetadata) -> String {
-        if self.state.session_source.is_non_root_agent() {
-            metadata.session_id.clone()
-        } else {
-            self.session_derived_cache_key(metadata)
         }
     }
 
@@ -1149,30 +1114,8 @@ impl ModelClient {
         extra_headers
     }
 
-    fn build_responses_compatibility_headers(
-        &self,
-        responses_metadata: &CodexResponsesMetadata,
-    ) -> ApiHeaderMap {
-        let mut extra_headers = responses_metadata.compatibility_headers();
-        if matches!(
-            self.state.session_source,
-            SessionSource::Internal(InternalSessionSource::MemoryConsolidation)
-        ) {
-            extra_headers.insert(
-                X_OPENAI_MEMGEN_REQUEST_HEADER,
-                HeaderValue::from_static("true"),
-            );
-        }
-        extra_headers
-    }
-
-    fn build_ws_client_metadata(
-        &self,
-        responses_metadata: &CodexResponsesMetadata,
-        include_internal: bool,
-        use_responses_lite: bool,
-    ) -> HashMap<String, String> {
-        let mut client_metadata = responses_metadata.client_metadata(include_internal);
+    fn build_ws_client_metadata(use_responses_lite: bool) -> HashMap<String, String> {
+        let mut client_metadata = HashMap::new();
         if use_responses_lite {
             client_metadata.insert(
                 WS_REQUEST_HEADER_RESPONSES_LITE_CLIENT_METADATA_KEY.to_string(),
@@ -1243,7 +1186,7 @@ impl ModelClient {
         effort: Option<ReasoningEffortConfig>,
         summary: ReasoningSummaryConfig,
         service_tier: Option<String>,
-        responses_metadata: &CodexResponsesMetadata,
+        _responses_metadata: &CodexResponsesMetadata,
         include_internal: bool,
     ) -> Result<ResponsesApiRequest> {
         let mut input = prompt.get_formatted_input_for_request(model_info);
@@ -1363,7 +1306,6 @@ impl ModelClient {
                 }
             }
         }
-        let client_metadata = responses_metadata.client_metadata(include_internal);
         let request = ResponsesApiRequest {
             model: model_info.slug.clone(),
             input,
@@ -1376,12 +1318,12 @@ impl ModelClient {
             stream_options,
             include,
             service_tier,
-            prompt_cache_key: self.prompt_cache_key(responses_metadata),
+            prompt_cache_key: self.prompt_cache_key(),
             prompt_cache_options: prompt
                 .prompt_cache_ttl
                 .map(|ttl| codex_api::PromptCacheOptions { ttl }),
             text,
-            client_metadata: Some(client_metadata),
+            client_metadata: None,
             access_programs: None,
             request_country: Default::default(),
         };
@@ -1442,7 +1384,7 @@ impl ModelClient {
             ClientRouting::Workspace => Some(&self.state.workspace_routing),
             ClientRouting::ConfiguredProvider => None,
         };
-        codex_model_provider::resolve_request(
+        let mut setup = codex_model_provider::resolve_request(
             provider.as_ref(),
             Some(ProviderAuthScope {
                 agent_identity_policy: self.agent_identity_policy,
@@ -1452,7 +1394,26 @@ impl ModelClient {
             routing,
             self.http_client_factory.clone(),
         )
-        .await
+        .await?;
+        // Only a configured model may widen the local transport policy, and only for inference.
+        let api = &setup.api_provider;
+        if provider.info().base_url.as_deref() == Some(api.base_url.as_str())
+            && url::Url::parse(&api.base_url)
+                .is_ok_and(|url| !codex_http_client::is_loopback_network_url(&url))
+        {
+            let endpoints = ["responses", "responses/compact"]
+                .into_iter()
+                .filter_map(|path| url::Url::parse(&api.url_for_path(path)).ok())
+                .chain(api.websocket_url_for_path("responses").ok())
+                .collect();
+            let policy = setup
+                .http_client_factory
+                .network_policy()
+                .clone()
+                .for_model_endpoints(endpoints);
+            setup.http_client_factory = setup.http_client_factory.with_network_policy(policy);
+        }
+        Ok(setup)
     }
 
     fn prepared_prompt_for_trace(
@@ -1592,7 +1553,6 @@ impl ModelClient {
     ) -> std::result::Result<ApiWebSocketConnection, ApiError> {
         let mut headers = self.build_websocket_headers(responses_metadata).await;
         headers.extend(responses_headers.clone());
-        inject_span_w3c_trace_headers(&tracing::Span::current(), &mut headers);
         if let Some(affinity) = parent_routing_affinity {
             let uri = api_provider
                 .websocket_url_for_path(RESPONSES_PATH)
@@ -1693,14 +1653,6 @@ impl ModelClient {
             /*turn_state*/ None,
         );
         add_originator_header(&mut headers, self.state.originator.as_str());
-        if let Ok(header_value) = HeaderValue::from_str(&responses_metadata.thread_id) {
-            headers.insert("x-client-request-id", header_value);
-        }
-        headers.extend(build_session_headers(
-            Some(self.responses_session_id(responses_metadata)),
-            Some(responses_metadata.thread_id.to_string()),
-        ));
-        headers.extend(self.build_responses_compatibility_headers(responses_metadata));
         if let Some(routing_hint) = &responses_metadata.routing_hint {
             headers.insert(X_CODEX_ROUTING_HINT_HEADER, routing_hint.clone());
         }
@@ -1755,24 +1707,19 @@ impl<'a> ResponsesHttpExecutor<'a> {
     async fn build_responses_options(
         &self,
         turn_state: &Arc<OnceLock<String>>,
-        responses_metadata: &CodexResponsesMetadata,
         compression: Compression,
         use_responses_lite: bool,
     ) -> ApiResponsesOptions {
         ApiResponsesOptions {
-            session_id: Some(self.client.responses_session_id(responses_metadata)),
-            thread_id: Some(responses_metadata.thread_id.to_string()),
-            session_source: Some(self.client.state.session_source.clone()),
+            session_id: None,
+            thread_id: None,
+            session_source: None,
             extra_headers: {
                 let mut headers = build_responses_headers(
                     self.client.state.beta_features_header.as_deref(),
                     Some(turn_state),
                 );
                 add_originator_header(&mut headers, self.client.state.originator.as_str());
-                headers.extend(
-                    self.client
-                        .build_responses_compatibility_headers(responses_metadata),
-                );
                 if let Some(header_value) = self.client.generate_attestation_header_for().await {
                     headers.insert(X_OAI_ATTESTATION_HEADER, header_value);
                 }
@@ -2149,12 +2096,7 @@ impl ResponsesHttpExecutor<'_> {
             );
             let compression = self.responses_request_compression(client_setup.auth.as_ref());
             let mut options = self
-                .build_responses_options(
-                    turn_state,
-                    responses_metadata,
-                    compression,
-                    model_info.use_responses_lite,
-                )
+                .build_responses_options(turn_state, compression, model_info.use_responses_lite)
                 .await;
 
             let mut request = self.client.build_responses_request(
@@ -2225,7 +2167,6 @@ impl ResponsesHttpExecutor<'_> {
                 &mut request.client_metadata,
             );
             let inference_trace_attempt = inference_trace.start_attempt();
-            inference_trace_attempt.add_request_headers(&mut options.extra_headers);
             if let Some(input) = tool_metadata::bounded_input(&request, &request.input) {
                 if let Some(recorder) = &self.client.executed_tool_calls {
                     recorder.invalidate_wire_inventory_loss(&request.input, &input);
@@ -2334,7 +2275,6 @@ impl ModelClientSession {
         sampling: SamplingOptions,
         responses_metadata: &CodexResponsesMetadata,
         warmup: bool,
-        request_trace: Option<W3cTraceContext>,
         inference_trace: &InferenceTraceContext,
     ) -> Result<WebsocketStreamOutcome> {
         let after_prewarm = !warmup && self.websocket_session.last_response_from_untraced_warmup;
@@ -2476,11 +2416,8 @@ impl ModelClientSession {
                 }
             }
 
-            let mut client_metadata = self.client.build_ws_client_metadata(
-                responses_metadata,
-                include_internal,
-                model_info.use_responses_lite,
-            );
+            let mut client_metadata =
+                ModelClient::build_ws_client_metadata(model_info.use_responses_lite);
             if let Some(turn_state) = self.turn_state.get() {
                 client_metadata.insert(X_CODEX_TURN_STATE_HEADER.to_string(), turn_state.clone());
             }
@@ -2563,10 +2500,7 @@ impl ModelClientSession {
                 previous_response_id,
                 input: incremental_items.as_deref().unwrap_or(&request.input),
                 generate: if warmup { Some(false) } else { None },
-                client_metadata: response_create_client_metadata(
-                    Some(client_metadata),
-                    request_trace.as_ref(),
-                ),
+                client_metadata: (!client_metadata.is_empty()).then_some(client_metadata),
                 ..ResponseCreateWsRequest::from(request.as_ref())
             };
             self.client.set_guardian_metadata(
@@ -2586,7 +2520,6 @@ impl ModelClientSession {
                 &mut ws_payload.client_metadata,
             );
             let mut ws_request = ResponsesWsRequest::ResponseCreate(ws_payload);
-            stamp_ws_stream_request_start_ms(&mut ws_request);
             let ResponsesWsRequest::ResponseCreate(payload) = &ws_request;
             let bounded_input = tool_metadata::bounded_input(&ws_request, payload.input);
             if let Some(input) = bounded_input.as_deref() {
@@ -2780,7 +2713,6 @@ impl ModelClientSession {
                 },
                 responses_metadata,
                 /*warmup*/ true,
-                current_span_w3c_trace_context(),
                 &disabled_trace,
             )
             .await
@@ -2865,7 +2797,6 @@ impl ModelClientSession {
         match wire_api {
             WireApi::Responses => {
                 if self.client.responses_websocket_enabled() {
-                    let request_trace = current_span_w3c_trace_context();
                     match self
                         .stream_responses_websocket(
                             prompt,
@@ -2874,7 +2805,6 @@ impl ModelClientSession {
                             sampling.clone(),
                             responses_metadata,
                             /*warmup*/ false,
-                            request_trace,
                             inference_trace,
                         )
                         .await?
@@ -2920,21 +2850,6 @@ impl ModelClientSession {
         self.websocket_session = WebsocketSession::default();
         activated
     }
-}
-
-/// Stamp a ResponsesWsRequest with the current time.
-///
-/// Meant to be called just before sending the request over the socket, to capture realistic
-/// transport timing.
-fn stamp_ws_stream_request_start_ms(request: &mut ResponsesWsRequest<'_>) {
-    let ResponsesWsRequest::ResponseCreate(payload) = request;
-    payload
-        .client_metadata
-        .get_or_insert_with(HashMap::new)
-        .insert(
-            X_CODEX_WS_STREAM_REQUEST_START_MS_CLIENT_METADATA_KEY.to_string(),
-            crate::turn_timing::now_unix_timestamp_ms().to_string(),
-        );
 }
 
 fn is_guardian_reviewer(responses_headers: &ApiHeaderMap) -> bool {

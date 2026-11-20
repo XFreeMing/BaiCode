@@ -85,7 +85,6 @@ pub(super) async fn test_processor(
         /*state_db*/ None,
         /*log_db*/ None,
         skills_watcher,
-        /*turn_cost_worker*/ None,
         Vec::new(),
         Arc::new(SampleResponseRegistry::default()),
     );
@@ -699,7 +698,6 @@ async fn revert_settles_interrupts_before_replacing_a_runtime() -> Result<()> {
         processor.thread_state_manager.clone(),
         processor.thread_watch_manager.clone(),
         processor.skills_watcher.clone(),
-        /*turn_cost_worker*/ None,
     );
     let request_id = |id| ConnectionRequestId {
         connection_id,

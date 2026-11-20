@@ -55,7 +55,6 @@ mod shell_snapshot_file;
 #[cfg(unix)]
 mod shell_snapshot_process;
 mod telemetry;
-mod trace_context;
 mod websocket_pong_watchdog;
 
 // Shared limits for inbound executor messages across all transports.

@@ -15,7 +15,6 @@ use codex_tools::ToolSearchInfo;
 use codex_tools::ToolSpec;
 use codex_tools::TurnItemEmissionFuture;
 use codex_tools::TurnItemEmitter;
-use codex_utils_string::to_ascii_json_string;
 
 use crate::session::session::Session;
 use crate::session::turn_context::TurnContext;
@@ -25,7 +24,6 @@ use crate::tools::context::ToolPayload;
 use crate::tools::lifecycle::extension_tool_call_source;
 use crate::tools::registry::CoreToolRuntime;
 use crate::tools::registry::ToolExecutor;
-use crate::turn_metadata::ExecutionMetadata;
 
 pub(crate) struct ExtensionToolAdapter(
     Arc<dyn for<'call> codex_tools::ToolExecutor<ExtensionToolCall<'call>>>,
@@ -241,19 +239,12 @@ async fn to_extension_call<'a>(
             .collect()
     });
     let settings = &invocation.step_context.settings;
-    let codex_turn_metadata = invocation
-        .turn
-        .turn_metadata_state
-        .current_meta_value_for_extension_request(ExecutionMetadata::from_settings(
-            &invocation.step_context.settings,
-        ))
-        .and_then(|metadata| to_ascii_json_string(&metadata).ok());
     ExtensionToolCall {
         turn_id: invocation.turn.sub_id.clone(),
         call_id: invocation.call_id.clone(),
         tool_name: invocation.tool_name.clone(),
         model: settings.model_info.slug.clone(),
-        codex_turn_metadata,
+        codex_turn_metadata: None,
         truncation_policy: settings.model_info.truncation_policy.into(),
         source: extension_tool_call_source(invocation.source.clone()),
         conversation_history,
@@ -532,7 +523,6 @@ mod tests {
         );
         let model_info = Arc::make_mut(&mut settings.model_info);
         model_info.node_repl_disabled = !turn.model_info().node_repl_disabled;
-        let node_repl_disabled = model_info.node_repl_disabled;
         let invocation = ToolInvocation {
             session,
             step_context,
@@ -567,14 +557,7 @@ mod tests {
         );
         assert_eq!(captured_call.model, model);
         assert_eq!(captured_call.truncation_policy, truncation_policy);
-        let metadata: serde_json::Value = serde_json::from_str(
-            captured_call
-                .codex_turn_metadata
-                .as_deref()
-                .expect("turn metadata"),
-        )
-        .expect("metadata JSON");
-        assert_eq!(metadata["node_repl_disabled"], json!(node_repl_disabled));
+        assert!(captured_call.codex_turn_metadata.is_none());
         assert_eq!(
             captured_call.source,
             ExtensionToolCallSource::CodeMode {

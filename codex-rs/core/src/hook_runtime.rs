@@ -76,7 +76,6 @@ use crate::state::TurnState;
 use crate::tools::hook_names::HookToolName;
 use crate::tools::registry::PostToolUsePayload;
 use crate::tools::sandboxing::PermissionRequestPayload;
-use crate::turn_metadata::ExecutionMetadata;
 
 pub(crate) struct HookRuntimeOutcome {
     pub should_stop: bool,
@@ -353,25 +352,6 @@ pub(crate) async fn run_post_tool_use_hooks(
     outcome
 }
 
-fn build_request_metadata(
-    step_context: Option<&StepContext>,
-    turn_context: &TurnContext,
-) -> Map<String, Value> {
-    let settings = step_context
-        .map(|step_context| step_context.settings.as_ref())
-        .unwrap_or(turn_context.initial_settings.as_ref());
-    turn_context
-        .turn_metadata_state
-        .current_meta_value_for_mcp_request(ExecutionMetadata::from_settings(settings))
-        .map(|turn_metadata| {
-            Map::from_iter([(
-                crate::X_CODEX_TURN_METADATA_HEADER.to_string(),
-                turn_metadata,
-            )])
-        })
-        .unwrap_or_default()
-}
-
 #[instrument(level = "trace", skip_all)]
 pub(crate) async fn run_turn_stop_hooks(
     sess: &Arc<Session>,
@@ -428,7 +408,7 @@ pub(crate) async fn run_turn_stop_hooks(
         ),
         _ => (StopHookTarget::Stop, sess.hook_transcript_path().await),
     };
-    let request_metadata = build_request_metadata(Some(step_context), turn_context);
+    let request_metadata = Map::new();
     let request = codex_hooks::StopRequest {
         session_id: sess.session_id().into(),
         turn_id: turn_context.sub_id.clone(),
@@ -525,7 +505,7 @@ pub(crate) async fn run_turn_interrupt_hooks(
         return;
     }
 
-    let request_metadata = build_request_metadata(last_known_step_context.as_deref(), turn_context);
+    let request_metadata = Map::new();
     let request = InterruptRequest {
         session_id: sess.session_id().into(),
         turn_id: turn_context.sub_id.clone(),

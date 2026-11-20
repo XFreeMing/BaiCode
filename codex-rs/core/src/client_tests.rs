@@ -654,9 +654,9 @@ async fn responses_request_includes_internal_metadata_for_provider_grant_or_firs
         TestCodexResponsesRequestKind::Turn,
     );
     for (provider_grant, base_url, allowed) in [
-        (false, "https://api.openai.com/v1", true),
-        (false, "https://chatgpt.com/backend-api/codex", true),
-        (false, "https://api.chatgpt-staging.com/v1", true),
+        (false, "https://api.openai.com/v1", false),
+        (false, "https://chatgpt.com/backend-api/codex", false),
+        (false, "https://api.chatgpt-staging.com/v1", false),
         (false, "https://proxy.example.com/v1", false),
         (false, "http://api.openai.com/v1", false),
         (false, "https://api.openai.com.evil.example/v1", false),
@@ -703,11 +703,7 @@ async fn responses_request_includes_internal_metadata_for_provider_grant_or_firs
                 serde_json::to_value(&request)?["input"],
                 expected_wire_input
             );
-            let ws_client_metadata = client.build_ws_client_metadata(
-                &responses_metadata,
-                include_internal,
-                responses_lite,
-            );
+            let ws_client_metadata = ModelClient::build_ws_client_metadata(responses_lite);
             let ws_request = codex_api::ResponseCreateWsRequest {
                 client_metadata: Some(ws_client_metadata),
                 ..codex_api::ResponseCreateWsRequest::from(&request)
@@ -1571,21 +1567,9 @@ fn build_subagent_headers_sets_other_subagent_label() {
 }
 
 #[test]
-fn internal_session_prompt_cache_key_is_scoped_to_parent_thread() {
-    let parent_thread_id = ThreadId::new();
+fn default_cache_key_does_not_identify_the_thread() {
     let client = test_model_client(SessionSource::Internal(InternalSessionSource::Guardian));
-    let metadata = test_responses_metadata_for_client(
-        &client,
-        Some("turn-123"),
-        "window-1".to_string(),
-        Some(parent_thread_id),
-        TestCodexResponsesRequestKind::Turn,
-    );
-
-    assert_eq!(
-        client.prompt_cache_key(&metadata),
-        Some(format!("guardian:{parent_thread_id}"))
-    );
+    assert_eq!(client.prompt_cache_key(), None);
 }
 
 #[test]
@@ -1605,71 +1589,9 @@ fn build_subagent_headers_sets_internal_memory_consolidation_label() {
 }
 
 #[test]
-fn build_ws_client_metadata_includes_window_lineage_and_turn_metadata() {
-    let parent_thread_id = ThreadId::new();
-    let client = test_model_client(SessionSource::SubAgent(SubAgentSource::ThreadSpawn {
-        parent_thread_id,
-        depth: 2,
-        agent_path: None,
-        agent_nickname: None,
-        agent_role: None,
-    }));
-
-    let thread_id = client.state.thread_id.to_string();
-    let expected_window_id = format!("{thread_id}:1");
-    let mut responses_metadata = test_responses_metadata_for_client(
-        &client,
-        Some("turn-123"),
-        expected_window_id.clone(),
-        Some(parent_thread_id),
-        TestCodexResponsesRequestKind::Turn,
-    );
-    responses_metadata.history_initialization = Some(HistoryInitialization::WarmFork);
-    let client_metadata = client.build_ws_client_metadata(
-        &responses_metadata,
-        /*include_internal*/ true,
-        /*use_responses_lite*/ false,
-    );
-    let parent_thread_id = parent_thread_id.to_string();
-    let turn_metadata: serde_json::Value = serde_json::from_str(
-        client_metadata
-            .get(X_CODEX_TURN_METADATA_HEADER)
-            .expect("turn metadata"),
-    )
-    .expect("valid turn metadata");
-    assert_eq!(turn_metadata["history_initialization"], "warm_fork");
-    for (client_key, metadata_key, expected) in [
-        (
-            X_CODEX_INSTALLATION_ID_HEADER,
-            "installation_id",
-            "11111111-1111-4111-8111-111111111111",
-        ),
-        ("session_id", "session_id", thread_id.as_str()),
-        ("thread_id", "thread_id", thread_id.as_str()),
-        ("turn_id", "turn_id", "turn-123"),
-        (
-            X_CODEX_WINDOW_ID_HEADER,
-            "window_id",
-            expected_window_id.as_str(),
-        ),
-        (
-            X_CODEX_PARENT_THREAD_ID_HEADER,
-            "parent_thread_id",
-            parent_thread_id.as_str(),
-        ),
-    ] {
-        assert_eq!(
-            client_metadata.get(client_key).map(String::as_str),
-            Some(expected)
-        );
-        assert_eq!(turn_metadata[metadata_key].as_str(), Some(expected));
-    }
-    assert_eq!(
-        client_metadata
-            .get(X_OPENAI_SUBAGENT_HEADER)
-            .map(String::as_str),
-        Some("collab_spawn")
-    );
+fn websocket_client_metadata_only_negotiates_the_wire_format() {
+    assert!(ModelClient::build_ws_client_metadata(false).is_empty());
+    assert_eq!(ModelClient::build_ws_client_metadata(true).len(), 1);
 }
 
 #[tokio::test]
@@ -2249,13 +2171,9 @@ fn thread_responses_headers_are_scoped_to_model_and_backend_auth() {
     );
 }
 
-#[test_case::test_case(/*session_id_override*/ None; "own_session_id")]
-#[test_case::test_case(Some("parent-session"); "inherited_session_id")]
 #[tokio::test]
-async fn websocket_handshake_includes_attestation_for_chatgpt_codex_responses(
-    session_id_override: Option<&str>,
-) {
-    let (mut model_client, attestation_calls) =
+async fn websocket_handshake_keeps_attestation_and_omits_session_identifiers() {
+    let (model_client, attestation_calls) =
         model_client_with_counting_attestation(/*include_attestation*/ true);
     let responses_metadata = test_responses_metadata_for_client(
         &model_client,
@@ -2265,7 +2183,6 @@ async fn websocket_handshake_includes_attestation_for_chatgpt_codex_responses(
         TestCodexResponsesRequestKind::WebsocketConnection,
     );
 
-    model_client.session_id_override = session_id_override.map(str::to_string);
     let headers = model_client
         .build_websocket_headers(&responses_metadata)
         .await;
@@ -2277,11 +2194,8 @@ async fn websocket_handshake_includes_attestation_for_chatgpt_codex_responses(
         Some("v1.header-1"),
     );
     assert_eq!(attestation_calls.load(Ordering::Relaxed), 1);
-    assert_eq!(
-        headers["session-id"],
-        session_id_override.unwrap_or(&responses_metadata.session_id)
-    );
-    assert_eq!(headers["thread-id"], responses_metadata.thread_id);
+    assert!(!headers.contains_key("session-id"));
+    assert!(!headers.contains_key("thread-id"));
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]

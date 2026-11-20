@@ -52,19 +52,16 @@ impl RuntimeAuthManager {
         )
     }
 
-    /// Resolve the ChatGPT registration origin only when a first-party request needs a runtime.
+    /// Keep the credential binding for local use without selecting a hosted registration endpoint.
     pub fn for_chatgpt(
         credentials: Arc<AuthManager>,
         installation_id: String,
-        base_url: String,
+        _base_url: String,
         metadata: RuntimeRegistrationMetadata,
     ) -> Self {
         Self::from_registration(
             credentials,
-            RegistrationTarget::ChatGpt {
-                installation_id,
-                base_url,
-            },
+            RegistrationTarget::ChatGpt { installation_id },
             metadata,
         )
     }
