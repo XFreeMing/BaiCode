@@ -29,7 +29,6 @@ use codex_hooks::HooksConfig;
 use codex_mcp::McpServerKey;
 use codex_model_provider::create_model_provider;
 use codex_protocol::models::PermissionProfile;
-use codex_protocol::openai_models::ReasoningEffort as ReasoningEffortConfig;
 use codex_protocol::protocol::AskForApproval;
 use codex_protocol::protocol::EnvironmentConfig;
 use codex_protocol::protocol::EnvironmentConfigState;

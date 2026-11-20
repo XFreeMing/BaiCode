@@ -90,7 +90,6 @@ mod dynamic_tool_cancellation;
 mod exec;
 mod exec_policy;
 #[cfg(not(target_os = "windows"))]
-mod extension_sandbox;
 mod external_auth;
 mod fork_thread;
 mod gcp;
@@ -264,8 +263,6 @@ mod user_shell_cmd;
 mod view_image;
 mod wake_reservation;
 mod web_search;
-#[path = "web_search_system_proxy_tests.rs"]
-mod web_search_system_proxy;
 mod websocket_fallback;
 mod window_headers;
 mod workspace_roots;

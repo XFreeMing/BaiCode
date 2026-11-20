@@ -16,7 +16,6 @@ use codex_core::CodexThread;
 use codex_core::ThreadManager;
 use codex_guardian_context::effective_input_token_limit;
 use codex_guardian_context::estimate_input_tokens;
-use codex_protocol::ThreadId;
 use codex_protocol::models::ContentItem;
 use codex_protocol::models::ContentItemKind;
 use codex_protocol::models::ContentItemMetadata;
@@ -34,7 +33,6 @@ use crate::housekeeper_transport::Transport;
 
 pub(super) struct HousekeeperSampler {
     parent: Weak<CodexThread>,
-    conversation: ThreadId,
     transport: Transport,
     model: CatalogModel,
     openai_provider: bool,
@@ -104,7 +102,6 @@ impl HousekeeperSampler {
         }
         Ok(Self {
             parent: Arc::downgrade(parent),
-            conversation: ThreadId::new(),
             transport: Transport::new(parent, &config, snapshot.originator)?,
             model,
             openai_provider: config.model_provider.is_openai(),
@@ -193,13 +190,7 @@ impl HousekeeperSampler {
                 let request = self.request(&schema);
                 let pending = self
                     .transport
-                    .stream(
-                        &parent,
-                        self.conversation,
-                        &attempt,
-                        request,
-                        self.model.use_responses_lite,
-                    )
+                    .stream(&attempt, request, self.model.use_responses_lite)
                     .await?;
                 drop(parent);
                 Self::read_response(pending).await
@@ -264,7 +255,7 @@ impl HousekeeperSampler {
             stream_options: None,
             include: vec!["reasoning.encrypted_content".to_owned()],
             service_tier: self.service_tier.clone(),
-            prompt_cache_key: Some(self.conversation.to_string()),
+            prompt_cache_key: None,
             prompt_cache_options: None,
             text: codex_api::create_text_param_for_request(
                 /*verbosity*/ None, schema, /*output_schema_strict*/ true,

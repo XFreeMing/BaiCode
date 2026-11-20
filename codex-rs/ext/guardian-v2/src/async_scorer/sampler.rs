@@ -279,7 +279,7 @@ impl LunaSampler {
             stream_options: None,
             include: Vec::new(),
             service_tier: None,
-            prompt_cache_key: Some(format!("guardian-v2:{}", self.config.thread_id)),
+            prompt_cache_key: None,
             prompt_cache_options: None,
             text: None,
             client_metadata: None,
@@ -295,10 +295,7 @@ impl LunaSampler {
             config: Arc::clone(&self.config),
             connections: Arc::clone(&self.connections),
             request: api_request,
-            turn_id: request.turn_id.to_string(),
             parent_response_id: request.parent_response_id.clone(),
-            parent_turn_id: request.parent_turn_id.clone(),
-            root_turn_id: request.root_turn_id.clone(),
         }
     }
 

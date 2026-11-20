@@ -482,11 +482,13 @@ pub(crate) fn create_default_auth_client(
     endpoint: &str,
     auth_route_config: &AuthRouteConfig,
 ) -> Result<HttpClient, BuildRouteAwareHttpClientError> {
+    let factory = auth_route_config.authentication_factory(endpoint);
+    let local_policy = factory.network_policy().clone().with_loopback_only();
     create_client_for_route(
-        &auth_route_config.authentication_factory(endpoint),
+        &factory.with_network_policy(local_policy),
         endpoint,
         ClientRouteClass::Auth,
-        ClientRedirectPolicy::Default,
+        ClientRedirectPolicy::Reject,
     )
 }
 

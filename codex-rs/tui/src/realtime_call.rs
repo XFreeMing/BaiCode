@@ -7,8 +7,6 @@ use codex_api::RealtimeEventParser;
 use codex_api::RealtimeSessionConfig;
 use codex_api::RealtimeSessionMode;
 use codex_api::ReqwestTransport;
-use codex_api::build_realtime_thread_headers;
-use codex_app_server_protocol::Thread;
 use codex_config::config_toml::RealtimeWsMode;
 use codex_http_client::ClientRouteClass;
 use codex_login::default_client::ClientRedirectPolicy;
@@ -34,7 +32,6 @@ pub(crate) struct CreatedCall {
 
 pub(crate) async fn create(
     config: &Config,
-    thread: &Thread,
     offer: String,
     voice: Option<RealtimeVoice>,
 ) -> Result<CreatedCall> {
@@ -58,13 +55,9 @@ pub(crate) async fn create(
         ClientRouteClass::Api,
         ClientRedirectPolicy::Reject,
     )?;
-    let id = thread.id.clone();
     let voice_session_id = Uuid::new_v4();
-    let mut headers = build_realtime_thread_headers(
-        thread.session_id.clone(),
-        id.clone(),
-        thread.thread_source.clone().map(Into::into),
-    );
+    let id = voice_session_id.to_string();
+    let mut headers = http::HeaderMap::new();
     headers.insert("openai-alpha", HeaderValue::from_static("quicksilver=v2"));
     headers.insert("x-session-id", HeaderValue::from_str(&id)?);
     headers.insert(

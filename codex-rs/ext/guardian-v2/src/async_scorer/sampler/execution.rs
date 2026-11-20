@@ -27,7 +27,6 @@ use codex_protocol::models::ResponseItem;
 use codex_protocol::protocol::TokenUsage;
 use codex_protocol::turn_input::CyberAccessProgram;
 use http::StatusCode;
-use serde_json::json;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::oneshot;
@@ -35,7 +34,6 @@ use tokio::sync::oneshot;
 const MAX_SAMPLING_RETRIES: usize = 2;
 const RESPONSES_LITE_METADATA_KEY: &str =
     "ws_request_header_x_openai_internal_codex_responses_lite";
-const TURN_METADATA_KEY: &str = "x-codex-turn-metadata";
 
 pub(super) struct SamplingExecution {
     pub(super) auth_owner: Option<AuthOwner>,
@@ -43,10 +41,7 @@ pub(super) struct SamplingExecution {
     pub(super) config: Arc<LunaSamplerConfig>,
     pub(super) connections: Arc<ConnectionPool>,
     pub(super) request: ResponsesApiRequest,
-    pub(super) turn_id: String,
     pub(super) parent_response_id: Option<String>,
-    pub(super) parent_turn_id: String,
-    pub(super) root_turn_id: Option<String>,
 }
 
 pub(super) struct RetainedCompletion {
@@ -271,31 +266,8 @@ impl SamplingExecution {
             } else {
                 self.config.service_tier.clone()
             };
-            let thread_id = &lease.thread_id;
-            let mut turn_metadata = json!({
-                "session_id": self.config.session_id,
-                "thread_id": thread_id,
-                "guardian_classifier_source_thread_id": self.config.thread_id,
-                "turn_id": self.turn_id,
-                "parent_turn_id": self.parent_turn_id,
-                "thread_source": "guardian_classifier",
-                "turn_trigger": "guardian_classifier",
-            });
-            let mut client_metadata = HashMap::from([
-                ("session_id".to_owned(), self.config.session_id.clone()),
-                ("thread_id".to_owned(), thread_id.clone()),
-                ("turn_id".to_owned(), self.turn_id.clone()),
-                ("parent_turn_id".to_owned(), self.parent_turn_id.clone()),
-                ("x-openai-subagent".to_owned(), "guardian".to_owned()),
-                // Classifier requests do not advance their own context window.
-                ("x-codex-window-id".to_owned(), format!("{thread_id}:0")),
-                (RESPONSES_LITE_METADATA_KEY.to_owned(), "true".to_owned()),
-            ]);
-            if let Some(root_turn_id) = &self.root_turn_id {
-                client_metadata.insert("root_turn_id".to_owned(), root_turn_id.clone());
-                turn_metadata["root_turn_id"] = json!(root_turn_id);
-            }
-            client_metadata.insert(TURN_METADATA_KEY.to_owned(), turn_metadata.to_string());
+            let mut client_metadata =
+                HashMap::from([(RESPONSES_LITE_METADATA_KEY.to_owned(), "true".to_owned())]);
             if lease.request_kind == RequestMode::GuardianClassifier
                 && let Some(parent_response_id) = &self.parent_response_id
             {

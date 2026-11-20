@@ -917,7 +917,7 @@ impl App {
                     return Ok(true);
                 }
                 let registration = self.chat_widget.begin_call_negotiation();
-                let mut server = app_server.request_view();
+                let server = app_server.request_view();
                 let config = self.config.clone();
                 let cwd = self.chat_widget.config_ref().cwd.clone();
                 let offer = String::from(offer_sdp.clone());
@@ -925,10 +925,7 @@ impl App {
                 tokio::spawn(async move {
                     let create = async {
                         let voice = Self::effective_realtime_voice(&server, &cwd).await?;
-                        let thread = server
-                            .thread_read(thread_id, /*include_turns*/ false)
-                            .await?;
-                        crate::realtime_call::create(&config, &thread, offer, voice).await
+                        crate::realtime_call::create(&config, offer, voice).await
                     };
                     if let Ok(result) = futures::future::Abortable::new(create, registration).await
                     {

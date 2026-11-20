@@ -107,8 +107,7 @@ fn build_trace_provider(endpoint: &str) -> anyhow::Result<OtelProvider> {
         headers_helper: None,
         http_client_factory: codex_http_client::HttpClientFactory::new(
             codex_http_client::OutboundProxyPolicy::ReqwestDefault,
-        )
-        .with_network_policy(codex_http_client::NetworkPolicy::default().with_loopback_only()),
+        ),
         environment: "code-mode-host".to_string(),
         service_name: "codex-code-mode-host".to_string(),
         service_version: env!("CARGO_PKG_VERSION").to_string(),

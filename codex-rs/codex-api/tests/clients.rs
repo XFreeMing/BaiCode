@@ -26,8 +26,6 @@ use codex_protocol::models::ExecutedToolCall;
 use codex_protocol::models::ResponseItem;
 use codex_protocol::models::ToolResultBody;
 use codex_protocol::models::ToolResultMetadata;
-use codex_protocol::protocol::SessionSource;
-use codex_protocol::protocol::SubAgentSource;
 use http::HeaderMap;
 use http::HeaderValue;
 use http::StatusCode;
@@ -734,9 +732,6 @@ async fn azure_store_sends_ids_and_headers() -> Result<()> {
         .stream_request(
             request,
             ResponsesOptions {
-                session_id: Some("sess_123".into()),
-                thread_id: Some("thread_123".into()),
-                session_source: Some(SessionSource::SubAgent(SubAgentSource::Review)),
                 extra_headers,
                 compression: Compression::None,
                 tool_results: Vec::new(),
@@ -749,26 +744,14 @@ async fn azure_store_sends_ids_and_headers() -> Result<()> {
     assert_eq!(requests.len(), 1);
     let req = &requests[0];
 
-    assert_eq!(
-        req.headers.get("session-id").and_then(|v| v.to_str().ok()),
-        Some("sess_123")
-    );
-    assert_eq!(
-        req.headers.get("thread-id").and_then(|v| v.to_str().ok()),
-        Some("thread_123")
-    );
-    assert_eq!(
-        req.headers
-            .get("x-client-request-id")
-            .and_then(|v| v.to_str().ok()),
-        Some("thread_123")
-    );
-    assert_eq!(
-        req.headers
-            .get("x-openai-subagent")
-            .and_then(|v| v.to_str().ok()),
-        Some("review")
-    );
+    for key in [
+        "session-id",
+        "thread-id",
+        "x-client-request-id",
+        "x-openai-subagent",
+    ] {
+        assert!(!req.headers.contains_key(key), "{key}");
+    }
     assert_eq!(
         req.headers
             .get("x-test-header")

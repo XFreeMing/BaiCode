@@ -661,10 +661,6 @@ async fn handle_approved_mcp_tool_call(
                             codex_protocol::openai_models::WebSearchProvider::SearchMcp,
                         );
                     }
-                    let mcp_call_trace = sess
-                        .services
-                        .rollout_thread_trace
-                        .start_mcp_call_trace(call_id);
                     let mut request_meta = request_meta;
                     if let Some(hook) = sess
                         .services

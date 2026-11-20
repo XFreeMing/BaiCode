@@ -23,7 +23,6 @@ use codex_api::ResponsesWebsocketConnection;
 use codex_api::ResponsesWsRequest;
 use codex_api::SharedAuthProvider;
 use codex_api::TransportError;
-use codex_api::build_session_headers;
 use codex_http_client::ClientRouteClass;
 use codex_http_client::HttpClientFactory;
 use codex_http_client::NetworkPolicy;
@@ -87,7 +86,7 @@ struct HttpTransport {
 pub(super) struct PooledConnection {
     connection: ResponsesWebsocketConnection,
     request_kind: RequestMode,
-    // The bridge routes by thread ID, so each socket needs its own identity.
+    // Local connection identity for lease tracking.
     pub(super) thread_id: String,
     pub(super) expires_at: Instant,
     auth_changes: Option<tokio::sync::watch::Receiver<AuthChangeState>>,
@@ -420,27 +419,21 @@ impl ConnectionPool {
         })
     }
 
-    fn headers(
-        &self,
-        thread_id: &str,
-        request_kind: RequestMode,
-    ) -> Result<HeaderMap, LunaSamplerError> {
-        let mut headers = build_session_headers(
-            Some(self.config.session_id.clone()),
-            Some(thread_id.to_owned()),
-        );
+    #[cfg(test)]
+    pub(super) async fn open_test_connection(&self) -> Result<(), LunaSamplerError> {
+        let permit = Arc::clone(&self.sockets)
+            .try_acquire_owned()
+            .expect("test socket permit");
+        let connection = self.open_connection(permit).await?;
+        self.idle_connections.lock().unwrap().push(connection);
+        Ok(())
+    }
+
+    fn headers(&self, request_kind: RequestMode) -> HeaderMap {
+        let mut headers = HeaderMap::new();
         if request_kind == RequestMode::GuardianClassifier {
             headers.insert("x-codex-guardian", HeaderValue::from_static("classifier"));
         }
-        headers.insert("x-openai-subagent", HeaderValue::from_static("guardian"));
-        headers.insert(
-            "x-codex-window-id",
-            HeaderValue::from_str(&format!("{thread_id}:0")).map_err(|error| {
-                LunaSamplerError::Api(ApiError::Stream(format!(
-                    "invalid classifier window ID: {error}"
-                )))
-            })?,
-        );
         headers.insert(
             "x-openai-internal-codex-responses-lite",
             HeaderValue::from_static("true"),
@@ -448,10 +441,7 @@ impl ConnectionPool {
         if let Some(originator) = self.config.originator.as_deref() {
             add_originator_header(&mut headers, originator);
         }
-        if let Ok(request_id) = HeaderValue::from_str(thread_id) {
-            headers.insert("x-client-request-id", request_id);
-        }
-        Ok(headers)
+        headers
     }
     fn responses_request_kind(&self, auth: Option<&CodexAuth>) -> RequestMode {
         let provider = self.config.provider.info();
@@ -541,7 +531,7 @@ impl ConnectionPool {
             auth_changes,
         } = setup;
         let thread_id = ThreadId::new().to_string();
-        let mut headers = self.headers(&thread_id, request_kind)?;
+        let mut headers = self.headers(request_kind);
         headers.insert(
             "openai-beta",
             HeaderValue::from_static(RESPONSES_WEBSOCKETS_BETA),
@@ -646,12 +636,7 @@ impl ConnectionLease {
                     client.stream_request(
                         request.clone(),
                         ResponsesOptions {
-                            session_id: Some(self.pool.config.session_id.clone()),
-                            thread_id: Some(self.thread_id.clone()),
-                            extra_headers: self
-                                .pool
-                                .headers(&self.thread_id, self.request_kind)
-                                .map_err(|error| ApiError::Stream(error.to_string()))?,
+                            extra_headers: self.pool.headers(self.request_kind),
                             ..Default::default()
                         },
                     ),

@@ -247,6 +247,13 @@ impl OtelProvider {
                 )
             })
             .unwrap_or_default();
+        let http_factory = settings.http_client_factory.clone().with_network_policy(
+            settings
+                .http_client_factory
+                .network_policy()
+                .clone()
+                .with_loopback_only(),
+        );
         let headers_helper = settings
             .headers_helper
             .as_ref()
@@ -255,7 +262,7 @@ impl OtelProvider {
                 HeadersHelper::start(
                     config,
                     &settings.codex_home,
-                    settings.http_client_factory.network_policy().clone(),
+                    http_factory.network_policy().clone(),
                 )
             })
             .transpose()?;
@@ -269,7 +276,7 @@ impl OtelProvider {
                 settings.service_version.clone(),
                 settings.metrics_exporter.clone(),
             )
-            .with_http_client_factory(settings.http_client_factory.clone());
+            .with_http_client_factory(http_factory.clone());
             if helper_for_metrics {
                 config.headers_helper = headers_helper.clone();
             }
@@ -286,7 +293,7 @@ impl OtelProvider {
                 build_logger(
                     &log_resource,
                     &settings.exporter,
-                    &settings.http_client_factory,
+                    &http_factory,
                     headers_helper.clone().filter(|_| helper_for_logs),
                 )
             })
@@ -298,7 +305,7 @@ impl OtelProvider {
                     &trace_resource,
                     &settings.trace_exporter,
                     settings.span_attributes.clone(),
-                    &settings.http_client_factory,
+                    &http_factory,
                     headers_helper.clone().filter(|_| helper_for_traces),
                 )
             })

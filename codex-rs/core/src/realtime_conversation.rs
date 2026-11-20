@@ -24,7 +24,6 @@ use codex_api::RealtimeWebsocketClient;
 use codex_api::RealtimeWebsocketConnection;
 use codex_api::RealtimeWebsocketEvents;
 use codex_api::RealtimeWebsocketWriter;
-use codex_api::build_realtime_thread_headers;
 use codex_api::map_api_error;
 use codex_async_utils::OrCancelExt;
 use codex_config::config_toml::RealtimeWsMode;
@@ -1857,7 +1856,7 @@ async fn prepare_realtime_start(
     let event_parser = session_config.event_parser;
     let originator = sess.originator().await;
     let mut websocket_auth = None;
-    let mut extra_headers = match transport {
+    let extra_headers = match transport {
         ConversationStartTransport::Websocket => {
             let realtime_api_key = realtime_api_key(auth.as_ref(), &provider)?;
             if realtime_sideband_base_url.is_none() {
@@ -1917,11 +1916,6 @@ async fn prepare_realtime_start(
         }
     }
     .unwrap_or_default();
-    extra_headers.extend(build_realtime_thread_headers(
-        sess.session_id().to_string(),
-        sess.thread_id().to_string(),
-        sess.thread_config_snapshot().await.thread_source,
-    ));
     Ok(PreparedRealtimeConversationStart {
         attachment_control: RealtimeAttachmentControl::default(),
         sideband: None,

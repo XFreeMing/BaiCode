@@ -6,9 +6,6 @@ use crate::endpoint::session::EndpointSession;
 use crate::error::ApiError;
 use crate::provider::Provider;
 use crate::requests::Compression;
-use crate::requests::headers::build_session_headers;
-use crate::requests::headers::insert_header;
-use crate::requests::headers::subagent_header;
 use crate::sse::spawn_response_stream;
 use crate::telemetry::SseTelemetry;
 use codex_client::EncodedJsonBody;
@@ -17,7 +14,6 @@ use codex_client::RequestCompression;
 use codex_client::RequestTelemetry;
 use codex_client::TransportError;
 use codex_protocol::models::ToolResultBody;
-use codex_protocol::protocol::SessionSource;
 use http::HeaderMap;
 use http::HeaderValue;
 use http::Method;
@@ -34,9 +30,6 @@ pub struct ResponsesClient<T: HttpTransport> {
 
 #[derive(Default)]
 pub struct ResponsesOptions {
-    pub session_id: Option<String>,
-    pub thread_id: Option<String>,
-    pub session_source: Option<SessionSource>,
     pub extra_headers: HeaderMap,
     pub compression: Compression,
     pub tool_results: Vec<(usize, usize, Arc<ToolResultBody>)>,
@@ -89,9 +82,6 @@ impl<T: HttpTransport> ResponsesClient<T> {
         on_encoded: impl FnOnce(&bytes::Bytes),
     ) -> Result<ResponseStream, ApiError> {
         let ResponsesOptions {
-            session_id,
-            thread_id,
-            session_source,
             extra_headers,
             compression,
             tool_results,
@@ -101,14 +91,7 @@ impl<T: HttpTransport> ResponsesClient<T> {
             .map_err(|e| ApiError::Stream(format!("failed to encode responses request: {e}")))?;
 
         on_encoded(body.shared_bytes());
-        let mut headers = extra_headers;
-        if let Some(ref thread_id) = thread_id {
-            insert_header(&mut headers, "x-client-request-id", thread_id);
-        }
-        headers.extend(build_session_headers(session_id, thread_id));
-        if let Some(subagent) = subagent_header(&session_source) {
-            insert_header(&mut headers, "x-openai-subagent", &subagent);
-        }
+        let headers = extra_headers;
 
         if !tool_results.is_empty()
             && let Ok(json) = std::str::from_utf8(body.as_bytes())

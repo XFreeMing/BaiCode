@@ -1711,9 +1711,6 @@ impl<'a> ResponsesHttpExecutor<'a> {
         use_responses_lite: bool,
     ) -> ApiResponsesOptions {
         ApiResponsesOptions {
-            session_id: None,
-            thread_id: None,
-            session_source: None,
             extra_headers: {
                 let mut headers = build_responses_headers(
                     self.client.state.beta_features_header.as_deref(),

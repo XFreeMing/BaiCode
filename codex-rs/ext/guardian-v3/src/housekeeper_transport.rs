@@ -16,7 +16,6 @@ use codex_api::ResponsesWebsocketClient;
 use codex_api::ResponsesWebsocketConnection;
 use codex_api::ResponsesWsRequest;
 use codex_api::TransportError;
-use codex_api::build_session_headers;
 use codex_core::CodexThread;
 use codex_core::config::Config;
 use codex_features::Feature;
@@ -34,7 +33,6 @@ use codex_model_provider::ResponsesConnectionKey;
 use codex_model_provider::SharedModelProvider;
 use codex_model_provider::WorkspaceRoutingContext;
 use codex_model_provider::resolve_request;
-use codex_protocol::ThreadId;
 use codex_protocol::protocol::InternalSessionSource;
 use codex_protocol::protocol::SessionSource;
 use codex_websocket_client::WebSocketConnector;
@@ -48,7 +46,6 @@ const MAX_SAMPLING_RETRIES: usize = 2;
 
 /// One inference turn across connection attempts for the same routing batch.
 pub(super) struct BatchAttempt {
-    turn: String,
     transport_retries: usize,
     auth_recovery: Option<UnauthorizedRecovery>,
 }
@@ -125,7 +122,6 @@ impl Transport {
 
     pub(super) fn start_batch(&self) -> BatchAttempt {
         BatchAttempt {
-            turn: uuid::Uuid::now_v7().to_string(),
             transport_retries: 0,
             auth_recovery: self
                 .provider
@@ -193,8 +189,6 @@ impl Transport {
 
     pub(super) async fn stream(
         &mut self,
-        parent: &CodexThread,
-        conversation: ThreadId,
         attempt: &BatchAttempt,
         mut request: ResponsesApiRequest,
         responses_lite: bool,
@@ -244,19 +238,7 @@ impl Transport {
             Ok::<(), anyhow::Error>(())
         };
         check_owner()?;
-        let ids = parent.startup_metadata();
-        let turn = &attempt.turn;
-        let turn_metadata = serde_json::json!({
-            "session_id": ids.session_id, "thread_id": conversation, "parent_thread_id": ids.thread_id,
-            "turn_id": turn, "root_turn_id": turn, "request_kind":"turn","turn_trigger":"guardian_housekeeper",
-        }).to_string();
         let add_guardian_headers = |headers: &mut HeaderMap| -> anyhow::Result<()> {
-            headers.insert("x-openai-subagent", HeaderValue::from_static("guardian"));
-            headers.insert(
-                "x-codex-parent-thread-id",
-                ids.thread_id.to_string().parse()?,
-            );
-            headers.insert("x-codex-window-id", format!("{conversation}:0").parse()?);
             add_originator_header(headers, &self.originator);
             if responses_lite {
                 headers.insert(
@@ -266,26 +248,12 @@ impl Transport {
             }
             Ok(())
         };
-        let mut metadata = std::collections::HashMap::from([
-            ("session_id".to_owned(), ids.session_id.to_string()),
-            ("thread_id".to_owned(), conversation.to_string()),
-            ("turn_id".to_owned(), turn.to_owned()),
-            ("root_turn_id".to_owned(), turn.to_owned()),
-            (
-                "x-codex-parent-thread-id".to_owned(),
-                ids.thread_id.to_string(),
-            ),
-            ("x-openai-subagent".to_owned(), "guardian".to_owned()),
-            ("x-codex-window-id".to_owned(), format!("{conversation}:0")),
-            ("x-codex-turn-metadata".to_owned(), turn_metadata.clone()),
-        ]);
-        if responses_lite {
-            metadata.insert(
+        request.client_metadata = responses_lite.then(|| {
+            std::collections::HashMap::from([(
                 "ws_request_header_x_openai_internal_codex_responses_lite".to_owned(),
                 "true".to_owned(),
-            );
-        }
-        request.client_metadata = Some(metadata);
+            )])
+        });
         let key = ResponsesConnectionKey::new(&setup.api_provider, revision);
         let policy = setup.http_client_factory.network_policy();
         let mut reused = false;
@@ -319,12 +287,8 @@ impl Transport {
                 .as_ref()
                 .and_then(|connector| connector.with_account_binding(policy))
                 .context("housekeeper WebSocket account policy mismatch")?;
-            let mut upgrade = build_session_headers(
-                Some(ids.session_id.to_string()),
-                Some(conversation.to_string()),
-            );
+            let mut upgrade = HeaderMap::new();
             add_guardian_headers(&mut upgrade)?;
-            upgrade.insert("x-client-request-id", conversation.to_string().parse()?);
             upgrade.insert(
                 "openai-beta",
                 HeaderValue::from_static("responses_websockets=2026-02-06"),
@@ -379,7 +343,6 @@ impl Transport {
         } else {
             let mut headers = HeaderMap::new();
             add_guardian_headers(&mut headers)?;
-            headers.insert("x-codex-turn-metadata", turn_metadata.parse()?);
             // The sampler owns retries across both transports, including stream failures.
             setup.api_provider.retry.max_attempts = 0;
             let http = tokio::task::spawn_blocking(move || {
@@ -395,8 +358,6 @@ impl Transport {
             http.stream_request(
                 request,
                 ResponsesOptions {
-                    session_id: Some(ids.session_id.to_string()),
-                    thread_id: Some(conversation.to_string()),
                     extra_headers: headers,
                     ..Default::default()
                 },
