@@ -247,9 +247,9 @@ mod tests {
         let codex_home = TempDir::new().unwrap();
         let install_root = codex_home.path().join("marketplaces");
         let source_root = codex_home.path().join("source");
-        fs::create_dir_all(source_root.join(".agents/plugins")).unwrap();
+        fs::create_dir_all(source_root.join(".BaiCode/plugins")).unwrap();
         fs::write(
-            source_root.join(".agents/plugins/marketplace.json"),
+            source_root.join(".BaiCode/plugins/marketplace.json"),
             r#"{"name":"debug","plugins":[]}"#,
         )
         .unwrap();
@@ -308,9 +308,9 @@ mod tests {
         let source_root = codex_home.path().join("source");
         let other_root = codex_home.path().join("other");
         for (root, name) in [(&source_root, "source"), (&other_root, "other")] {
-            fs::create_dir_all(root.join(".agents/plugins")).unwrap();
+            fs::create_dir_all(root.join(".BaiCode/plugins")).unwrap();
             fs::write(
-                root.join(".agents/plugins/marketplace.json"),
+                root.join(".BaiCode/plugins/marketplace.json"),
                 format!(r#"{{"name":"{name}","plugins":[]}}"#),
             )
             .unwrap();

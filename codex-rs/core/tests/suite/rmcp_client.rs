@@ -2379,7 +2379,7 @@ async fn local_stdio_server_uses_runtime_fallback_cwd_when_config_omits_cwd() ->
     let remote_workspace = tempdir()?;
     let remote_skill = remote_workspace
         .path()
-        .join(".agents/skills/remote-fixture");
+        .join(".BaiCode/skills/remote-fixture");
     fs::create_dir_all(&remote_skill)?;
     fs::write(
         remote_skill.join("SKILL.md"),

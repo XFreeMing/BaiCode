@@ -2,7 +2,7 @@ use super::RewriteProfile;
 
 pub(super) fn rewrite_terms(content: &str, profile: RewriteProfile) -> String {
     let mut rewritten =
-        replace_case_insensitive_with_boundaries(content, profile.doc_file_name, "AGENTS.md");
+        replace_case_insensitive_with_boundaries(content, profile.doc_file_name, "BAICODE.md");
     for from in profile.term_variants {
         rewritten = replace_case_insensitive_with_boundaries(&rewritten, from, "Codex");
     }

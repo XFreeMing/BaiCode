@@ -6,12 +6,12 @@ from itertools import chain
 
 import pytest
 
-from openai_codex import AsyncCodex
-from openai_codex._run import _collect_turn_result
-from openai_codex.api import AsyncThread, AsyncTurnHandle, Thread, TurnHandle
-from openai_codex.async_client import AsyncCodexClient
-from openai_codex.client import CodexClient
-from openai_codex.errors import TransportClosedError
+from baicode_sdk import AsyncCodex
+from baicode_sdk._run import _collect_turn_result
+from baicode_sdk.api import AsyncThread, AsyncTurnHandle, Thread, TurnHandle
+from baicode_sdk.async_client import AsyncCodexClient
+from baicode_sdk.client import CodexClient
+from baicode_sdk.errors import TransportClosedError
 
 
 def turn_events(client, *, status="completed"):
@@ -295,7 +295,7 @@ def test_cancelled_turn_start_releases_result_after_response(monkeypatch):
 
 def test_cancelled_queued_start_does_not_send_a_request(monkeypatch):
     with ThreadPoolExecutor(max_workers=1) as executor:
-        monkeypatch.setattr("openai_codex.async_client._TURN_START_EXECUTOR", executor)
+        monkeypatch.setattr("baicode_sdk.async_client._TURN_START_EXECUTOR", executor)
         release_worker = threading.Event()
         worker_started = threading.Event()
         request_sent = threading.Event()

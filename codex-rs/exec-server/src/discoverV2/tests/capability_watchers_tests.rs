@@ -81,15 +81,15 @@ async fn watch_events_invalidate_discovery_and_no_subscription_disables_caching(
     // Neither the plugin cache nor the user skills directory existed at startup.
     write(
         &root,
-        "codex/plugins/cache/acme/gmail/1.0.0/.codex-plugin/plugin.json",
+        "codex/plugins/cache/acme/gmail/1.0.0/.baicode-plugin/plugin.json",
         r#"{"name":"gmail"}"#,
     )?;
     write(
         &root,
-        "home/.agents/skills/added/SKILL.md",
+        "home/.BaiCode/skills/added/SKILL.md",
         "---\nname: added\ndescription: new global root\n---\n",
     )?;
-    let home_skills = PathUri::from_host_native_path(root.join("home/.agents/skills"))?;
+    let home_skills = PathUri::from_host_native_path(root.join("home/.BaiCode/skills"))?;
     tokio::time::timeout(Duration::from_secs(10), async {
         let mut interval = tokio::time::interval(Duration::from_millis(50));
         loop {
@@ -150,7 +150,7 @@ async fn watch_events_invalidate_discovery_and_no_subscription_disables_caching(
     assert_eq!(retained.sandbox_discoveries.lock().await.len(), 2);
     write(
         &root,
-        "codex/plugins/cache/acme/gmail/2.0.0/.codex-plugin/plugin.json",
+        "codex/plugins/cache/acme/gmail/2.0.0/.baicode-plugin/plugin.json",
         r#"{"name":"gmail"}"#,
     )?;
     write(
@@ -245,7 +245,7 @@ async fn watch_events_invalidate_discovery_and_no_subscription_disables_caching(
     )?;
     write(
         &root,
-        "codex/plugins/cache/acme/calendar/1.0.0/.codex-plugin/plugin.json",
+        "codex/plugins/cache/acme/calendar/1.0.0/.baicode-plugin/plugin.json",
         r#"{"name":"calendar"}"#,
     )?;
     let after = uncached.get_or_refresh_discovery(params.clone()).await?;
@@ -306,7 +306,7 @@ async fn failed_watch_registration_reloads_locations_and_contents() -> anyhow::R
     )?;
     write(
         &root,
-        "codex/plugins/cache/acme/calendar/1.0.0/.codex-plugin/plugin.json",
+        "codex/plugins/cache/acme/calendar/1.0.0/.baicode-plugin/plugin.json",
         r#"{"name":"calendar"}"#,
     )?;
     let after = manager.get_or_refresh_discovery(params.clone()).await?;

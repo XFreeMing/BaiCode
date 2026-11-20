@@ -116,9 +116,9 @@ async fn user_turn_includes_skill_instructions() -> Result<()> {
     let skill_path = test
         .config
         .cwd
-        .join(".agents/skills/demo/SKILL.md")
+        .join(".BaiCode/skills/demo/SKILL.md")
         .canonicalize()
-        .unwrap_or_else(|_| test.config.cwd.join(".agents/skills/demo/SKILL.md"))
+        .unwrap_or_else(|_| test.config.cwd.join(".BaiCode/skills/demo/SKILL.md"))
         .to_path_buf();
 
     let mock = mount_sse_once(
@@ -262,9 +262,9 @@ async fn history_injection_skips_skill_discovery_after_initial_context() -> Resu
     let skill_path = test
         .config
         .cwd
-        .join(".agents/skills/demo/SKILL.md")
+        .join(".BaiCode/skills/demo/SKILL.md")
         .canonicalize()
-        .unwrap_or_else(|_| test.config.cwd.join(".agents/skills/demo/SKILL.md"))
+        .unwrap_or_else(|_| test.config.cwd.join(".BaiCode/skills/demo/SKILL.md"))
         .to_path_buf();
     test.codex
         .start_or_steer_turn(TurnInputRequest::user_input(vec![
@@ -336,7 +336,7 @@ async fn user_turn_selects_symlinked_skill_by_advertised_discovery_path() -> Res
         .with_extensions(Arc::new(extensions.build()))
         .with_workspace_setup(move |cwd, _fs| async move {
             let source_skill_dir = cwd.join("shared-skills/linked-demo");
-            let discovery_root = cwd.join(".agents/skills");
+            let discovery_root = cwd.join(".BaiCode/skills");
             std::fs::create_dir_all(source_skill_dir.as_path())?;
             std::fs::create_dir_all(discovery_root.as_path())?;
             std::fs::write(
@@ -352,7 +352,7 @@ async fn user_turn_selects_symlinked_skill_by_advertised_discovery_path() -> Res
             Ok(())
         });
     let test = builder.build_with_auto_env(&server).await?;
-    let discovery_root = test.config.cwd.join(".agents/skills").canonicalize()?;
+    let discovery_root = test.config.cwd.join(".BaiCode/skills").canonicalize()?;
     let discovery_path = discovery_root.join("linked-demo/SKILL.md");
     let canonical_path = discovery_path.canonicalize()?;
     let discovery_path_display = discovery_path.display();
@@ -440,9 +440,9 @@ async fn idle_user_turn_includes_skill_instructions_in_the_first_request() -> Re
     let skill_path = test
         .config
         .cwd
-        .join(".agents/skills/queued-demo/SKILL.md")
+        .join(".BaiCode/skills/queued-demo/SKILL.md")
         .canonicalize()
-        .unwrap_or_else(|_| test.config.cwd.join(".agents/skills/queued-demo/SKILL.md"))
+        .unwrap_or_else(|_| test.config.cwd.join(".BaiCode/skills/queued-demo/SKILL.md"))
         .to_path_buf();
     let mock = mount_sse_once(
         &server,

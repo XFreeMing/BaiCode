@@ -1,6 +1,6 @@
 //! Prepare the policy and dependency facts, then run checks per dependency.
 //! Runtime checks are paused; retain the implementation for isolated tests.
-//! Results never affect execution. See AGENTS.md for scope and accepted approximations.
+//! Results never affect execution. See BAICODE.md for scope and accepted approximations.
 
 use super::backend;
 use super::dependencies::DependencyTarget;

@@ -131,12 +131,12 @@ impl Normalizer {
         } else {
             text.to_string()
         };
-        let text = if text.starts_with("# AGENTS.md instructions for ") {
+        let text = if text.starts_with("# BAICODE.md instructions for ") {
             let (header, body) = text.split_once('\n').unwrap_or((&text, ""));
             if let Some((_, directory)) = header.split_once("for ")
                 && (directory.starts_with('/') || directory.as_bytes().get(1) == Some(&b':'))
             {
-                format!("# AGENTS.md instructions for <AGENTS_DIRECTORY>\n{body}")
+                format!("# BAICODE.md instructions for <AGENTS_DIRECTORY>\n{body}")
             } else {
                 text
             }
@@ -307,7 +307,7 @@ fn known_segment_name(text: &str, source: TextSource<'_>) -> Option<String> {
             (GUARDIAN_PROVENANCE_PREFIX, "GUARDIAN_INSTRUCTIONS"),
         ],
         TextSource::Message("user") => &[
-            ("# AGENTS.md instructions", "AGENTS_MD"),
+            ("# BAICODE.md instructions", "AGENTS_MD"),
             (
                 "You are performing a CONTEXT CHECKPOINT COMPACTION.",
                 "SUMMARIZATION_PROMPT",
@@ -377,7 +377,7 @@ fn normalize_skill_path(path: &str) -> String {
     let path = path.replace('\\', "/");
     if let Some((_, rest)) = path.rsplit_once("/plugins/cache/") {
         format!("<PLUGINS_CACHE>/{rest}")
-    } else if let Some((_, rest)) = path.rsplit_once("/.agents/skills/") {
+    } else if let Some((_, rest)) = path.rsplit_once("/.BaiCode/skills/") {
         format!("<PROJECT_SKILLS>/{rest}")
     } else if let Some((_, rest)) = path.rsplit_once("/skills/") {
         format!("<SKILLS_ROOT>/{rest}")

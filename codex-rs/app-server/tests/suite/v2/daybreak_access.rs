@@ -54,9 +54,9 @@ async fn daybreak_access_respects_plugin_provenance(case: AccessCall) -> Result<
     } else {
         home.path().join("plugins/cache/test/sample/local")
     };
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"sample"}"#,
     )?;
     let mut mcp_config = json!({

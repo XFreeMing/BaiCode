@@ -9,16 +9,16 @@ use serde::Deserialize;
 use serde::Serialize;
 
 const REPLACEMENT_NOTICE: &str =
-    "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.";
-const REMOVAL_NOTICE: &str = "The previously provided AGENTS.md instructions no longer apply.";
+    "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.";
+const REMOVAL_NOTICE: &str = "The previously provided BAICODE.md instructions no longer apply.";
 
-/// The AGENTS.md instructions currently visible to the model.
+/// The BAICODE.md instructions currently visible to the model.
 #[derive(Clone, Debug, Default)]
 pub(crate) struct AgentsMdState {
     instructions: Option<UserInstructions>,
 }
 
-/// Persisted model-visible AGENTS.md state, without filesystem provenance.
+/// Persisted model-visible BAICODE.md state, without filesystem provenance.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq, Serialize)]
 pub(crate) struct AgentsMdSnapshot {
     directory: Option<String>,

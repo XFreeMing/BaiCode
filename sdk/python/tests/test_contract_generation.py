@@ -12,9 +12,9 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED_TARGETS = [
-    Path("src/openai_codex/generated/notification_registry.py"),
-    Path("src/openai_codex/generated/v2_all.py"),
-    Path("src/openai_codex/api.py"),
+    Path("src/baicode_sdk/generated/notification_registry.py"),
+    Path("src/baicode_sdk/generated/v2_all.py"),
+    Path("src/baicode_sdk/api.py"),
 ]
 
 
@@ -140,14 +140,14 @@ def test_schema_generation_failure_does_not_update_python(monkeypatch):
     ],
 )
 def test_model_provider_errors_round_trip_wire_names(payload):
-    from openai_codex.generated.v2_all import ModelProviderError
+    from baicode_sdk.generated.v2_all import ModelProviderError
 
     error = ModelProviderError.model_validate(payload)
     assert error.model_dump(by_alias=True) == payload
 
 
 def test_answer_display_is_read_in_thread_history_and_notifications():
-    from openai_codex.generated.v2_all import ItemCompletedNotification, ThreadItemsListResponse
+    from baicode_sdk.generated.v2_all import ItemCompletedNotification, ThreadItemsListResponse
 
     display = {
         "version": 1,

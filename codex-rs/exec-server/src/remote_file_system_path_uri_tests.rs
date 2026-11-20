@@ -473,7 +473,7 @@ async fn concurrent_remote_metadata_requests_share_only_in_flight_results() {
         ),
         HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
     )));
-    let path = PathUri::parse("file:///workspace/project/AGENTS.md").expect("valid path URI");
+    let path = PathUri::parse("file:///workspace/project/BAICODE.md").expect("valid path URI");
 
     let (first, second) = tokio::join!(
         file_system.get_metadata(&path, Default::default(), /*sandbox*/ None),
@@ -566,7 +566,7 @@ async fn concurrent_remote_metadata_errors_are_shared_but_retried() {
         ),
         HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
     ));
-    let path = PathUri::parse("file:///workspace/project/AGENTS.md").expect("valid path URI");
+    let path = PathUri::parse("file:///workspace/project/BAICODE.md").expect("valid path URI");
 
     let (first, second) = tokio::join!(
         file_system.get_metadata(&path, Default::default(), /*sandbox*/ None),
@@ -608,7 +608,7 @@ async fn concurrent_remote_metadata_errors_are_shared_but_retried() {
 
 #[tokio::test]
 async fn remote_metadata_starts_fresh_after_intervening_filesystem_mutation() {
-    let path = PathUri::parse("file:///workspace/project/AGENTS.md").expect("valid path URI");
+    let path = PathUri::parse("file:///workspace/project/BAICODE.md").expect("valid path URI");
     let source_path =
         PathUri::parse("file:///workspace/project/source.md").expect("valid source path URI");
 
@@ -747,7 +747,7 @@ async fn remote_metadata_requests_do_not_cross_path_or_sandbox_boundaries() {
         ),
         HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault),
     ));
-    let first_path = PathUri::parse("file:///workspace/project/AGENTS.md").expect("valid path URI");
+    let first_path = PathUri::parse("file:///workspace/project/BAICODE.md").expect("valid path URI");
     let second_path = PathUri::parse("file:///workspace/project/SKILL.md").expect("valid path URI");
     let sandbox = FileSystemSandboxContext::from_permission_profile(
         PermissionProfile::from_runtime_permissions(

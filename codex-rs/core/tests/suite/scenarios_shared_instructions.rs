@@ -107,14 +107,14 @@ async fn running_descendants_refresh_only_shared_thread_instructions(shared: boo
     let previous_loads = previous_provider.load_count();
 
     let replacement = format!(
-        "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{UPDATED}"
+        "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{UPDATED}"
     );
     let updates = [
         (Some(INITIAL), INITIAL),
         (Some(UPDATED), replacement.as_str()),
         (
             None,
-            "The previously provided AGENTS.md instructions no longer apply.",
+            "The previously provided BAICODE.md instructions no longer apply.",
         ),
         (None, ""),
     ];
@@ -283,12 +283,12 @@ async fn guardian_tracks_shared_instruction_updates_in_running_descendants() -> 
     }
     let requests = requests.requests();
     assert_eq!(requests.len(), 9);
-    let initial = format!("# AGENTS.md instructions\n\n<INSTRUCTIONS>\n{INITIAL}\n</INSTRUCTIONS>");
-    let updated = format!("# AGENTS.md instructions\n\n<INSTRUCTIONS>\n{UPDATED}\n</INSTRUCTIONS>");
+    let initial = format!("# BAICODE.md instructions\n\n<INSTRUCTIONS>\n{INITIAL}\n</INSTRUCTIONS>");
+    let updated = format!("# BAICODE.md instructions\n\n<INSTRUCTIONS>\n{UPDATED}\n</INSTRUCTIONS>");
     let replacement = format!(
-        "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nThese AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{UPDATED}\n</INSTRUCTIONS>"
+        "# BAICODE.md instructions\n\n<INSTRUCTIONS>\nThese BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{UPDATED}\n</INSTRUCTIONS>"
     );
-    let cleared = "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nThe previously provided AGENTS.md instructions no longer apply.\n</INSTRUCTIONS>".to_owned();
+    let cleared = "# BAICODE.md instructions\n\n<INSTRUCTIONS>\nThe previously provided BAICODE.md instructions no longer apply.\n</INSTRUCTIONS>".to_owned();
     assert_eq!(
         requests
             .iter()

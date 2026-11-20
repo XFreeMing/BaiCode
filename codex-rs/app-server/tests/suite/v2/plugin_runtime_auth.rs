@@ -84,12 +84,12 @@ async fn direct_mutation_initializes_runtime_after_config_reload(
                         apps_needing_auth: Vec::new(),
                     }
                 );
-                assert!(cache.join("1.2.3/.codex-plugin/plugin.json").is_file());
+                assert!(cache.join("1.2.3/.baicode-plugin/plugin.json").is_file());
             }
             "uninstall" => {
-                std::fs::create_dir_all(cache.join("1.2.3/.codex-plugin"))?;
+                std::fs::create_dir_all(cache.join("1.2.3/.baicode-plugin"))?;
                 std::fs::write(
-                    cache.join("1.2.3/.codex-plugin/plugin.json"),
+                    cache.join("1.2.3/.baicode-plugin/plugin.json"),
                     r#"{"name":"linear","version":"1.2.3"}"#,
                 )?;
                 let id = app

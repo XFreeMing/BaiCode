@@ -43,9 +43,9 @@ fn run_git(cwd: &Path, args: &[&str]) -> Result<String> {
 }
 
 fn write_marketplace_files(root: &Path, marketplace_name: &str, marker: &str) -> Result<()> {
-    std::fs::create_dir_all(root.join(".agents/plugins"))?;
+    std::fs::create_dir_all(root.join(".BaiCode/plugins"))?;
     std::fs::write(
-        root.join(".agents/plugins/marketplace.json"),
+        root.join(".BaiCode/plugins/marketplace.json"),
         format!(r#"{{"name":"{marketplace_name}","plugins":[]}}"#),
     )?;
     std::fs::write(root.join("marker.txt"), marker)?;
@@ -212,10 +212,10 @@ async fn marketplace_upgrade_all_configured_git_marketplaces() -> Result<()> {
 }
 
 fn write_plugin_release(root: &Path, name: &str, version: &str, instructions: &str) -> Result<()> {
-    std::fs::create_dir_all(root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(root.join(".baicode-plugin"))?;
     std::fs::create_dir_all(root.join("skills/deploy"))?;
     let manifest = serde_json::json!({ "name": name, "version": version });
-    std::fs::write(root.join(".codex-plugin/plugin.json"), manifest.to_string())?;
+    std::fs::write(root.join(".baicode-plugin/plugin.json"), manifest.to_string())?;
     std::fs::write(root.join("skills/deploy/SKILL.md"), instructions)?;
     Ok(())
 }
@@ -262,9 +262,9 @@ async fn first_full_plugin_list_installs_only_new_plugin_versions() -> Result<()
         "name": name,
         "source": { "source": "git-subdir", "url": repo_url.as_str(), "path": name, "ref": "stable" }
     }));
-    std::fs::create_dir_all(catalog.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(catalog.path().join(".BaiCode/plugins"))?;
     std::fs::write(
-        catalog.path().join(".agents/plugins/marketplace.json"),
+        catalog.path().join(".BaiCode/plugins/marketplace.json"),
         serde_json::json!({ "name": "team", "plugins": entries }).to_string(),
     )?;
     std::fs::write(
@@ -325,7 +325,7 @@ async fn automatic_upgrade_isolates_git_while_explicit_install_preserves_configu
     init_marketplace_repo(source.path(), "trusted", "old")?;
 
     init_marketplace_repo(plugin_source.path(), "plugin", "plugin")?;
-    let plugin_root = plugin_source.path().join(".codex-plugin");
+    let plugin_root = plugin_source.path().join(".baicode-plugin");
     std::fs::create_dir_all(&plugin_root)?;
     std::fs::write(
         plugin_root.join("plugin.json"),
@@ -337,7 +337,7 @@ async fn automatic_upgrade_isolates_git_while_explicit_install_preserves_configu
         .map_err(|()| anyhow::anyhow!("invalid plugin source path"))?
         .to_string();
     std::fs::write(
-        source.path().join(".agents/plugins/marketplace.json"),
+        source.path().join(".BaiCode/plugins/marketplace.json"),
         serde_json::json!({
             "name": "trusted",
             "plugins": [{
@@ -347,7 +347,7 @@ async fn automatic_upgrade_isolates_git_while_explicit_install_preserves_configu
         })
         .to_string(),
     )?;
-    run_git(source.path(), &["add", ".agents/plugins/marketplace.json"])?;
+    run_git(source.path(), &["add", ".BaiCode/plugins/marketplace.json"])?;
     commit_marketplace_marker(source.path(), "new")?;
     record_git_marketplace(
         codex_home.path(),
@@ -412,7 +412,7 @@ async fn automatic_upgrade_isolates_git_while_explicit_install_preserves_configu
         .await?;
     let plugin_root = codex_home
         .path()
-        .join("plugins/cache/trusted/toolkit/1.0.0/.codex-plugin/plugin.json");
+        .join("plugins/cache/trusted/toolkit/1.0.0/.baicode-plugin/plugin.json");
     timeout(DEFAULT_TIMEOUT, async {
         while !plugin_root.exists() {
             tokio::time::sleep(Duration::from_millis(10)).await;
@@ -426,7 +426,7 @@ async fn automatic_upgrade_isolates_git_while_explicit_install_preserves_configu
         std::fs::write(&config_path, config_before)?;
     }
     let marketplace_path = marketplace_install_root(codex_home.path())
-        .join("trusted/.agents/plugins/marketplace.json");
+        .join("trusted/.BaiCode/plugins/marketplace.json");
     std::fs::write(
         &marketplace_path,
         serde_json::json!({
@@ -452,7 +452,7 @@ async fn automatic_upgrade_isolates_git_while_explicit_install_preserves_configu
         .await?;
 
     std::fs::write(
-        plugin_source.path().join(".codex-plugin/plugin.json"),
+        plugin_source.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"toolkit","version":"1.1.0","interface":{"displayName":"Toolkit"}}"#,
     )?;
     run_git(plugin_source.path(), &["add", "."])?;
@@ -461,7 +461,7 @@ async fn automatic_upgrade_isolates_git_while_explicit_install_preserves_configu
     assert!(
         codex_home
             .path()
-            .join("plugins/cache/trusted/toolkit/1.1.0/.codex-plugin/plugin.json")
+            .join("plugins/cache/trusted/toolkit/1.1.0/.baicode-plugin/plugin.json")
             .is_file(),
         "explicit plugin/list refresh must preserve command-scoped Git configuration"
     );

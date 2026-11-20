@@ -55,7 +55,7 @@ async fn spawned_agent_inherits_selected_executor_skill(
     let auto_env = app_server.auto_env()?;
     let environment_id = auto_env.selection().environment_id.clone();
     let plugin_dir = auto_env.selection().cwd.join("spawn-plugin")?;
-    let manifest_dir = plugin_dir.join(".codex-plugin")?;
+    let manifest_dir = plugin_dir.join(".baicode-plugin")?;
     let skill_dir = plugin_dir.join("skills/deploy")?;
     let file_system = auto_env.environment().get_filesystem();
     for directory in [&manifest_dir, &skill_dir] {

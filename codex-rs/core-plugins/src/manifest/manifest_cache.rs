@@ -62,7 +62,7 @@ impl ManifestCache {
         let is_agent_plugin =
             manifest_path == plugin_root.join(AGENT_PLUGIN_MANIFEST_RELATIVE_PATH);
         let overlay = if is_agent_plugin {
-            let overlay_path = plugin_root.join(".codex-plugin/plugin.json");
+            let overlay_path = plugin_root.join(".baicode-plugin/plugin.json");
             fs::read_to_string(&overlay_path)
                 .ok()
                 .map(|contents| (overlay_path, contents))

@@ -13,7 +13,7 @@ use tracing_test::internal::MockWriter;
 fn repeated_revision_runs_parser_once_and_changes_run_it_again() {
     let directory = tempfile::tempdir().unwrap();
     let root = PathUri::from_host_native_path(directory.path()).unwrap();
-    let path = root.join(".codex-plugin/plugin.json").unwrap();
+    let path = root.join(".baicode-plugin/plugin.json").unwrap();
     let first = r#"{"name":"demo","description":"first"}"#;
     let changed = r#"{"name":"demo","description":"changed"}"#;
     let parses = Cell::new(0);
@@ -44,7 +44,7 @@ fn repeated_revision_runs_parser_once_and_changes_run_it_again() {
 #[test]
 fn invalid_fields_warn_once_until_the_manifest_changes() {
     let directory = tempfile::tempdir().unwrap();
-    let path = directory.path().join(".codex-plugin/plugin.json");
+    let path = directory.path().join(".baicode-plugin/plugin.json");
     let buffer: &'static Mutex<Vec<u8>> = Box::leak(Box::new(Mutex::new(Vec::new())));
     let subscriber = tracing_subscriber::fmt()
         .without_time()
@@ -85,7 +85,7 @@ fn overlay_revision_and_resource_root_are_part_of_cached_parse() {
     let root = PathUri::from_host_native_path(directory.path()).unwrap();
     let other_root = root.join("other").unwrap();
     let path = root.join("plugin.json").unwrap();
-    let overlay_path = root.join(".codex-plugin/plugin.json").unwrap();
+    let overlay_path = root.join(".baicode-plugin/plugin.json").unwrap();
     let contents = serde_json::json!({
         "$schema": codex_utils_plugins::AGENT_PLUGIN_SCHEMA_URI,
         "name": "demo"
@@ -129,7 +129,7 @@ fn overlay_revision_and_resource_root_are_part_of_cached_parse() {
 fn failed_revision_is_retried_and_repair_is_visible() {
     let directory = tempfile::tempdir().unwrap();
     let root = PathUri::from_host_native_path(directory.path()).unwrap();
-    let path = root.join(".codex-plugin/plugin.json").unwrap();
+    let path = root.join(".baicode-plugin/plugin.json").unwrap();
     let cache = ManifestCache::default();
     for contents in ["{", "{"] {
         assert!(
@@ -159,7 +159,7 @@ fn equivalent_windows_paths_share_a_cached_revision() {
     let mut manifests = Vec::new();
     for value in ["file:///C:/plugins/Demo", "file:///C:/plugins/demo"] {
         let root = PathUri::parse(value).unwrap();
-        let path = root.join(".codex-plugin/plugin.json").unwrap();
+        let path = root.join(".baicode-plugin/plugin.json").unwrap();
         manifests.push(
             cache
                 .parse(&root, &path, contents, /*overlay*/ None, || {
@@ -177,7 +177,7 @@ fn equivalent_windows_paths_share_a_cached_revision() {
 fn oversized_revision_invalidates_previous_result_without_being_cached() {
     let directory = tempfile::tempdir().unwrap();
     let root = PathUri::from_host_native_path(directory.path()).unwrap();
-    let path = root.join(".codex-plugin/plugin.json").unwrap();
+    let path = root.join(".baicode-plugin/plugin.json").unwrap();
     let small = r#"{"name":"demo"}"#;
     let large = format!("{}{small}", " ".repeat(super::MAX_CACHABLE_INPUT_LEN));
     let parses = Cell::new(0);
@@ -242,9 +242,9 @@ fn store_clones_reuse_validation_but_independent_stores_warn_again() {
 
     let directory = tempfile::tempdir().unwrap();
     let root = directory.path().join("plugin");
-    std::fs::create_dir_all(root.join(".codex-plugin")).unwrap();
+    std::fs::create_dir_all(root.join(".baicode-plugin")).unwrap();
     std::fs::write(
-        root.join(".codex-plugin/plugin.json"),
+        root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"demo","interface":{"defaultPrompt":" "}}"#,
     )
     .unwrap();
@@ -285,7 +285,7 @@ fn store_clones_reuse_validation_but_independent_stores_warn_again() {
 fn disabled_cache_parses_each_load() {
     let directory = tempfile::tempdir().unwrap();
     let root = PathUri::from_host_native_path(directory.path()).unwrap();
-    let path = root.join(".codex-plugin/plugin.json").unwrap();
+    let path = root.join(".baicode-plugin/plugin.json").unwrap();
     let contents = r#"{"name":"demo"}"#;
     let expected = parse_legacy_plugin_manifest_uri(&root, &path, contents).unwrap();
     let cache = ManifestCache::disabled();

@@ -16,7 +16,7 @@ use std::path::Path;
 const PLUGIN_COMMANDS_DIR: &str = "commands";
 const MAX_MIGRATED_COMMAND_SKILL_BYTES: usize = 4_000;
 
-const PLUGIN_REWRITE_PROFILE: RewriteProfile = RewriteProfile::new("AGENTS.md", &[]);
+const PLUGIN_REWRITE_PROFILE: RewriteProfile = RewriteProfile::new("BAICODE.md", &[]);
 const PLUGIN_MIGRATION_PROFILE: CommandMigrationProfile = CommandMigrationProfile::new(
     PLUGIN_REWRITE_PROFILE,
     CommandDescriptionMode::RequireFrontmatter,

@@ -219,10 +219,10 @@ fn print_startup_config_preserves_project_login_restrictions() -> Result<()> {
         format!("[projects.{project_key}]\ntrust_level = \"trusted\"\n"),
     )?;
     std::fs::create_dir(project.path().join(".git"))?;
-    std::fs::create_dir(project.path().join(".codex"))?;
+    std::fs::create_dir(project.path().join(".BaiCode"))?;
     for method in ["chatgpt", "api"] {
         std::fs::write(
-            project.path().join(".codex/config.toml"),
+            project.path().join(".BaiCode/config.toml"),
             format!("forced_login_method = '{method}'\n"),
         )?;
         for sign_out in [None, Some("--startup-sign-out")] {

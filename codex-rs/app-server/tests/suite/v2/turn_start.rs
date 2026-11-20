@@ -2831,7 +2831,7 @@ async fn turn_start_ignores_deprecated_multi_agent_mode() -> Result<()> {
         .message_input_texts("developer");
     assert!(developer_texts.iter().any(|text| {
         text.contains(
-            "Do not spawn sub-agents unless the user or applicable AGENTS.md/skill instructions explicitly ask for sub-agents",
+            "Do not spawn sub-agents unless the user or applicable BAICODE.md/skill instructions explicitly ask for sub-agents",
         )
     }));
     assert!(
@@ -2904,7 +2904,7 @@ async fn thread_start_ignores_deprecated_multi_agent_mode() -> Result<()> {
     assert!(developer_texts.iter().any(|text| {
         text.contains(MULTI_AGENT_MODE_OPEN_TAG)
             && text.contains(
-                "Do not spawn sub-agents unless the user or applicable AGENTS.md/skill instructions explicitly ask for sub-agents",
+                "Do not spawn sub-agents unless the user or applicable BAICODE.md/skill instructions explicitly ask for sub-agents",
             )
     }));
     assert!(
@@ -5862,17 +5862,17 @@ async fn command_execution_notifications_include_trusted_plugin_id(
     let script_path = plugin_root.join("scripts/run.sh");
     let synced_root = codex_home.path().join(".tmp/plugins");
     for path in [
-        plugin_root.join(".codex-plugin"),
+        plugin_root.join(".baicode-plugin"),
         script_path
             .parent()
             .expect("script path should have parent")
             .to_path_buf(),
-        synced_root.join(".agents/plugins"),
+        synced_root.join(".BaiCode/plugins"),
     ] {
         std::fs::create_dir_all(path)?;
     }
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"google-calendar","version":"0.1.0"}"#,
     )?;
     std::fs::write(&script_path, "echo hi\n")?;
@@ -5881,7 +5881,7 @@ async fn command_execution_notifications_include_trusted_plugin_id(
         format!("{curated_sha}\n"),
     )?;
     std::fs::write(
-        synced_root.join(".agents/plugins/api_marketplace.json"),
+        synced_root.join(".BaiCode/plugins/api_marketplace.json"),
         r#"{
   "name": "openai-api-curated",
   "plugins": [{

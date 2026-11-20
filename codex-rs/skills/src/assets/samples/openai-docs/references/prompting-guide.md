@@ -15,7 +15,7 @@ Use the following prompts as a starting point across the GPT-6 model family. The
 ### GPT-6 Astra behavior
 
 - [Initiative and follow-through](#initiative-and-follow-through): The model is designed to be a more effective collaborator and is thus more likely to ask the user a question when additional input could materially change the result. This can cause it to stop when the user may expect it to make reasonable assumptions and persist.
-- [Instruction following](#instruction-following): GPT-6 Astra is stronger at general instruction following than our previous models, giving you greater control over its behavior. It can be more sensitive to instructions contained in skills and other files, such as `AGENTS.md`. We **strongly recommend** auditing skills and other files accessible to your model for instructions that could influence its behavior.
+- [Instruction following](#instruction-following): GPT-6 Astra is stronger at general instruction following than our previous models, giving you greater control over its behavior. It can be more sensitive to instructions contained in skills and other files, such as `BAICODE.md`. We **strongly recommend** auditing skills and other files accessible to your model for instructions that could influence its behavior.
 - [Personality and writing style](#personality-and-writing-style): The model tends toward detailed, formatted responses and may use recurring phrases across sessions. Specify the writing style and structure your application needs.
 - [Subagent delegation](#subagent-delegation): The model may delegate less often than desired for your workflow. Specify when and how much it should use subagents for parallel work.
 - [Testing and verification](#testing-and-verification): For coding tasks, the model tends to be thorough in testing before considering a task complete. For smaller tasks, this can result in broader tests than the task requires.
@@ -62,7 +62,7 @@ Asking the model to identify the skill and instruction that caused it to pause o
 If a skill causes you to ask for permission or confirmation, pause, leave requested work unfinished, or diverge from the user's intent, name and link to the exact SKILL.md file you read, quote the relevant instruction, and briefly explain how it applies. Distinguish explicit skill requirements from your interpretation of guidelines.
 ```
 
-Use this prompt to find silent and conflicting guidance when your application loads many skills and instruction files such as `AGENTS.md`.
+Use this prompt to find silent and conflicting guidance when your application loads many skills and instruction files such as `BAICODE.md`.
 
 ### Personality and writing style
 

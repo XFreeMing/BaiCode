@@ -44,7 +44,7 @@ use tempfile::TempDir;
 use test_case::test_case;
 
 fn write_global_instructions(home: &Path) {
-    fs::write(home.join("AGENTS.md"), "be consistent and helpful")
+    fs::write(home.join("BAICODE.md"), "be consistent and helpful")
         .expect("write global instructions");
 }
 

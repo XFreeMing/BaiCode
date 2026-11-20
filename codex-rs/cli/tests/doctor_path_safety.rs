@@ -126,7 +126,7 @@ wire_api = "responses"
             .env("BAICODE_MANAGED_BY_NPM", "1")
             .env(
                 "BAICODE_MANAGED_PACKAGE_ROOT",
-                self.workspace.join("node_modules/@openai/codex"),
+                self.workspace.join("node_modules/@baicode/cli"),
             )
             .env(
                 "BAICODE_APP_SERVER_MANAGED_CONFIG_PATH",
@@ -352,7 +352,7 @@ fn doctor_reports_only_safe_config_error_metadata() -> Result<()> {
     // macOS temp directories can use a symlinked path; trust the canonical workspace.
     let project_key = toml::Value::String(project_trust_key(&fixture.workspace));
     let original = format!("{original}\n[projects.{project_key}]\ntrust_level = \"trusted\"\n");
-    let project_config_dir = fixture.workspace.join(".codex");
+    let project_config_dir = fixture.workspace.join(".BaiCode");
     std::fs::create_dir(&project_config_dir)?;
     for (snapshot_name, config_file, config) in [
         (
@@ -514,7 +514,7 @@ fn filesystem_probe_does_not_load_configuration() -> Result<()> {
 #[tokio::test]
 async fn interactive_tmux_startup_does_not_execute_workspace_helpers() -> Result<()> {
     let fixture = Fixture::new()?;
-    std::fs::create_dir(fixture.workspace.join(".codex"))?;
+    std::fs::create_dir(fixture.workspace.join(".BaiCode"))?;
     let command = fixture.command()?;
     let mut env: std::collections::HashMap<String, String> = std::env::vars().collect();
     for (key, value) in command.get_envs() {
@@ -634,7 +634,7 @@ async fn feedback_with_logs_does_not_execute_path_helpers() -> Result<()> {
     let path = fixture.path.to_string_lossy();
     let marker = fixture.marker.to_string_lossy();
     let home = fixture.root.path().to_string_lossy();
-    let package_root = fixture.workspace.join("node_modules/@openai/codex");
+    let package_root = fixture.workspace.join("node_modules/@baicode/cli");
     let package_root = package_root.to_string_lossy();
     let mut app_server = TestAppServer::builder()
         .with_program(&fixture.program)

@@ -582,7 +582,7 @@ fn selected_capability_fixture(
     )?;
 
     let plugin = TempDir::new()?;
-    let manifest_dir = plugin.path().join(".codex-plugin");
+    let manifest_dir = plugin.path().join(".baicode-plugin");
     let skill_dir = plugin.path().join("skills/deploy");
     let pid_file = plugin.path().join("executor-mcp.pid");
     std::fs::create_dir_all(&manifest_dir)?;

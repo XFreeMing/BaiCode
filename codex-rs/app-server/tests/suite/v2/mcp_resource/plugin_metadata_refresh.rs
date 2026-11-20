@@ -38,7 +38,7 @@ async fn catalog_metadata_updates_preserve_live_mcp_and_plugin_skills() -> Resul
     })));
     let mut archive = tar::Builder::new(GzEncoder::new(Vec::new(), Compression::default()));
     for (path, contents) in [
-        (".codex-plugin/plugin.json", r#"{"name":"demo-plugin"}"#),
+        (".baicode-plugin/plugin.json", r#"{"name":"demo-plugin"}"#),
         ("skills/deploy/SKILL.md", SKILL_CONTENTS),
     ] {
         let mut header = tar::Header::new_gnu();

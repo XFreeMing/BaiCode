@@ -502,14 +502,14 @@ fn curated_marketplace_paths_for_cache_refresh(
     let curated_marketplace_path = AbsolutePathBuf::try_from(
         codex_home
             .join(".tmp/plugins")
-            .join(".agents/plugins/marketplace.json"),
+            .join(".BaiCode/plugins/marketplace.json"),
     )
     .map_err(|_| "local curated marketplace is not available".to_string())?;
     let mut paths = vec![curated_marketplace_path];
 
     let api_marketplace_path = codex_home
         .join(".tmp/plugins")
-        .join(".agents/plugins/api_marketplace.json");
+        .join(".BaiCode/plugins/api_marketplace.json");
     if api_marketplace_path.is_file() {
         paths.push(
             AbsolutePathBuf::try_from(api_marketplace_path)
@@ -1202,7 +1202,7 @@ pub fn load_plugin_hooks(
         Some(PluginManifestHooks::Inline(hooks_files)) => {
             let manifest_path = find_plugin_manifest_path(plugin_root.as_path())
                 .and_then(|path| AbsolutePathBuf::try_from(path).ok())
-                .unwrap_or_else(|| plugin_root.join(".codex-plugin/plugin.json"));
+                .unwrap_or_else(|| plugin_root.join(".baicode-plugin/plugin.json"));
             for (index, hooks_file) in hooks_files.iter().enumerate() {
                 if hooks_file.hooks.is_empty() {
                     continue;

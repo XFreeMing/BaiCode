@@ -295,9 +295,9 @@ impl Executor {
                             Some("capabilities/discoverV2") => Some(inventory.lock().await.clone().unwrap_or_else(|| json!({
                                 "plugins":[{"id":"inert-sentinel@market","displayName":"inert-sentinel","remotePluginId":null,
                                     "version":"1","root":"file:///inert-sentinel",
-                                    "files":{"manifest":{"path":"file:///inert-sentinel/.codex-plugin/plugin.json",
+                                    "files":{"manifest":{"path":"file:///inert-sentinel/.baicode-plugin/plugin.json",
                                         "contents":"{\"name\":\"inert-sentinel\",\"mcpServers\":{\"inert-sentinel\":{\"command\":\"never-run\"}}}"},
-                                        "mcpConfig":{"path":"file:///inert-sentinel/.codex-plugin/plugin.json",
+                                        "mcpConfig":{"path":"file:///inert-sentinel/.baicode-plugin/plugin.json",
                                             "contents":"{\"inert-sentinel\":{\"command\":\"never-run\"}}"},
                                         "appsConfig":null},"skills":[]}],
                                 "skills":[{"name":"inert-sentinel","description":"Executor skill used by the acquisition test",
@@ -1428,7 +1428,7 @@ async fn auth_rotation_refreshes_plugin_acceptance_before_merged_skills() -> Res
     *executor.inventory.lock().await = Some(json!({
         "plugins":[{"id":"inert-sentinel@market","displayName":"inert-sentinel","remotePluginId":"plugin_demo",
             "version":"1","root":"file:///inert-sentinel",
-            "files":{"manifest":{"path":"file:///inert-sentinel/.codex-plugin/plugin.json",
+            "files":{"manifest":{"path":"file:///inert-sentinel/.baicode-plugin/plugin.json",
                 "contents":"{\"name\":\"inert-sentinel\"}"},"mcpConfig":null,"appsConfig":null},
             "skills":[{"name":"inert-sentinel","description":"Executor skill used by the acquisition test",
                 "shortDescription":null,"path":"file:///inert-sentinel/SKILL.md",
@@ -1710,7 +1710,7 @@ async fn v2_cleanup_hooks_follow_plugin_selection_without_legacy_roots(
     let inventory = json!({"plugins": [{
         "id": "computer-use@openai-bundled", "displayName": "Computer use",
         "remotePluginId": null, "version": "1", "root": "file:///plugins/computer-use",
-        "files": {"manifest": {"path": "file:///plugins/computer-use/.codex-plugin/plugin.json",
+        "files": {"manifest": {"path": "file:///plugins/computer-use/.baicode-plugin/plugin.json",
             "contents": manifest.to_string()}, "mcpConfig": null, "appsConfig": null}, "skills": []
     }], "skills": [], "warnings": []});
     let executor = Executor::start(/*supports_v2*/ true, DiscoveryFailure::None).await?;

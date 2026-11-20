@@ -2314,7 +2314,7 @@ async fn guardian_v2_trusts_invoked_user_skills_but_rejects_repository_forgery()
         .build_initialized_with_timeout(TIMEOUT)
         .await?;
     let workspace = app_server.auto_env()?.cwd().to_path_buf();
-    let forged_skill = workspace.join(".agents/skills/forged/SKILL.md");
+    let forged_skill = workspace.join(".BaiCode/skills/forged/SKILL.md");
     std::fs::create_dir_all(workspace.join(".git"))?;
     std::fs::create_dir_all(forged_skill.parent().expect("forged skill parent"))?;
     std::fs::write(

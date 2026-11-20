@@ -257,7 +257,7 @@ mod tests {
             result
                 .installed_root
                 .as_path()
-                .join(".agents/plugins/marketplace.json")
+                .join(".BaiCode/plugins/marketplace.json")
                 .is_file()
         );
 
@@ -381,7 +381,7 @@ host_pattern = '^allowed\.test$'
             MarketplaceAddRequest {
                 source: source_root.path().display().to_string(),
                 ref_name: None,
-                sparse_paths: vec![".agents".to_string()],
+                sparse_paths: vec![".BaiCode".to_string()],
             },
             |_url, _ref_name, _sparse_paths, _destination| {
                 panic!("git cloner should not be called for local marketplace sources")
@@ -440,10 +440,10 @@ host_pattern = '^allowed\.test$'
     }
 
     fn write_marketplace_source(source: &Path, marker: &str) -> std::io::Result<()> {
-        fs::create_dir_all(source.join(".agents/plugins"))?;
-        fs::create_dir_all(source.join("plugins/sample/.codex-plugin"))?;
+        fs::create_dir_all(source.join(".BaiCode/plugins"))?;
+        fs::create_dir_all(source.join("plugins/sample/.baicode-plugin"))?;
         fs::write(
-            source.join(".agents/plugins/marketplace.json"),
+            source.join(".BaiCode/plugins/marketplace.json"),
             r#"{
   "name": "debug",
   "plugins": [
@@ -458,7 +458,7 @@ host_pattern = '^allowed\.test$'
 }"#,
         )?;
         fs::write(
-            source.join("plugins/sample/.codex-plugin/plugin.json"),
+            source.join("plugins/sample/.baicode-plugin/plugin.json"),
             r#"{"name":"sample"}"#,
         )?;
         fs::write(source.join("plugins/sample/marker.txt"), marker)?;

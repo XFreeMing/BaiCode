@@ -487,7 +487,7 @@ fn collect_user_messages_filters_session_prefix_entries() {
             id: None,
             role: "user".to_string(),
             content: vec![ContentItem::InputText {
-                text: r#"# AGENTS.md instructions for project
+                text: r#"# BAICODE.md instructions for project
 
 <INSTRUCTIONS>
 do things

@@ -45,7 +45,7 @@ async fn windows_elevated_repository_skills_enforce_cached_read_denials() -> any
         })
         .with_workspace_setup(|cwd, _fs| async move {
             for name in ["allowed", "revoked", "file", "directory"] {
-                let root = cwd.join(format!(".agents/skills/windows-{name}"));
+                let root = cwd.join(format!(".BaiCode/skills/windows-{name}"));
                 std::fs::create_dir_all(&root)?;
                 std::fs::write(
                     root.join("SKILL.md"),
@@ -122,7 +122,7 @@ async fn windows_elevated_repository_skills_enforce_cached_read_denials() -> any
 
     policy.entries.push(FileSystemSandboxEntry::new(
         FileSystemPath::Path {
-            path: cwd.join(".agents/skills/windows-revoked/SKILL.md").into(),
+            path: cwd.join(".BaiCode/skills/windows-revoked/SKILL.md").into(),
         },
         FileSystemAccessMode::Deny,
     ));
@@ -146,10 +146,10 @@ async fn windows_elevated_repository_skills_enforce_cached_read_denials() -> any
         .await
         .expect_err("revoked read must be denied");
 
-    let file_path = cwd.join(".agents/skills/windows-file/SKILL.md");
+    let file_path = cwd.join(".BaiCode/skills/windows-file/SKILL.md");
     std::fs::remove_file(&file_path)?;
     std::os::windows::fs::symlink_file(cwd.join("denied/SKILL.md"), &file_path)?;
-    let directory_path = cwd.join(".agents/skills/windows-directory");
+    let directory_path = cwd.join(".BaiCode/skills/windows-directory");
     std::fs::remove_dir_all(&directory_path)?;
     std::os::windows::fs::symlink_dir(cwd.join("denied"), &directory_path)?;
     for skill in [&file, &directory] {

@@ -51,7 +51,7 @@ class ProvisioningTestCase(unittest.TestCase):
             "TeamIdentifier": ["TESTTEAM01"],
             "ApplicationIdentifierPrefix": ["TESTTEAM01"],
             "Entitlements": {
-                "com.apple.application-identifier": "TESTTEAM01.com.openai.codex.cli",
+                "com.apple.application-identifier": "TESTTEAM01.local.baicode.cli",
                 "com.apple.developer.team-identifier": "TESTTEAM01",
                 "keychain-access-groups": ["TESTTEAM01.*"],
             },

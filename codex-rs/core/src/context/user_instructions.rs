@@ -28,7 +28,7 @@ impl ContextualUserFragment for UserInstructions {
     }
 
     fn type_markers() -> (&'static str, &'static str) {
-        ("# AGENTS.md instructions", "</INSTRUCTIONS>")
+        ("# BAICODE.md instructions", "</INSTRUCTIONS>")
     }
 
     fn body(&self) -> ContentItem {

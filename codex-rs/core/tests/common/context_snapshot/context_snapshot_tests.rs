@@ -706,7 +706,7 @@ fn rewritten_segments_share_one_tag_format_and_keep_compaction_data() {
         ),
         message(
             "user",
-            "# AGENTS.md instructions for project\n\n<INSTRUCTIONS>\nProject rules\n</INSTRUCTIONS>",
+            "# BAICODE.md instructions for project\n\n<INSTRUCTIONS>\nProject rules\n</INSTRUCTIONS>",
         ),
         message(
             "user",

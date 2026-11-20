@@ -67,7 +67,7 @@ impl RewriteProfile {
 
     fn rewrite_terms(self, content: &str) -> String {
         let mut rewritten =
-            replace_case_insensitive_with_boundaries(content, self.doc_file_name, "AGENTS.md");
+            replace_case_insensitive_with_boundaries(content, self.doc_file_name, "BAICODE.md");
         for from in self.term_variants {
             rewritten = replace_case_insensitive_with_boundaries(&rewritten, from, "Codex");
         }

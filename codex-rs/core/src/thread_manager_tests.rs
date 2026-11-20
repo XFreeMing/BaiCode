@@ -2006,7 +2006,7 @@ async fn spawn_internal_session_preserves_parent_lineage_without_forking_history
 
     let parent_instructions = codex_extension_api::Instructions {
         text: "parent user instructions must not be inherited".to_string(),
-        source: Some(config.codex_home.join("AGENTS.md")),
+        source: Some(config.codex_home.join("BAICODE.md")),
     };
     let mut manager = ThreadManager::with_models_provider_and_home_for_tests(
         CodexAuth::from_api_key("dummy"),

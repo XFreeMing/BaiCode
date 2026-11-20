@@ -8,11 +8,11 @@ from app_server_harness import (
 )
 from app_server_helpers import agent_message_texts
 
-from openai_codex import Codex
-from openai_codex._goal import _GoalNotificationStream
-from openai_codex._run import _collect_turn_result
-from openai_codex.generated.notification_registry import notification_turn_id
-from openai_codex.generated.v2_all import TurnStatus
+from baicode_sdk import Codex
+from baicode_sdk._goal import _GoalNotificationStream
+from baicode_sdk._run import _collect_turn_result
+from baicode_sdk.generated.notification_registry import notification_turn_id
+from baicode_sdk.generated.v2_all import TurnStatus
 
 
 def test_private_goal_operation_coalesces_runtime_continuations(tmp_path) -> None:

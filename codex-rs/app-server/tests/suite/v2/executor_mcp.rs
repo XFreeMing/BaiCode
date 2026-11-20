@@ -292,9 +292,9 @@ async fn legacy_executor_blocks_plugin_host_credentials_and_keeps_host_owned_mcp
             "[mcp_servers.node_repl]\nurl = \"http://127.0.0.1:9/mcp\"\nbearer_token_env_var = \"NODE_REPL_AUTH_TOKEN\"\nrequired = true\nstartup_timeout_sec = 1\n\n[mcp_servers.executor_public]\nurl = \"{mcp_url}\"\nhttp_headers = {{ Authorization = \"Bearer host-only-token\" }}\nrequired = true\n"
         ),
     )?;
-    std::fs::create_dir_all(plugin.path().join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin.path().join(".baicode-plugin"))?;
     std::fs::write(
-        plugin.path().join(".codex-plugin/plugin.json"),
+        plugin.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"legacy-plugin"}"#,
     )?;
     std::fs::write(
@@ -1113,9 +1113,9 @@ url = "{executor_url}"
     )?;
 
     let plugin = TempDir::new()?;
-    std::fs::create_dir_all(plugin.path().join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin.path().join(".baicode-plugin"))?;
     std::fs::write(
-        plugin.path().join(".codex-plugin/plugin.json"),
+        plugin.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"executor-demo"}"#,
     )?;
     std::fs::write(

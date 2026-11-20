@@ -12,9 +12,9 @@ use codex_config::record_user_marketplace;
 async fn automatic_marketplace_upgrade_failure_shows_warning() -> Result<()> {
     let (mut app, mut events, _ops) = make_test_app_with_channels().await;
     let source = tempdir()?;
-    std::fs::create_dir_all(source.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(source.path().join(".BaiCode/plugins"))?;
     std::fs::write(
-        source.path().join(".agents/plugins/marketplace.json"),
+        source.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{"name":"other","plugins":[]}"#,
     )?;
     for args in [

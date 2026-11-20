@@ -494,7 +494,7 @@ jobs:
               assert not any("codex-resources/voice/" in item.name for item in archive)
           PY
 
-          stage_dir="${RUNNER_TEMP}/openai-codex-cli-bin-${{ matrix.target }}"
+          stage_dir="${RUNNER_TEMP}/baicode-cli-bin-${{ matrix.target }}"
           wheel_dir="${GITHUB_WORKSPACE}/python-runtime-dist/${{ matrix.target }}"
           stage_runtime_args=(
             "${GITHUB_WORKSPACE}/sdk/python/scripts/update_sdk_artifacts.py"
@@ -801,7 +801,7 @@ jobs:
               --target "$binary" \
               --identity unused \
               --deep false \
-              --identifier "com.openai.codex.${resource}" \
+              --identifier "local.baicode.${resource}" \
               --options runtime \
               --timestamp true
 
@@ -835,12 +835,12 @@ jobs:
             name="$(basename "$library")"
             .github/scripts/macos-signing/sign_macos_code.sh \
               --target "$library" --identity unused --deep false \
-              --identifier "com.openai.codex.voice.${name}" \
+              --identifier "local.baicode.voice.${name}" \
               --options runtime --timestamp true
           done < <(find "$signed/runtime" -name '*.dylib' -type f -print0)
           .github/scripts/macos-signing/sign_macos_code.sh \
             --target "$signed/codex-voice-host" --identity unused --deep false \
-            --identifier com.openai.codex.voice-host --options runtime --timestamp true \
+            --identifier local.baicode.voice-host --options runtime --timestamp true \
             --entitlements .github/scripts/macos-signing/codex-voice-host.entitlements.plist
 
           # Notarize the actual signed closure together, then hash those bytes.
@@ -1132,7 +1132,7 @@ jobs:
               assert not any("codex-resources/voice/" in item.name for item in archive)
           PY
 
-          stage_dir="${RUNNER_TEMP}/openai-codex-cli-bin-${{ matrix.target }}"
+          stage_dir="${RUNNER_TEMP}/baicode-cli-bin-${{ matrix.target }}"
           wheel_dir="${GITHUB_WORKSPACE}/python-runtime-dist/${{ matrix.target }}"
           python3 \
             "${GITHUB_WORKSPACE}/sdk/python/scripts/update_sdk_artifacts.py" \
@@ -1980,7 +1980,7 @@ jobs:
           sdk_tarball="dist/npm/codex-sdk-npm-${VERSION}.tgz"
           # Keep this list in sync with BAICODE_PLATFORM_PACKAGES in
           # codex-cli/scripts/build_npm_package.py. The root wrapper advances
-          # @openai/codex@latest as soon as it publishes, so every platform
+          # @baicode/cli@latest as soon as it publishes, so every platform
           # package it aliases must already exist in the registry first.
           platform_tarballs=(
             "dist/npm/codex-npm-linux-x64-${VERSION}.tgz"
@@ -2020,7 +2020,7 @@ jobs:
           done
 
           # npm returns HTTP 409 when concurrent publishes update the same
-          # packument. Every platform tarball is a version of @openai/codex,
+          # packument. Every platform tarball is a version of @baicode/cli,
           # so publish all tarballs serially.
           tarballs=(
             "${platform_tarballs[@]}"

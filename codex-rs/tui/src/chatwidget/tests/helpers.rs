@@ -1447,7 +1447,7 @@ pub(super) fn plugins_test_absolute_path(path: &str) -> AbsolutePathBuf {
 pub(super) fn plugins_test_personal_marketplace_path() -> AbsolutePathBuf {
     dirs::home_dir()
         .expect("home directory should be available")
-        .join(".agents/plugins/marketplace.json")
+        .join(".BaiCode/plugins/marketplace.json")
         .abs()
 }
 

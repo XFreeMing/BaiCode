@@ -1,6 +1,6 @@
 # OpenAI Codex Python SDK - API Reference
 
-Public surface of `openai_codex` for Codex workflows.
+Public surface of `baicode_sdk` for Codex workflows.
 
 Turn streams are routed by turn ID so one client can consume multiple active turns concurrently.
 Thread starts default to `ApprovalMode.auto_review`; turn starts accept an optional `approval_mode` override.
@@ -8,7 +8,7 @@ Thread starts default to `ApprovalMode.auto_review`; turn starts accept an optio
 ## Package Entry
 
 ```python
-from openai_codex import (
+from baicode_sdk import (
     Codex,
     AsyncCodex,
     CodexConfig,
@@ -33,7 +33,7 @@ from openai_codex import (
     MentionInput,
     ExternalMessage,
 )
-from openai_codex.types import (
+from baicode_sdk.types import (
     Account,
     AccountLoginCompletedNotification,
     CancelLoginAccountResponse,
@@ -48,9 +48,9 @@ from openai_codex.types import (
 )
 ```
 
-- Version: `openai_codex.__version__`
+- Version: `baicode_sdk.__version__`
 - Requires Python >= 3.10
-- Public Codex protocol value and event types live in `openai_codex.types`
+- Public Codex protocol value and event types live in `baicode_sdk.types`
 
 ## Codex (sync)
 
@@ -241,7 +241,7 @@ are sent. A custom `launch_args_override` must report a supported version.
 Use `sandbox=` consistently on thread lifecycle methods and turns:
 
 ```python
-from openai_codex import Codex, Sandbox
+from baicode_sdk import Codex, Sandbox
 
 with Codex() as codex:
     thread = codex.thread_start(sandbox=Sandbox.workspace_write)
@@ -315,7 +315,7 @@ approval. Keep the thread's sandbox and approval policies appropriate for the
 work the user has authorized.
 
 ```python
-from openai_codex import ExternalMessage
+from baicode_sdk import ExternalMessage
 
 message = ExternalMessage(
     tool_name="notifications",
@@ -363,7 +363,7 @@ request followed by an external notification.
 The SDK wrappers return and accept public Codex protocol models wherever possible:
 
 ```python
-from openai_codex.types import (
+from baicode_sdk.types import (
     Account,
     AccountLoginCompletedNotification,
     CancelLoginAccountResponse,
@@ -395,7 +395,7 @@ separate command, MCP tool, prompt, and agent hook variants.
 ## Retry + errors
 
 ```python
-from openai_codex import (
+from baicode_sdk import (
     retry_on_overload,
     JsonRpcError,
     MethodNotFoundError,
@@ -411,7 +411,7 @@ from openai_codex import (
 ## Example
 
 ```python
-from openai_codex import Codex
+from baicode_sdk import Codex
 
 with Codex() as codex:
     thread = codex.thread_start(model="gpt-5.4", config={"model_reasoning_effort": "high"})

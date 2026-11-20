@@ -7,11 +7,11 @@ from typing import get_type_hints
 import pytest
 from pydantic import ValidationError
 
-from openai_codex._runtime_requirements import CheckoutCapabilities
-from openai_codex.client import CodexClient, _params_dict
-from openai_codex.errors import CodexError
-from openai_codex.generated.notification_registry import notification_turn_id
-from openai_codex.generated.v2_all import (
+from baicode_sdk._runtime_requirements import CheckoutCapabilities
+from baicode_sdk.client import CodexClient, _params_dict
+from baicode_sdk.errors import CodexError
+from baicode_sdk.generated.notification_registry import notification_turn_id
+from baicode_sdk.generated.v2_all import (
     AbsolutePathBuf,
     AccountRateLimitsUpdatedNotification,
     AccountUpdatedNotification,
@@ -39,8 +39,8 @@ from openai_codex.generated.v2_all import (
     TurnStartParams,
     WarningNotification,
 )
-from openai_codex.models import InitializeResponse, JsonObject, Notification, UnknownNotification
-from openai_codex.types import ThreadSource
+from baicode_sdk.models import InitializeResponse, JsonObject, Notification, UnknownNotification
+from baicode_sdk.types import ThreadSource
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -247,7 +247,7 @@ def test_unversioned_checkout_probes_and_caches_its_own_schema(
                 )
             )
 
-    monkeypatch.setattr("openai_codex._runtime_requirements.subprocess.run", generate_schema)
+    monkeypatch.setattr("baicode_sdk._runtime_requirements.subprocess.run", generate_schema)
     for method, params in (
         ("turn/start", {"input": [], "turnTrigger": "automation"}),
         ("thread/resume", {"threadId": "thread-1", "excludeTurns": False}),
@@ -324,7 +324,7 @@ def test_generated_params_models_are_snake_case_and_dump_by_alias() -> None:
 
 
 def test_generated_v2_bundle_has_single_shared_plan_type_definition() -> None:
-    source = (ROOT / "src" / "openai_codex" / "generated" / "v2_all.py").read_text()
+    source = (ROOT / "src" / "baicode_sdk" / "generated" / "v2_all.py").read_text()
     assert source.count("class PlanType(") == 1
 
 

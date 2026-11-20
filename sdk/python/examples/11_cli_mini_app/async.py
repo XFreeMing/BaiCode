@@ -11,10 +11,10 @@ ensure_local_sdk_src()
 
 import asyncio
 
-from openai_codex import (
+from baicode_sdk import (
     AsyncCodex,
 )
-from openai_codex.types import (
+from baicode_sdk.types import (
     ThreadTokenUsageUpdatedNotification,
     TurnCompletedNotification,
 )

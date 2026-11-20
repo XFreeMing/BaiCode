@@ -87,7 +87,7 @@ impl ExternalAgentConfigService {
         let settings = self.effective_source_settings(scope)?;
         let target_config = repo_root.map_or_else(
             || self.codex_home.join("config.toml"),
-            |repo_root| repo_root.join(".codex").join("config.toml"),
+            |repo_root| repo_root.join(".BaiCode").join("config.toml"),
         );
         if let Some(settings) = settings.as_ref() {
             let migrated = self.source.build_config(settings)?;
@@ -168,7 +168,7 @@ impl ExternalAgentConfigService {
         let source_external_agent_dir = self.source_config_dir(scope);
         let target_hooks = repo_root.map_or_else(
             || self.codex_home.join("hooks.json"),
-            |repo_root| repo_root.join(".codex").join("hooks.json"),
+            |repo_root| repo_root.join(".BaiCode").join("hooks.json"),
         );
         let hook_event_names = self
             .source
@@ -203,7 +203,7 @@ impl ExternalAgentConfigService {
             .collect::<Vec<_>>();
         let target_skills = repo_root.map_or_else(
             || self.home_target_skills_dir(),
-            |repo_root| repo_root.join(".agents").join("skills"),
+            |repo_root| repo_root.join(".BaiCode").join("skills"),
         );
         let mut skill_names = Vec::new();
         for source_skills_dir in &source_skills {
@@ -244,7 +244,7 @@ impl ExternalAgentConfigService {
         let source_commands = source_external_agent_dir.join("commands");
         let target_command_skills = repo_root.map_or_else(
             || self.home_target_skills_dir(),
-            |repo_root| repo_root.join(".agents").join("skills"),
+            |repo_root| repo_root.join(".BaiCode").join("skills"),
         );
         let commands_count = self
             .source
@@ -276,7 +276,7 @@ impl ExternalAgentConfigService {
         let source_subagents = source_external_agent_dir.join("agents");
         let target_subagents = repo_root.map_or_else(
             || self.codex_home.join("agents"),
-            |repo_root| repo_root.join(".codex").join("agents"),
+            |repo_root| repo_root.join(".BaiCode").join("agents"),
         );
         let subagents_count = count_missing_subagents(&source_subagents, &target_subagents)?;
         if subagents_count > 0 {
@@ -314,7 +314,7 @@ impl ExternalAgentConfigService {
                 .collect()
         };
         for group in instruction_source_groups {
-            let target_agents_md = group.scope.join("AGENTS.md");
+            let target_agents_md = group.scope.join("BAICODE.md");
             if !is_missing_or_empty_text_file(&target_agents_md)? {
                 continue;
             }

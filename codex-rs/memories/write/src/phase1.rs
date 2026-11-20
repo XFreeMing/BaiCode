@@ -598,11 +598,11 @@ mod tests {
             content: vec![
                 ContentItem::InputText {
                     text:
-                        "# AGENTS.md instructions for /tmp\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
+                        "# BAICODE.md instructions for /tmp\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
                             .to_string(),
                 },
                 ContentItem::InputText {
-                    text: "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
+                    text: "# BAICODE.md instructions\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
                         .to_string(),
                 },
                 ContentItem::InputText {

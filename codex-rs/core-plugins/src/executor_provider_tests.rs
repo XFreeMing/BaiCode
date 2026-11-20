@@ -268,7 +268,7 @@ async fn root_ownership_survives_malformed_ancestor_manifests() {
     );
     write_manifest(
         root.parent().unwrap(),
-        ".codex-plugin/plugin.json",
+        ".baicode-plugin/plugin.json",
         "{broken",
     );
     assert_eq!(
@@ -315,7 +315,7 @@ async fn discovery_ownership_uses_ancestors_not_nested_plugins() {
         plugin: None,
         skills: Vec::new(),
         namespace_manifests: vec![CapabilityTextFile {
-            path: path.join("nested/.codex-plugin/plugin.json").unwrap(),
+            path: path.join("nested/.baicode-plugin/plugin.json").unwrap(),
             contents: "{broken".into(),
         }],
         warnings: Vec::new(),
@@ -328,7 +328,7 @@ async fn discovery_ownership_uses_ancestors_not_nested_plugins() {
             .unwrap(),
         PluginRootOwnership::Standalone
     );
-    discovery.namespace_manifests[0].path = path.join(".codex-plugin/plugin.json").unwrap();
+    discovery.namespace_manifests[0].path = path.join(".baicode-plugin/plugin.json").unwrap();
     assert_eq!(
         provider
             .root_ownership(&selected, Some(&discovery), /*sandbox*/ None)
@@ -350,8 +350,8 @@ async fn discovery_ownership_uses_ancestors_not_nested_plugins() {
 async fn ancestor_manifest_probes_pipeline_and_preserve_error_order() {
     let root = PathUri::parse("file:///a/b/c/d/e/f").expect("selected root URI");
     let owner = PathUri::parse("file:///a/b/c").expect("owner URI");
-    let manifest = owner.join(".codex-plugin/plugin.json").unwrap();
-    let earlier_error = root.join(".codex-plugin/plugin.json").unwrap();
+    let manifest = owner.join(".baicode-plugin/plugin.json").unwrap();
+    let earlier_error = root.join(".baicode-plugin/plugin.json").unwrap();
     let later_error = owner.join(".claude-plugin/plugin.json").unwrap();
     let expected_probes = std::iter::successors(Some(root.clone()), PathUri::parent)
         .flat_map(|ancestor| {
@@ -418,7 +418,7 @@ async fn ancestor_manifest_probes_pipeline_and_preserve_error_order() {
 async fn manifest_presence_uses_sandboxed_metadata_without_reading_contents() {
     let plugin_root = PathUri::parse("file:///C:").expect("Windows anchor URI");
     let manifest_path = plugin_root
-        .join(".codex-plugin/plugin.json")
+        .join(".baicode-plugin/plugin.json")
         .expect("manifest URI");
     for follow_symlinks in [true, false] {
         let file_system = SyntheticPluginFileSystem {
@@ -465,7 +465,7 @@ async fn plugin_root_resolution_uses_supplied_executor_file_system() {
     assert!(!plugin_root.exists());
     let plugin_root = PathUri::from_host_native_path(&plugin_root).expect("plugin root URI");
     let manifest_path = plugin_root
-        .join(".codex-plugin/plugin.json")
+        .join(".baicode-plugin/plugin.json")
         .expect("manifest URI");
     let parsed_manifest =
         parse_plugin_manifest_uri(&plugin_root, &manifest_path, MANIFEST_CONTENTS)
@@ -516,7 +516,7 @@ async fn plugin_root_resolution_uses_supplied_executor_file_system() {
 async fn plugin_root_resolution_accepts_foreign_executor_file_uri() {
     let plugin_root = PathUri::parse("file:///C:/plugins/foo").expect("Windows plugin root URI");
     let manifest_path = plugin_root
-        .join(".codex-plugin/plugin.json")
+        .join(".baicode-plugin/plugin.json")
         .expect("manifest URI");
     let parsed_manifest =
         parse_plugin_manifest_uri(&plugin_root, &manifest_path, MANIFEST_CONTENTS)
@@ -610,7 +610,7 @@ async fn root_agent_plugin_manifest_is_not_an_executor_plugin() {
 async fn unavailable_environment_does_not_fall_back_to_host_filesystem() {
     let temp_dir = tempdir().expect("tempdir");
     let plugin_root = temp_dir.path().join("host-plugin");
-    write_manifest(&plugin_root, ".codex-plugin/plugin.json", MANIFEST_CONTENTS);
+    write_manifest(&plugin_root, ".baicode-plugin/plugin.json", MANIFEST_CONTENTS);
     let provider =
         ExecutorPluginProvider::new(Arc::new(environment_manager_without_environments()));
 
@@ -630,14 +630,14 @@ async fn unavailable_environment_does_not_fall_back_to_host_filesystem() {
 async fn malformed_preferred_manifest_does_not_fall_through_to_alternate() {
     let temp_dir = tempdir().expect("tempdir");
     let plugin_root = temp_dir.path().join("demo-plugin");
-    write_manifest(&plugin_root, ".codex-plugin/plugin.json", "{not-json");
+    write_manifest(&plugin_root, ".baicode-plugin/plugin.json", "{not-json");
     write_manifest(
         &plugin_root,
         ".claude-plugin/plugin.json",
         MANIFEST_CONTENTS,
     );
     let expected_path =
-        PathUri::from_host_native_path(plugin_root.join(".codex-plugin/plugin.json"))
+        PathUri::from_host_native_path(plugin_root.join(".baicode-plugin/plugin.json"))
             .expect("manifest URI");
     let provider = ExecutorPluginProvider::new(Arc::new(EnvironmentManager::default_for_tests()));
 

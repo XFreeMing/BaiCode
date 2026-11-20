@@ -83,9 +83,9 @@ fn expected_source(index: usize) -> ExecutorPluginHookSource {
         mcp_environment_id: None,
         mcp_metadata: None,
         plugin_root: PathUri::parse("file:///plugins/computer-use").expect("plugin root"),
-        manifest_path: PathUri::parse("file:///plugins/computer-use/.codex-plugin/plugin.json")
+        manifest_path: PathUri::parse("file:///plugins/computer-use/.baicode-plugin/plugin.json")
             .expect("manifest path"),
-        source_relative_path: format!(".codex-plugin/plugin.json#hooks[{index}]"),
+        source_relative_path: format!(".baicode-plugin/plugin.json#hooks[{index}]"),
         hooks: HookEventsToml {
             stop: vec![MatcherGroup {
                 matcher: None,
@@ -126,7 +126,7 @@ fn discovers_allowlisted_executor_plugin_hook_sources() {
     let snapshot = snapshot_for_manifest(
         "computer-use@openai-bundled",
         "executor-a",
-        "file:///plugins/computer-use/.codex-plugin/plugin.json",
+        "file:///plugins/computer-use/.baicode-plugin/plugin.json",
         manifest,
     );
 
@@ -171,7 +171,7 @@ fn discovers_unified_computer_use_cleanup_hooks() {
     let snapshot = snapshot_for_manifest(
         "unified-computer-use@openai-bundled",
         "executor-a",
-        "file:///plugins/computer-use/.codex-plugin/plugin.json",
+        "file:///plugins/computer-use/.baicode-plugin/plugin.json",
         manifest,
     );
     let mut expected = expected_source(/*index*/ 0);
@@ -214,7 +214,7 @@ fn filters_mixed_handlers_without_rewriting_allowed_groups() {
     let snapshot = snapshot_for_manifest(
         "computer-use@openai-bundled",
         "executor-a",
-        "file:///plugins/computer-use/.codex-plugin/plugin.json",
+        "file:///plugins/computer-use/.baicode-plugin/plugin.json",
         manifest,
     );
 
@@ -235,7 +235,7 @@ fn preserves_allowlisted_executor_plugin_hook_options() {
     let snapshot = snapshot_for_manifest(
         "computer-use@openai-bundled",
         "executor-a",
-        "file:///plugins/computer-use/.codex-plugin/plugin.json",
+        "file:///plugins/computer-use/.baicode-plugin/plugin.json",
         manifest,
     );
 
@@ -378,7 +378,7 @@ fn resolves_apps_hook_metadata_from_the_registered_connector() {
         let snapshot = snapshot_for_manifest(
             "browser@openai-curated-remote",
             "executor-a",
-            "file:///plugins/computer-use/.codex-plugin/plugin.json",
+            "file:///plugins/computer-use/.baicode-plugin/plugin.json",
             manifest,
         );
         let tool_info = connector_id.map(|connector_id| {
@@ -470,7 +470,7 @@ fn ignores_unallowlisted_executor_plugin_hooks() {
         let snapshot = snapshot_for_manifest(
             plugin_id,
             "executor-a",
-            "file:///plugins/computer-use/.codex-plugin/plugin.json",
+            "file:///plugins/computer-use/.baicode-plugin/plugin.json",
             manifest,
         );
 
@@ -487,7 +487,7 @@ fn ignores_file_backed_executor_plugin_hooks() {
     let file_backed = snapshot_for_manifest(
         "computer-use@openai-bundled",
         "executor-a",
-        "file:///plugins/computer-use/.codex-plugin/plugin.json",
+        "file:///plugins/computer-use/.baicode-plugin/plugin.json",
         json!({
             "name": "computer-use",
             "hooks": "./hooks/hooks.json"
@@ -505,7 +505,7 @@ fn v2_hooks_preserve_admission_policy_and_environment_routing() {
     let manifest = cleanup_hook_manifest();
     let files = DiscoveredPluginFiles {
         manifest: CapabilityTextFile {
-            path: PathUri::parse("file:///plugins/computer-use/.codex-plugin/plugin.json").unwrap(),
+            path: PathUri::parse("file:///plugins/computer-use/.baicode-plugin/plugin.json").unwrap(),
             contents: manifest.to_string(),
         },
         mcp_config: None,

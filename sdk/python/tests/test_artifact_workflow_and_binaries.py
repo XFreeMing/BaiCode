@@ -1,13 +1,11 @@
 import ast
 import importlib.util
-import io
 import json
 import os
 import re
 import subprocess
 import sys
 import tarfile
-import urllib.error
 import zipfile
 from email.parser import BytesParser
 from pathlib import Path
@@ -498,7 +496,7 @@ def test_python_codegen_schema_annotation_adds_stable_variant_titles() -> None:
         "GranularAskForApproval",
     ]
 
-    from openai_codex.generated.v2_all import ReasoningSummary
+    from baicode_sdk.generated.v2_all import ReasoningSummary
 
     reasoning_values, disabled = definitions["ReasoningSummary"]["oneOf"]
     assert reasoning_values["title"] == "ReasoningSummaryValue"
@@ -515,7 +513,7 @@ def test_generate_v2_all_uses_titles_for_generated_names() -> None:
 
 
 def test_generated_chatgpt_account_email_is_required_nullable() -> None:
-    from openai_codex.generated.v2_all import ChatgptAccount
+    from baicode_sdk.generated.v2_all import ChatgptAccount
 
     account = ChatgptAccount.model_validate({"email": None, "planType": "pro", "type": "chatgpt"})
     assert account.email is None
@@ -527,7 +525,7 @@ def test_generated_chatgpt_account_email_is_required_nullable() -> None:
 
 @pytest.mark.parametrize("link_id", ["link_calendar", None])
 def test_generated_resource_read_target_requires_explicit_account(link_id: str | None) -> None:
-    from openai_codex.generated.v2_all import McpResourceReadTarget
+    from baicode_sdk.generated.v2_all import McpResourceReadTarget
 
     payload = {"connectorId": "calendar", "linkId": link_id}
     target = McpResourceReadTarget.model_validate(payload)
@@ -539,7 +537,7 @@ def test_generated_resource_read_target_requires_explicit_account(link_id: str |
 
 def test_generated_inline_image_class_names_remain_stable() -> None:
     """Keep the existing Python class names when image references expand."""
-    from openai_codex.generated.v2_all import (
+    from baicode_sdk.generated.v2_all import (
         ImageUserInput,
         InputImageContentItem,
         InputImageFunctionCallOutputContentItem,
@@ -555,7 +553,7 @@ def test_generated_inline_image_class_names_remain_stable() -> None:
 
 def test_generated_audio_inputs_preserve_inline_and_file_shapes() -> None:
     """Existing audio imports still work, and file references round-trip through the unions."""
-    from openai_codex.generated.v2_all import (
+    from baicode_sdk.generated.v2_all import (
         AudioUserInput,
         ContentItem,
         FileIdUserInput1,
@@ -579,7 +577,7 @@ def test_generated_audio_inputs_preserve_inline_and_file_shapes() -> None:
 
 def test_generated_image_generation_thread_item_alias_remains_available() -> None:
     """Existing SDK callers can still construct and validate inline image-generation items."""
-    from openai_codex.generated.v2_all import (
+    from baicode_sdk.generated.v2_all import (
         ImageGenerationThreadItem,
         ResultThreadItem,
     )
@@ -602,7 +600,7 @@ def test_generated_image_generation_thread_item_alias_remains_available() -> Non
 
 
 def test_runtime_package_template_has_no_checked_in_binaries() -> None:
-    runtime_root = ROOT.parent / "python-runtime" / "src" / "codex_cli_bin"
+    runtime_root = ROOT.parent / "python-runtime" / "src" / "baicode_cli_bin"
     assert sorted(
         path.name
         for path in runtime_root.rglob("*")
@@ -619,14 +617,14 @@ def test_examples_readme_points_to_runtime_version_source_of_truth() -> None:
 def test_runtime_distribution_name_is_consistent() -> None:
     script = _load_update_script_module()
     runtime_setup = _load_runtime_setup_module()
-    from openai_codex import _version, client as client_module
+    from baicode_sdk import _version, client as client_module
 
-    assert script.SDK_DISTRIBUTION_NAME == "openai-codex"
-    assert runtime_setup.SDK_PACKAGE_NAME == "openai-codex"
-    assert _version.DISTRIBUTION_NAME == "openai-codex"
-    assert script.RUNTIME_DISTRIBUTION_NAME == "openai-codex-cli-bin"
-    assert runtime_setup.PACKAGE_NAME == "openai-codex-cli-bin"
-    assert client_module.RUNTIME_PKG_NAME == "openai-codex-cli-bin"
+    assert script.SDK_DISTRIBUTION_NAME == "baicode-sdk"
+    assert runtime_setup.SDK_PACKAGE_NAME == "baicode-sdk"
+    assert _version.DISTRIBUTION_NAME == "baicode-sdk"
+    assert script.RUNTIME_DISTRIBUTION_NAME == "baicode-cli-bin"
+    assert runtime_setup.PACKAGE_NAME == "baicode-cli-bin"
+    assert client_module.RUNTIME_PKG_NAME == "baicode-cli-bin"
     assert (
         "importlib.metadata.version('codex-cli-bin')"
         not in (ROOT / "_runtime_setup.py").read_text()
@@ -644,45 +642,27 @@ def test_source_sdk_package_declares_stable_documentation() -> None:
         in pyproject["project"]["classifiers"],
         "license": pyproject["project"]["license"],
         "documentation": pyproject["project"]["urls"]["Documentation"],
-        "readme_is_stable": "# OpenAI Codex Python SDK\n" in readme,
+        "readme_is_stable": "# BaiCode Python SDK\n" in readme,
         "local_license_file": (ROOT / "LICENSE").exists(),
     } == {
-        "description": "Python SDK for Codex",
+        "description": "Python SDK for BaiCode",
         "is_stable": True,
         "license": "Apache-2.0",
-        "documentation": "https://github.com/openai/codex/tree/main/sdk/python/docs",
+        "documentation": "https://github.com/XFreeMing/BaiCode/tree/main/sdk/python/docs",
         "readme_is_stable": True,
         "local_license_file": False,
     }
 
 
-def test_release_metadata_retries_without_invalid_auth(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_missing_runtime_requires_local_baicode_package(monkeypatch: pytest.MonkeyPatch) -> None:
     runtime_setup = _load_runtime_setup_module()
-    authorizations: list[str | None] = []
-
-    def fake_urlopen(request):
-        authorization = request.headers.get("Authorization")
-        authorizations.append(authorization)
-        if authorization is not None:
-            raise urllib.error.HTTPError(
-                request.full_url,
-                401,
-                "Unauthorized",
-                hdrs=None,
-                fp=None,
-            )
-        return io.StringIO('{"assets": []}')
-
-    monkeypatch.setenv("GH_TOKEN", "invalid-token")
-    monkeypatch.setattr(runtime_setup.urllib.request, "urlopen", fake_urlopen)
-
-    assert runtime_setup._release_metadata("1.2.3") == {"assets": []}
-    assert authorizations == ["Bearer invalid-token", None]
+    monkeypatch.setattr(runtime_setup, "_installed_runtime_version", lambda _: None)
+    monkeypatch.delenv("BAICODE_RUNTIME_PACKAGE", raising=False)
+    with pytest.raises(runtime_setup.RuntimeSetupError, match="BAICODE_RUNTIME_PACKAGE"):
+        runtime_setup.ensure_runtime_package_installed(sys.executable, ROOT)
 
 
-def test_runtime_setup_reads_independent_runtime_pin_and_release_tags() -> None:
+def test_runtime_setup_reads_independent_runtime_pin() -> None:
     """Runtime package pins remain independent of the SDK template version."""
     runtime_setup = _load_runtime_setup_module()
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text())
@@ -697,38 +677,13 @@ def test_runtime_setup_reads_independent_runtime_pin_and_release_tags() -> None:
         "normalized_alpha_hotfix_version": runtime_setup._normalized_package_version(
             "rust-v0.116.0-alpha.1.2"
         ),
-        "release_tag": runtime_setup._release_tag("0.116.0a1"),
-        "alpha_hotfix_release_tag": runtime_setup._release_tag("0.116.0a1.post2"),
     } == {
-        "package_name": "openai-codex-cli-bin",
+        "package_name": "baicode-cli-bin",
         "sdk_template_version": "0.0.0-dev",
-        "runtime_pin": "0.153.4",
+        "runtime_pin": "0.0.0.dev0",
         "normalized_release_version": "0.116.0a1",
         "normalized_alpha_hotfix_version": "0.116.0a1.post2",
-        "release_tag": "rust-v0.116.0-alpha.1",
-        "alpha_hotfix_release_tag": "rust-v0.116.0-alpha.1.2",
     }
-
-
-@pytest.mark.parametrize(
-    ("system", "machine", "asset_name"),
-    [
-        ("Darwin", "arm64", "codex-package-aarch64-apple-darwin.tar.gz"),
-        ("Linux", "x86_64", "codex-package-x86_64-unknown-linux-musl.tar.gz"),
-        ("Windows", "AMD64", "codex-package-x86_64-pc-windows-msvc.tar.gz"),
-    ],
-)
-def test_runtime_setup_downloads_codex_package_archives(
-    monkeypatch: pytest.MonkeyPatch,
-    system: str,
-    machine: str,
-    asset_name: str,
-) -> None:
-    runtime_setup = _load_runtime_setup_module()
-    monkeypatch.setattr(runtime_setup.platform, "system", lambda: system)
-    monkeypatch.setattr(runtime_setup.platform, "machine", lambda: machine)
-
-    assert runtime_setup.platform_asset_name() == asset_name
 
 
 def test_runtime_package_is_wheel_only_and_builds_platform_specific_wheels() -> None:
@@ -776,14 +731,14 @@ def test_runtime_package_is_wheel_only_and_builds_platform_specific_wheels() -> 
         elif isinstance(node.value, ast.JoinedStr):
             build_data_assignments[node.targets[0].slice.value] = "joined-string"
 
-    assert pyproject["project"]["name"] == "openai-codex-cli-bin"
+    assert pyproject["project"]["name"] == "baicode-cli-bin"
     assert pyproject["tool"]["hatch"]["build"]["targets"]["wheel"] == {
-        "packages": ["src/codex_cli_bin"],
+        "packages": ["src/baicode_cli_bin"],
         "include": [
-            "src/codex_cli_bin/codex-package.json",
-            "src/codex_cli_bin/bin/**",
-            "src/codex_cli_bin/codex-resources/**",
-            "src/codex_cli_bin/codex-path/**",
+            "src/baicode_cli_bin/codex-package.json",
+            "src/baicode_cli_bin/bin/**",
+            "src/baicode_cli_bin/codex-resources/**",
+            "src/baicode_cli_bin/codex-path/**",
         ],
         "hooks": {"custom": {}},
     }
@@ -824,7 +779,7 @@ def test_stage_runtime_release_copies_package_layout_and_sets_version(
         "bwrap": "fake bwrap\n",
         "rg": "fake rg\n",
     }
-    assert 'name = "openai-codex-cli-bin"' in (staged / "pyproject.toml").read_text()
+    assert 'name = "baicode-cli-bin"' in (staged / "pyproject.toml").read_text()
     assert 'version = "1.2.3"' in (staged / "pyproject.toml").read_text()
 
 
@@ -1019,10 +974,10 @@ def test_runtime_package_layout_is_included_by_wheel_config(
 
     pyproject = tomllib.loads((staged / "pyproject.toml").read_text())
     assert pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["include"] == [
-        "src/codex_cli_bin/codex-package.json",
-        "src/codex_cli_bin/bin/**",
-        "src/codex_cli_bin/codex-resources/**",
-        "src/codex_cli_bin/codex-path/**",
+        "src/baicode_cli_bin/codex-package.json",
+        "src/baicode_cli_bin/bin/**",
+        "src/baicode_cli_bin/codex-resources/**",
+        "src/baicode_cli_bin/codex-path/**",
     ]
 
 
@@ -1034,7 +989,7 @@ def sdk_release_source(tmp_path: Path) -> Path:
     project = source / "pyproject.toml"
     project.write_text(
         re.sub(
-            r"openai-codex-cli-bin==[^\"\s]+", "openai-codex-cli-bin==0.153.0", project.read_text()
+            r"baicode-cli-bin==[^\"\s]+", "baicode-cli-bin==0.153.0", project.read_text()
         )
     )
     return source
@@ -1048,9 +1003,9 @@ def test_stage_sdk_release_packages_reviewed_artifacts(
     staged = tmp_path / "sdk-stage"
     source_project = tomllib.loads((sdk_release_source / "pyproject.toml").read_text())
     generated_paths = [
-        "src/openai_codex/generated/v2_all.py",
-        "src/openai_codex/generated/notification_registry.py",
-        "src/openai_codex/api.py",
+        "src/baicode_sdk/generated/v2_all.py",
+        "src/baicode_sdk/generated/notification_registry.py",
+        "src/baicode_sdk/api.py",
     ]
     reviewed_artifacts = {path: (ROOT / path).read_bytes() for path in generated_paths}
 
@@ -1069,20 +1024,20 @@ def test_stage_sdk_release_packages_reviewed_artifacts(
         "version": pyproject["project"]["version"],
         "dependencies": pyproject["project"]["dependencies"],
     } == {
-        "name": "openai-codex",
+        "name": "baicode-sdk",
         "version": "0.153.0",
         "dependencies": source_project["project"]["dependencies"],
     }
     assert {path: (staged / path).read_bytes() for path in generated_paths} == reviewed_artifacts
     assert (
         '__version__ = "0.147.0"'
-        not in (staged / "src" / "openai_codex" / "__init__.py").read_text()
+        not in (staged / "src" / "baicode_sdk" / "__init__.py").read_text()
     )
     assert (
         'client_version: str = "0.147.0"'
-        not in (staged / "src" / "openai_codex" / "client.py").read_text()
+        not in (staged / "src" / "baicode_sdk" / "client.py").read_text()
     )
-    assert not any((staged / "src" / "openai_codex").glob("bin/**"))
+    assert not any((staged / "src" / "baicode_sdk").glob("bin/**"))
 
 
 @pytest.mark.parametrize("source_runtime", ["0.147.0", "0.153.0"])
@@ -1101,14 +1056,14 @@ def test_built_sdk_uses_explicit_release_versions(
     source_project = project_path.read_bytes()
     expected_dependencies = {
         *tomllib.loads(source_project.decode())["project"]["dependencies"],
-        "openai-codex-cli-bin==0.154.0",
-    } - {f"openai-codex-cli-bin=={source_runtime}"}
+        "baicode-cli-bin==0.154.0",
+    } - {f"baicode-cli-bin=={source_runtime}"}
     reviewed_files = {
         path: (sdk_release_source / path).read_bytes()
         for path in (
-            "src/openai_codex/generated/v2_all.py",
-            "src/openai_codex/generated/notification_registry.py",
-            "src/openai_codex/api.py",
+            "src/baicode_sdk/generated/v2_all.py",
+            "src/baicode_sdk/generated/notification_registry.py",
+            "src/baicode_sdk/api.py",
         )
     }
     staged = script.stage_python_sdk_package(tmp_path / "sdk-stage", sdk_version, "rust-v0.154.0")
@@ -1128,7 +1083,7 @@ def test_built_sdk_uses_explicit_release_versions(
             path: wheel.read(path.removeprefix("src/")) for path in reviewed_files
         } == reviewed_files
     with tarfile.open(next(dist.glob("*.tar.gz"))) as sdist:
-        prefix = f"openai_codex-{sdk_version}/"
+        prefix = f"baicode_sdk-{sdk_version}/"
         metadata.append(sdist.extractfile(prefix + "PKG-INFO").read())
         assert {
             path: sdist.extractfile(prefix + path).read() for path in reviewed_files
@@ -1140,7 +1095,7 @@ def test_built_sdk_uses_explicit_release_versions(
             "version": package["Version"],
             "dependencies": set(package.get_all("Requires-Dist")),
         } == {
-            "name": "openai-codex",
+            "name": "baicode-sdk",
             "version": sdk_version,
             "dependencies": expected_dependencies,
         }
@@ -1196,7 +1151,7 @@ def test_sdk_release_matches_stable_runtime(
         "sdk_dependencies": [
             "pydantic>=2.12",
             "packaging>=26.2",
-            "openai-codex-cli-bin==0.153.0",
+            "baicode-cli-bin==0.153.0",
         ],
     }
 
@@ -1237,7 +1192,7 @@ def test_sdk_beta_can_use_a_supported_runtime(
     project = tomllib.loads((staged / "pyproject.toml").read_text())["project"]
     assert (project["version"], project["dependencies"]) == (
         "0.1.0b1",
-        ["pydantic>=2.12", "packaging>=26.2", "openai-codex-cli-bin==0.153.0"],
+        ["pydantic>=2.12", "packaging>=26.2", "baicode-cli-bin==0.153.0"],
     )
 
 
@@ -1291,7 +1246,7 @@ def test_stage_runtime_stages_package_without_type_generation(
 def test_default_runtime_is_resolved_from_installed_runtime_package(
     tmp_path: Path,
 ) -> None:
-    from openai_codex import client as client_module
+    from baicode_sdk import client as client_module
 
     fake_binary = tmp_path / ("baic.exe" if client_module.os.name == "nt" else "baic")
     fake_binary.write_text("")
@@ -1306,7 +1261,7 @@ def test_default_runtime_is_resolved_from_installed_runtime_package(
 
 
 def test_runtime_path_dir_is_prepended_without_duplicates(tmp_path: Path) -> None:
-    from openai_codex import client as client_module
+    from baicode_sdk import client as client_module
 
     path_dir = tmp_path / "codex-path"
     env = {"PATH": os.pathsep.join(["/usr/bin", str(path_dir), "/bin"])}
@@ -1320,7 +1275,7 @@ def test_runtime_path_dir_preserves_windows_path_key(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    from openai_codex import client as client_module
+    from baicode_sdk import client as client_module
 
     path_dir = tmp_path / "codex-path"
     monkeypatch.setattr(client_module.os, "name", "nt")
@@ -1335,7 +1290,7 @@ def test_runtime_path_dir_preserves_windows_path_key(
 
 
 def test_explicit_codex_bin_override_takes_priority(tmp_path: Path) -> None:
-    from openai_codex import client as client_module
+    from baicode_sdk import client as client_module
 
     explicit_binary = tmp_path / (
         "custom-codex.exe" if client_module.os.name == "nt" else "custom-codex"
@@ -1353,7 +1308,7 @@ def test_explicit_codex_bin_override_takes_priority(tmp_path: Path) -> None:
 
 
 def test_missing_runtime_package_requires_explicit_codex_bin() -> None:
-    from openai_codex import client as client_module
+    from baicode_sdk import client as client_module
 
     ops = client_module.CodexBinResolverOps(
         installed_codex_path=lambda: (_ for _ in ()).throw(
@@ -1367,7 +1322,7 @@ def test_missing_runtime_package_requires_explicit_codex_bin() -> None:
 
 
 def test_broken_runtime_package_does_not_fall_back() -> None:
-    from openai_codex import client as client_module
+    from baicode_sdk import client as client_module
 
     ops = client_module.CodexBinResolverOps(
         installed_codex_path=lambda: (_ for _ in ()).throw(
@@ -1403,7 +1358,7 @@ def test_release_version_cli_rejects_unsupported_runtime_releases(
     assert not github_output.exists()
 
 
-@pytest.mark.parametrize("runtime_dependency", ["", ', "openai-codex-cli-bin==1.2.3"' * 2])
+@pytest.mark.parametrize("runtime_dependency", ["", ', "baicode-cli-bin==1.2.3"' * 2])
 def test_stage_sdk_release_rejects_missing_or_duplicate_runtime_pin(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1413,11 +1368,11 @@ def test_stage_sdk_release_rejects_missing_or_duplicate_runtime_pin(
     template = tmp_path / "template"
     template.mkdir()
     (template / "pyproject.toml").write_text(
-        '[project]\nname = "openai-codex"\nversion = "0.0.0"\n'
+        '[project]\nname = "baicode-sdk"\nversion = "0.0.0"\n'
         f'dependencies = ["pydantic>=2.12"{runtime_dependency}]\n'
     )
     monkeypatch.setattr(script, "sdk_root", lambda: template)
-    with pytest.raises(RuntimeError, match="Expected exactly one openai-codex-cli-bin"):
+    with pytest.raises(RuntimeError, match="Expected exactly one baicode-cli-bin"):
         script.stage_python_sdk_package(tmp_path / "sdk-stage", "1.2.3", "1.2.3")
 
 
@@ -1436,7 +1391,7 @@ def test_sdk_beta_can_pin_an_independent_runtime(tmp_path: Path) -> None:
     project = tomllib.loads((staged / "pyproject.toml").read_text())["project"]
     assert (project["version"], project["dependencies"]) == (
         "0.1.0b1",
-        ["pydantic>=2.12", "packaging>=26.2", "openai-codex-cli-bin==0.153.0"],
+        ["pydantic>=2.12", "packaging>=26.2", "baicode-cli-bin==0.153.0"],
     )
 
 
@@ -1479,7 +1434,7 @@ def test_sdk_release_matches_runtime(
         "sdk_dependencies": [
             "pydantic>=2.12",
             "packaging>=26.2",
-            f"openai-codex-cli-bin=={package_version}",
+            f"baicode-cli-bin=={package_version}",
         ],
     }
     assert (script.sdk_root() / "pyproject.toml").read_text() == source_pyproject

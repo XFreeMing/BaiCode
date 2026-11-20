@@ -9,7 +9,7 @@ expression: rendered
   Your existing setup will not be changed.
   Home
   › [x] Settings
-        Import /Users/alex/.claude/settings.json into /Users/alex/.codex/conf…
+        Import /Users/alex/.claude/settings.json into /Users/alex/.BaiCode/conf…
     [x] Memory
         Import memory files from /Users/alex/.claude/projects to /Users/alex/…
         1 memory: project
@@ -25,7 +25,7 @@ expression: rendered
         • debug: sample
         • +1 more marketplaces
     [x] Instructions
-        Import CLAUDE.md to AGENTS.md
+        Import CLAUDE.md to BAICODE.md
 
   Selected 5 of 5 items.
     1. Review selection

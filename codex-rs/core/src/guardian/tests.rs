@@ -391,7 +391,7 @@ fn format_guardian_requests_snapshot(
                         .retain(|part| {
                             !part["text"]
                                 .as_str()
-                                .is_some_and(|text| text.starts_with("# AGENTS.md instructions"))
+                                .is_some_and(|text| text.starts_with("# BAICODE.md instructions"))
                         });
                 }
             }

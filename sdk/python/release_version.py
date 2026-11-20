@@ -8,7 +8,7 @@ from typing import Sequence
 
 _PYTHON_RUNTIME_VERSION_PATTERN = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+(?:a[0-9]+(?:\.post[0-9]+)?)?")
 _NORMALIZED_BAICODE_VERSION_PATTERN = re.compile(
-    r"[0-9]+(?:\.[0-9]+)*(?:(?:a|b|rc)[0-9]+)?(?:\.post[0-9]+)?"
+    r"[0-9]+(?:\.[0-9]+)*(?:(?:a|b|rc)[0-9]+)?(?:\.post[0-9]+)?(?:\.dev[0-9]+)?"
 )
 
 

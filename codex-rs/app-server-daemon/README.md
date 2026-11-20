@@ -81,14 +81,14 @@ For a new Linux or macOS machine:
 
 ```sh
 curl -fsSL https://chatgpt.com/codex/install.sh | sh
-$HOME/.codex/packages/standalone/current/codex app-server daemon bootstrap --remote-control
+$HOME/.BaiCode/packages/standalone/current/codex app-server daemon bootstrap --remote-control
 ```
 
 On Windows, use a non-elevated PowerShell terminal whose host allows breakaway:
 
 ```powershell
 irm https://chatgpt.com/codex/install.ps1 | iex
-$codexHome = if ($env:BAICODE_HOME) { $env:BAICODE_HOME } else { Join-Path $HOME '.codex' }
+$codexHome = if ($env:BAICODE_HOME) { $env:BAICODE_HOME } else { Join-Path $HOME '.BaiCode' }
 & "$codexHome\packages\standalone\current\bin\codex.exe" app-server daemon bootstrap --remote-control
 ```
 

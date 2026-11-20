@@ -668,7 +668,7 @@ async fn plugin_share_checkout_adds_personal_marketplace_entry() -> Result<()> {
 
     let plugin_path = AbsolutePathBuf::try_from(home.path().join("plugins/demo-plugin"))?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(home.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(home.path().join(".BaiCode/plugins/marketplace.json"))?;
     assert_eq!(
         response,
         PluginShareCheckoutResponse {
@@ -684,7 +684,7 @@ async fn plugin_share_checkout_adds_personal_marketplace_entry() -> Result<()> {
     assert!(
         plugin_path
             .as_path()
-            .join(".codex-plugin/plugin.json")
+            .join(".baicode-plugin/plugin.json")
             .is_file()
     );
 
@@ -848,7 +848,7 @@ async fn plugin_share_checkout_cleans_up_path_when_marketplace_update_fails() ->
         AuthCredentialsStoreMode::File,
     )?;
 
-    let marketplace_path = home.path().join(".agents/plugins/marketplace.json");
+    let marketplace_path = home.path().join(".BaiCode/plugins/marketplace.json");
     std::fs::create_dir_all(
         marketplace_path
             .parent()
@@ -1475,7 +1475,7 @@ fn expected_share_context(plugin_id: &str) -> PluginShareContext {
 fn write_test_plugin(root: &Path, plugin_name: &str) -> std::io::Result<PathBuf> {
     let plugin_path = root.join(plugin_name);
     write_file(
-        &plugin_path.join(".codex-plugin/plugin.json"),
+        &plugin_path.join(".baicode-plugin/plugin.json"),
         &format!(r#"{{"name":"{plugin_name}"}}"#),
     )?;
     write_file(
@@ -1492,7 +1492,7 @@ fn remote_plugin_bundle_tar_gz_bytes(plugin_name: &str) -> Result<Vec<u8>> {
     let mut tar = tar::Builder::new(encoder);
     for (path, contents, mode) in [
         (
-            ".codex-plugin/plugin.json",
+            ".baicode-plugin/plugin.json",
             manifest.as_bytes(),
             /*mode*/ 0o644,
         ),

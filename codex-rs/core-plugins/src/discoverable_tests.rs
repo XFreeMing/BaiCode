@@ -161,7 +161,7 @@ async fn omits_openai_curated_but_keeps_configured_marketplaces_for_remote_codex
         ".tmp/bundled-marketplaces/{bundled_marketplace_name}"
     ));
     write_file(
-        &bundled_marketplace_root.join(".agents/plugins/marketplace.json"),
+        &bundled_marketplace_root.join(".BaiCode/plugins/marketplace.json"),
         &format!(
             r#"{{
   "name": "{bundled_marketplace_name}",
@@ -243,7 +243,7 @@ async fn deduplicates_and_reprojects_cached_configured_marketplace_plugin() {
         .path()
         .join(format!(".tmp/bundled-marketplaces/{marketplace_name}"));
     write_file(
-        &marketplace_root.join(".agents/plugins/marketplace.json"),
+        &marketplace_root.join(".BaiCode/plugins/marketplace.json"),
         &format!(
             r#"{{
   "name": "{marketplace_name}",
@@ -414,7 +414,7 @@ async fn clear_cache_invalidates_cached_tool_suggest_metadata() {
     let codex_home = tempdir().expect("tempdir should succeed");
     let curated_root = curated_plugins_repo_path(codex_home.path());
     write_openai_curated_marketplace(&curated_root, &["slack"]);
-    let plugin_manifest = curated_root.join("plugins/slack/.codex-plugin/plugin.json");
+    let plugin_manifest = curated_root.join("plugins/slack/.baicode-plugin/plugin.json");
     write_file(
         &plugin_manifest,
         r#"{
@@ -474,7 +474,7 @@ async fn ignores_missing_marketplace_plugin() {
         .path()
         .join(format!(".tmp/marketplaces/{marketplace_name}"));
     write_file(
-        &marketplace_root.join(".agents/plugins/marketplace.json"),
+        &marketplace_root.join(".BaiCode/plugins/marketplace.json"),
         &format!(
             r#"{{
   "name": "{marketplace_name}",
@@ -522,7 +522,7 @@ async fn normalizes_description() {
     let curated_root = curated_plugins_repo_path(codex_home.path());
     write_openai_curated_marketplace(&curated_root, &["installed", "slack"]);
     write_file(
-        &curated_root.join("plugins/slack/.codex-plugin/plugin.json"),
+        &curated_root.join("plugins/slack/.baicode-plugin/plugin.json"),
         r#"{
   "name": "slack",
   "description": "  Plugin\n   with   extra   spacing  "
@@ -581,7 +581,7 @@ async fn omits_not_available_curated_plugins() {
     let codex_home = tempdir().expect("tempdir should succeed");
     let curated_root = curated_plugins_repo_path(codex_home.path());
     write_file(
-        &curated_root.join(".agents/plugins/marketplace.json"),
+        &curated_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "openai-curated",
   "plugins": [
@@ -650,7 +650,7 @@ async fn discovery_warns_once_per_invalid_manifest() {
     let too_long_prompt = "x".repeat(513);
     for plugin_name in ["gmail", "openai-developers"] {
         write_file(
-            &curated_root.join(format!("plugins/{plugin_name}/.codex-plugin/plugin.json")),
+            &curated_root.join(format!("plugins/{plugin_name}/.baicode-plugin/plugin.json")),
             &format!(
                 r#"{{
   "name": "{plugin_name}",
@@ -699,9 +699,9 @@ async fn discovery_warns_once_per_invalid_manifest() {
         .expect("utf8 logs")
         .replace('\\', "/");
     assert_eq!(logs.matches("ignoring interface.defaultPrompt").count(), 2);
-    assert_eq!(logs.matches("gmail/.codex-plugin/plugin.json").count(), 1);
+    assert_eq!(logs.matches("gmail/.baicode-plugin/plugin.json").count(), 1);
     assert_eq!(
-        logs.matches("openai-developers/.codex-plugin/plugin.json")
+        logs.matches("openai-developers/.baicode-plugin/plugin.json")
             .count(),
         1
     );
@@ -785,7 +785,7 @@ async fn does_not_expand_local_sales_apps() {
         .path()
         .join(format!(".tmp/marketplaces/{sales_marketplace_name}"));
     write_file(
-        &sales_marketplace_root.join(".agents/plugins/marketplace.json"),
+        &sales_marketplace_root.join(".BaiCode/plugins/marketplace.json"),
         &format!(
             r#"{{
   "name": "{sales_marketplace_name}",
@@ -1109,7 +1109,7 @@ async fn install_marketplace_plugin(codex_home: &Path, marketplace_root: &Path, 
             PluginInstallRequest {
                 plugin_name: plugin_name.to_string(),
                 marketplace_path: AbsolutePathBuf::try_from(
-                    marketplace_root.join(".agents/plugins/marketplace.json"),
+                    marketplace_root.join(".BaiCode/plugins/marketplace.json"),
                 )
                 .expect("marketplace path"),
             },

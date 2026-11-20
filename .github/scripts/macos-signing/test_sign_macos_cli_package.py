@@ -264,7 +264,7 @@ class MacosSigningTests(ProvisioningTestCase):
                             archive.read("CodexCLI.app/Contents/Info.plist")
                         )
                         self.assertEqual(
-                            info["CFBundleIdentifier"], "com.openai.codex.cli"
+                            info["CFBundleIdentifier"], "local.baicode.cli"
                         )
                         self.assertEqual(info["CFBundleExecutable"], "codex")
                         self.assertEqual(
@@ -281,10 +281,10 @@ class MacosSigningTests(ProvisioningTestCase):
                                         / "codex.entitlements.plist"
                                     ).read_bytes()
                                 ),
-                                "com.apple.application-identifier": "TESTTEAM01.com.openai.codex.cli",
+                                "com.apple.application-identifier": "TESTTEAM01.local.baicode.cli",
                                 "com.apple.developer.team-identifier": "TESTTEAM01",
                                 "keychain-access-groups": [
-                                    "TESTTEAM01.com.openai.codex.cli"
+                                    "TESTTEAM01.local.baicode.cli"
                                 ],
                             },
                         )

@@ -19,7 +19,7 @@ async fn host_skill_discovery_reports_unsupported_remote_sandbox() -> Result<()>
     assert!(!environment.info().await?.capabilities.windows_mxc);
     let workspace = tempfile::tempdir()?;
     std::fs::create_dir(workspace.path().join(".git"))?;
-    let root = workspace.path().join(".agents/skills");
+    let root = workspace.path().join(".BaiCode/skills");
     std::fs::create_dir_all(root.join("existing"))?;
     std::fs::write(
         root.join("existing/SKILL.md"),

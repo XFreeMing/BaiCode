@@ -8,8 +8,8 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-import openai_codex.api as public_api_module
-from openai_codex.api import (
+import baicode_sdk.api as public_api_module
+from baicode_sdk.api import (
     ApprovalMode,
     AsyncCodex,
     Codex,
@@ -17,9 +17,9 @@ from openai_codex.api import (
     Sandbox,
     TextInput,
 )
-from openai_codex.client import _params_dict
-from openai_codex.generated.v2_all import TurnCompletedNotification, TurnStartParams
-from openai_codex.models import InitializeResponse, Notification
+from baicode_sdk.client import _params_dict
+from baicode_sdk.generated.v2_all import TurnCompletedNotification, TurnStartParams
+from baicode_sdk.models import InitializeResponse, Notification
 
 ROOT = Path(__file__).resolve().parents[1]
 

@@ -5,8 +5,8 @@ Each example folder contains runnable versions:
 - `sync.py` (public sync surface: `Codex`)
 - `async.py` (public async surface: `AsyncCodex`)
 
-All examples intentionally use only public SDK exports from `openai_codex`
-and `openai_codex.types`.
+All examples intentionally use only public SDK exports from `baicode_sdk`
+and `baicode_sdk.types`.
 
 Examples use plain strings for text-only turns and typed input objects for
 multimodal or structured input lists.
@@ -20,13 +20,13 @@ authorization or approval; example 16 establishes the user's task first.
 - Python `>=3.10`
 - Install the SDK for the same Python interpreter you will use to run examples
 
-Install the published SDK:
+Install the local SDK and runtime wheels.
 
 ```bash
-python -m pip install openai-codex
+python -m pip install --no-index --find-links /path/to/wheels baicode-sdk
 ```
 
-The SDK installs its pinned `openai-codex-cli-bin` runtime dependency.
+The SDK installs its pinned `baicode-cli-bin` runtime dependency.
 The pinned runtime version comes from the SDK package dependency.
 
 ## Run From A Checkout
@@ -40,8 +40,8 @@ source .venv/bin/activate
 ```
 
 The examples bootstrap local SDK imports from `sdk/python/src`. If the pinned
-runtime is not already installed, the bootstrap installs the matching runtime
-package for the active interpreter and cleans up temporary files afterward.
+runtime is not already installed, set `BAICODE_RUNTIME_PACKAGE` to a local BaiCode package directory or archive and
+install the Hatchling build backend in the active interpreter.
 
 ## Run examples
 

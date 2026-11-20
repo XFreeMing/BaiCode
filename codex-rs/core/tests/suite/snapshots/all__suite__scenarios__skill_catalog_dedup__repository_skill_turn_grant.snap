@@ -77,8 +77,8 @@ Settings:
 03:message/user:
     Request access to the repository skills.
 -- request 2 (request) --
-04:function_call/request_permissions:{"permissions":{"file_system":{"read":["<CWD>/.agents/skills"]},"network":null},"reason":"Read repository skills"}
-05:function_call_output:{"permissions":{"network":null,"file_system":{"read":["<CWD>/.agents/skills"]}},"scope":"turn"}
+04:function_call/request_permissions:{"permissions":{"file_system":{"read":["<CWD>/.BaiCode/skills"]},"network":null},"reason":"Read repository skills"}
+05:function_call_output:{"permissions":{"network":null,"file_system":{"read":["<CWD>/.BaiCode/skills"]}},"scope":"turn"}
 06:message/developer:
     <skills_instructions>
     ## Host skills
@@ -99,8 +99,8 @@ Settings:
 08:message/user:
     Use $approved-skill.
 -- request 4 (request) --
-09:function_call/request_permissions:{"permissions":{"file_system":{"read":["<CWD>/.agents/skills"]},"network":null},"reason":"Read repository skills"}
-10:function_call_output:{"permissions":{"network":null,"file_system":{"read":["<CWD>/.agents/skills"]}},"scope":"turn"}
+09:function_call/request_permissions:{"permissions":{"file_system":{"read":["<CWD>/.BaiCode/skills"]},"network":null},"reason":"Read repository skills"}
+10:function_call_output:{"permissions":{"network":null,"file_system":{"read":["<CWD>/.BaiCode/skills"]}},"scope":"turn"}
 11:message/developer:
     <skills_instructions>
     ## Host skills update

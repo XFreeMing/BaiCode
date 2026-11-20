@@ -18,7 +18,7 @@ use std::sync::Arc;
 #[test]
 fn discovered_mcp_contents_populate_catalog() -> anyhow::Result<()> {
     let root = PathUri::parse("file:///plugins/example/1.0.0")?;
-    let manifest_path = root.join(".codex-plugin/plugin.json")?;
+    let manifest_path = root.join(".baicode-plugin/plugin.json")?;
     let declarations = serde_json::json!({"example": {"command": "node"}});
     let snapshot = ExecutorCapabilityDiscoveryV2Snapshot {
         environment_id: "executor-a".to_string(),

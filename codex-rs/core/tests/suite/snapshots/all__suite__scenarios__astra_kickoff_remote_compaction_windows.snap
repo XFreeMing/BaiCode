@@ -116,7 +116,7 @@ Settings:
 04:message/developer:
     <multi_agent_mode>Any earlier instruction enabling proactive multi-agent delegation no longer applies. D...elegation, or parallel agent work.</multi_agent_mode> [hash=2b6e037067b4390c]
 05:message/user[2]:
-    [01] # AGENTS.md instructions for <AGENTS_DIRECTORY>
+    [01] # BAICODE.md instructions for <AGENTS_DIRECTORY>
 
         <INSTRUCTIONS>
         Kickoff updates must name an owner and a date.
@@ -290,7 +290,7 @@ Settings: same as window 1
 05:message/developer:
     <multi_agent_mode>Any earlier instruction enabling proactive multi-agent delegation no longer applies. D...elegation, or parallel agent work.</multi_agent_mode> [hash=2b6e037067b4390c]
 06:message/user[2]:
-    [01] # AGENTS.md instructions for <AGENTS_DIRECTORY>
+    [01] # BAICODE.md instructions for <AGENTS_DIRECTORY>
 
         <INSTRUCTIONS>
         Kickoff updates must name an owner and a date.

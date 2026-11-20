@@ -310,7 +310,7 @@ async fn copy_file_uses_each_environments_permissions(use_grants: bool) -> Resul
         .with_extensions(Arc::new(extensions.build()))
         .with_config(|config| {
             // Make the copy itself the first restricted read. On unelevated Windows the
-            // executor rejects this policy, which would otherwise stop AGENTS.md discovery.
+            // executor rejects this policy, which would otherwise stop BAICODE.md discovery.
             config.project_doc_max_bytes = 0;
             config
                 .features

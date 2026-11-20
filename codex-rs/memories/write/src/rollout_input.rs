@@ -355,7 +355,7 @@ fn is_memory_excluded_contextual_user_fragment(content_item: &ContentItem) -> bo
         return false;
     };
 
-    matches_marked_fragment(text, "# AGENTS.md instructions", "</INSTRUCTIONS>")
+    matches_marked_fragment(text, "# BAICODE.md instructions", "</INSTRUCTIONS>")
         || matches_marked_fragment(text, "<skill>", "</skill>")
 }
 

@@ -144,7 +144,7 @@ async fn executor_discovery_uses_current_environment_grants(
             .executor_environment()
             .selection()
             .cwd
-            .join(".agents/skills")?;
+            .join(".BaiCode/skills")?;
         (test, root)
     };
     let selection = test.executor_environment().selection().clone();
@@ -186,7 +186,7 @@ async fn executor_discovery_uses_current_environment_grants(
                 .expect("root parent")
                 .join("denied-plugin")?
         } else {
-            plugin_root.join(".codex-plugin")?
+            plugin_root.join(".baicode-plugin")?
         };
         test.fs()
             .create_directory(
@@ -198,7 +198,7 @@ async fn executor_discovery_uses_current_environment_grants(
                 /*sandbox*/ None,
             )
             .await?;
-        let manifest = plugin_root.join(".codex-plugin/plugin.json")?;
+        let manifest = plugin_root.join(".baicode-plugin/plugin.json")?;
         let target = if matches!(
             discovery,
             Discovery::DisabledExecutorV1UnreadablePlugin
@@ -224,7 +224,7 @@ async fn executor_discovery_uses_current_environment_grants(
             Discovery::DisabledExecutorV1UnreadablePluginDirectory
                 | Discovery::DisabledExecutorV1UnreadableAncestorPluginDirectory
         ) {
-            (directory, plugin_root.join(".codex-plugin")?)
+            (directory, plugin_root.join(".baicode-plugin")?)
         } else {
             (target, manifest)
         };

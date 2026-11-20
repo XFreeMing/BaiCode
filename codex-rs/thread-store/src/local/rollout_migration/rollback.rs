@@ -130,7 +130,7 @@ fn is_known_contextual_user_text(text: &str) -> bool {
     let text = text.trim();
     parse_hook_prompt_fragment(text).is_some()
         || [
-            ("# AGENTS.md instructions", "</INSTRUCTIONS>"),
+            ("# BAICODE.md instructions", "</INSTRUCTIONS>"),
             ("<environment_context>", "</environment_context>"),
             ("<skill>", "</skill>"),
             ("<user_shell_command>", "</user_shell_command>"),

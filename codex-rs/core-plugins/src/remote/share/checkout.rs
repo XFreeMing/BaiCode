@@ -21,7 +21,7 @@ use std::path::Path;
 
 const PERSONAL_MARKETPLACE_NAME: &str = "codex-curated";
 const PERSONAL_MARKETPLACE_DISPLAY_NAME: &str = "Personal";
-const PERSONAL_MARKETPLACE_RELATIVE_PATH: &str = ".agents/plugins/marketplace.json";
+const PERSONAL_MARKETPLACE_RELATIVE_PATH: &str = ".BaiCode/plugins/marketplace.json";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RemotePluginShareCheckoutResult {

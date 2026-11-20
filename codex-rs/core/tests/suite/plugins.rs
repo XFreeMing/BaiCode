@@ -120,9 +120,9 @@ fn write_sample_plugin_manifest_and_config_at_root(
     plugin_root: std::path::PathBuf,
     plugin_config_name: &str,
 ) -> std::path::PathBuf {
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin")).expect("create plugin manifest dir");
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin")).expect("create plugin manifest dir");
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         format!(
             r#"{{"name":"{SAMPLE_PLUGIN_DISPLAY_NAME}","description":"{SAMPLE_PLUGIN_DESCRIPTION}"}}"#
         ),
@@ -143,12 +143,12 @@ fn write_remote_plugin_script_and_config(home: &TempDir) -> std::path::PathBuf {
     let store = PluginStore::new(home.path().to_path_buf());
     let plugin_root = store.plugin_root(&plugin_id, "1.2.3");
     let script_path = plugin_root.join("scripts/run.sh");
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))
         .expect("create remote plugin manifest dir");
     std::fs::create_dir_all(script_path.parent().expect("script parent"))
         .expect("create remote plugin scripts dir");
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"sample","version":"1.2.3"}"#,
     )
     .expect("write remote plugin manifest");
@@ -1133,7 +1133,7 @@ async fn plugin_skill_product_policy_and_migrated_command_precedence_reach_agent
     )?;
     if include_migrated_command {
         let migrated_skill_dir =
-            plugin_root.join(".codex-plugin/migrated-command-skills/source-command-review");
+            plugin_root.join(".baicode-plugin/migrated-command-skills/source-command-review");
         std::fs::create_dir_all(&migrated_skill_dir)?;
         std::fs::write(
             migrated_skill_dir.join("SKILL.md"),
@@ -1310,9 +1310,9 @@ enabled = true
         let root = codex_home
             .path()
             .join(format!("plugins/cache/{marketplace}/{plugin_name}/local"));
-        std::fs::create_dir_all(root.join(".codex-plugin"))?;
+        std::fs::create_dir_all(root.join(".baicode-plugin"))?;
         std::fs::write(
-            root.join(".codex-plugin/plugin.json"),
+            root.join(".baicode-plugin/plugin.json"),
             format!(r#"{{"name":"{plugin_name}"}}"#),
         )?;
         let skill_dir = root.join("skills").join(skill);
@@ -1440,9 +1440,9 @@ async fn agent_plugin_root_mcp_stdio_tool_round_trip_expands_reserved_paths_and_
         plugin_root.join("mcp.json"),
         serde_json::to_vec_pretty(&mcp_config)?,
     )?;
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"acme.tools","mcpServers":{"agent":{"command":"ignored","env_vars":["INSTA_WORKSPACE_ROOT"]}}}"#,
     )?;
     let mut builder = test_codex().with_home(Arc::clone(&codex_home));
@@ -1682,9 +1682,9 @@ enabled = true
                 .join(marketplace_name)
                 .join(plugin_name)
                 .join("local");
-            std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+            std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
             std::fs::write(
-                plugin_root.join(".codex-plugin/plugin.json"),
+                plugin_root.join(".baicode-plugin/plugin.json"),
                 format!(r#"{{"name":"{plugin_name}","description":"{plugin_name}"}}"#),
             )?;
             let skill_dir = plugin_root.join("skills").join(skill_name);
@@ -2048,9 +2048,9 @@ async fn system_marketplace_plugin_honors_layered_activation_and_mcp_policy(
     )?;
     let system_config_path = codex_home.path().join("system.toml");
     let marketplace = TempDir::new()?;
-    std::fs::create_dir_all(marketplace.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(marketplace.path().join(".BaiCode/plugins"))?;
     std::fs::write(
-        marketplace.path().join(".agents/plugins/marketplace.json"),
+        marketplace.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{"name":"test","plugins":[{"name":"sample","source":{"source":"local","path":"./sample"}}]}"#,
     )?;
     let marketplace_source = toml::Value::String(marketplace.path().to_string_lossy().into_owned());
@@ -2070,9 +2070,9 @@ async fn system_marketplace_plugin_honors_layered_activation_and_mcp_policy(
         ),
     )?;
     std::fs::create_dir_all(project.path().join(".git"))?;
-    std::fs::create_dir_all(project.path().join(".codex"))?;
+    std::fs::create_dir_all(project.path().join(".BaiCode"))?;
     std::fs::write(
-        project.path().join(".codex/config.toml"),
+        project.path().join(".BaiCode/config.toml"),
         format!(
             "[plugins.\"{SAMPLE_PLUGIN_CONFIG_NAME}\"]\nenabled = {plugin_enabled}\n[plugins.\"{SAMPLE_PLUGIN_CONFIG_NAME}\".mcp_servers.sample]\nenabled = {project_enabled}\ndisabled_tools = [\"echo-tool\"]\n"
         ),

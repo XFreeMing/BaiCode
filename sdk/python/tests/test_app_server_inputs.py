@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from app_server_harness import AppServerHarness
 from app_server_helpers import TINY_PNG_BYTES, streaming_response
 
-from openai_codex import (
+from baicode_sdk import (
     AsyncCodex,
     Codex,
     ExternalMessage,
@@ -16,8 +16,8 @@ from openai_codex import (
     SkillInput,
     TextInput,
 )
-from openai_codex.generated.v2_all import FunctionCallOutputThreadItem
-from openai_codex.types import ThreadItem
+from baicode_sdk.generated.v2_all import FunctionCallOutputThreadItem
+from baicode_sdk.types import ThreadItem
 
 
 def _external_items(request) -> list[dict]:

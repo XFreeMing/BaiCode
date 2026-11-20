@@ -212,7 +212,7 @@ fn thread_binding_rejects_primary_and_unmanaged_worktrees() {
             .is_err(),
     );
     assert!(
-        !fixture.repository.join(".git/codex-thread.json").exists(),
+        !fixture.repository.join(".git/baicode-thread.json").exists(),
         "primary checkout ownership metadata must not be modified",
     );
 
@@ -264,7 +264,7 @@ fn thread_binding_writes_the_exact_desktop_owner_schema_into_git_metadata() {
 
     let metadata_path = checkout.join(run_git(
         &checkout,
-        &["rev-parse", "--git-path", "codex-thread.json"],
+        &["rev-parse", "--git-path", "baicode-thread.json"],
     ));
     let metadata: Value = serde_json::from_slice(
         &fs::read(&metadata_path).expect("read Desktop-compatible worktree owner metadata"),

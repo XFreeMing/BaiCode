@@ -20,7 +20,7 @@ use crate::operations::run_git_for_status;
 
 // Match the default file limit for automatic ghost snapshots. A baseline is derived data.
 const MAX_BASELINE_FILE_BYTES: u64 = 10 * 1024 * 1024;
-const BASELINE_VERSION_FILE: &str = "codex-baseline-version";
+const BASELINE_VERSION_FILE: &str = "baicode-baseline-version";
 const BASELINE_VERSION: &[u8] = b"1\n";
 
 const BASELINE_COMMIT_MESSAGE: &str =
@@ -123,7 +123,7 @@ async fn with_baseline_lock<T: Send + 'static>(
         fs::create_dir_all(&root)?;
         let root = fs::canonicalize(root)?;
         let control = baseline_control(&root);
-        for dir in [root.join(".codex-baseline"), control.clone()] {
+        for dir in [root.join(".baicode-baseline"), control.clone()] {
             match fs::create_dir(&dir) {
                 Ok(()) => {}
                 Err(err)
@@ -142,7 +142,7 @@ async fn with_baseline_lock<T: Send + 'static>(
             .write(true)
             .create(true)
             .truncate(false)
-            .open(control.join("codex-baseline.lock"))?;
+            .open(control.join("baicode-baseline.lock"))?;
         lock.lock().context("lock git baseline")?;
         operation(&root)
     })
@@ -150,7 +150,7 @@ async fn with_baseline_lock<T: Send + 'static>(
 }
 
 fn baseline_control(root: &Path) -> PathBuf {
-    root.join(".codex-baseline").join(".git")
+    root.join(".baicode-baseline").join(".git")
 }
 
 fn discard_baseline_path(path: &Path) -> anyhow::Result<()> {

@@ -23,7 +23,7 @@ async fn v2_rpc_refreshes_metadata_and_enforces_sandbox() -> anyhow::Result<()> 
     let skills = codex_home_path.join("skills/demo/SKILL.md");
     let plugin = codex_home_path.join("plugins/cache/market/mail/1.0.0");
     write(
-        &plugin.join(".codex-plugin/plugin.json"),
+        &plugin.join(".baicode-plugin/plugin.json"),
         r#"{"name":"mail"}"#,
     )?;
     write(

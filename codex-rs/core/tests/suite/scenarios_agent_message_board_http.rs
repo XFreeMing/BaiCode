@@ -71,13 +71,13 @@ async fn http_board_is_shared_with_children(mode: BoardMode) -> anyhow::Result<(
     let endpoint = json!({"url":url,"http_headers":{"Authorization":authorization,"Host":host},"required":true,"default_tools_approval_mode":"approve"});
     if plugin {
         let manifest = codex_utils_cargo_bin::find_resource!(
-            "../message-board-mcp/plugin/.codex-plugin/plugin.json"
+            "../message-board-mcp/plugin/.baicode-plugin/plugin.json"
         )?;
         let declaration_path =
             codex_utils_cargo_bin::find_resource!("../message-board-mcp/plugin/.mcp.json")?;
         let installed = home.path().join("plugins/cache/test/message-board/local");
-        std::fs::create_dir_all(installed.join(".codex-plugin"))?;
-        std::fs::copy(manifest, installed.join(".codex-plugin/plugin.json"))?;
+        std::fs::create_dir_all(installed.join(".baicode-plugin"))?;
+        std::fs::copy(manifest, installed.join(".baicode-plugin/plugin.json"))?;
         let mut declaration: Value = serde_json::from_slice(&std::fs::read(declaration_path)?)?;
         if !in_memory {
             declaration["mcpServers"]["codex_message_board"] = endpoint.clone();

@@ -94,7 +94,7 @@ fn executor_snapshot(
                 version: "1.0.0".to_string(),
                 files: DiscoveredPluginFiles {
                     manifest: CapabilityTextFile {
-                        path: root.join(".codex-plugin/plugin.json")?,
+                        path: root.join(".baicode-plugin/plugin.json")?,
                         contents: r#"{"name":"example"}"#.to_string(),
                     },
                     mcp_config: None,
@@ -200,9 +200,9 @@ async fn projection_respects_discovery_mode_and_preserves_enabled_plugins() -> a
 
     let home = tempfile::tempdir()?;
     let root = home.path().join("legacy");
-    std::fs::create_dir_all(root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(root.join(".baicode-plugin"))?;
     std::fs::write(
-        root.join(".codex-plugin/plugin.json"),
+        root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"legacy","mcpServers":{"legacy":{"command":"legacy-command"}}}"#,
     )?;
     let mut config = ConfigBuilder::default()

@@ -564,7 +564,7 @@ fn conversation_history_snapshot_excludes_contextual_user_messages() {
     let user_message = user_input_text_msg("Review this repository.");
     let assistant_message = assistant_msg("I will inspect the repository.");
     let developer_message = developer_msg(
-        "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nDeveloper context\n</INSTRUCTIONS>",
+        "# BAICODE.md instructions\n\n<INSTRUCTIONS>\nDeveloper context\n</INSTRUCTIONS>",
     );
     let history = create_history_with_items(vec![
         contextual_message,
@@ -2242,7 +2242,7 @@ async fn drop_last_n_user_turns_ignores_session_prefix_user_messages() {
     let items = vec![
         user_input_text_msg("<environment_context>ctx</environment_context>"),
         user_input_text_msg(
-            "# AGENTS.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
+            "# BAICODE.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
         ),
         user_input_text_msg(
             "<skill>\n<name>demo</name>\n<path>skills/demo/SKILL.md</path>\nbody\n</skill>",
@@ -2264,7 +2264,7 @@ async fn drop_last_n_user_turns_ignores_session_prefix_user_messages() {
     let expected_prefix_and_first_turn = vec![
         user_input_text_msg("<environment_context>ctx</environment_context>"),
         user_input_text_msg(
-            "# AGENTS.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
+            "# BAICODE.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
         ),
         user_input_text_msg(
             "<skill>\n<name>demo</name>\n<path>skills/demo/SKILL.md</path>\nbody\n</skill>",
@@ -2287,7 +2287,7 @@ async fn drop_last_n_user_turns_ignores_session_prefix_user_messages() {
     let expected_prefix_only = vec![
         user_input_text_msg("<environment_context>ctx</environment_context>"),
         user_input_text_msg(
-            "# AGENTS.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
+            "# BAICODE.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
         ),
         user_input_text_msg(
             "<skill>\n<name>demo</name>\n<path>skills/demo/SKILL.md</path>\nbody\n</skill>",
@@ -2301,7 +2301,7 @@ async fn drop_last_n_user_turns_ignores_session_prefix_user_messages() {
     let mut history = create_history_with_items(vec![
         user_input_text_msg("<environment_context>ctx</environment_context>"),
         user_input_text_msg(
-            "# AGENTS.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
+            "# BAICODE.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
         ),
         user_input_text_msg(
             "<skill>\n<name>demo</name>\n<path>skills/demo/SKILL.md</path>\nbody\n</skill>",
@@ -2326,7 +2326,7 @@ async fn drop_last_n_user_turns_ignores_session_prefix_user_messages() {
     let mut history = create_history_with_items(vec![
         user_input_text_msg("<environment_context>ctx</environment_context>"),
         user_input_text_msg(
-            "# AGENTS.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
+            "# BAICODE.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>",
         ),
         user_input_text_msg(
             "<skill>\n<name>demo</name>\n<path>skills/demo/SKILL.md</path>\nbody\n</skill>",

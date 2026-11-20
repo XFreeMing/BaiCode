@@ -510,7 +510,7 @@ async fn repository_skill_turn_grant() -> Result<()> {
         for item in body["input"].as_array_mut().expect("request input") {
             for field in ["arguments", "output"] {
                 if let Some(serde_json::Value::String(text)) = item.get_mut(field) {
-                    *text = text.replace(&skill_root, r#""<CWD>/.agents/skills""#);
+                    *text = text.replace(&skill_root, r#""<CWD>/.BaiCode/skills""#);
                 }
             }
         }

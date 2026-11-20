@@ -24,7 +24,7 @@ use toml::Value as TomlValue;
 
 use crate::loader::HostSkillRoot;
 
-const AGENTS_DIR_NAME: &str = ".agents";
+const AGENTS_DIR_NAME: &str = ".BaiCode";
 const SKILLS_DIR_NAME: &str = "skills";
 const MAX_CONCURRENT_ANCESTOR_PROBES: usize = 8;
 

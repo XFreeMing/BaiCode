@@ -179,7 +179,7 @@ impl ExecutorFileSystem for BlockingMetadataFileSystem {
             }
             if path
                 .to_abs_path()
-                .is_ok_and(|path| path.ends_with(Path::new(".agents").join("skills")))
+                .is_ok_and(|path| path.ends_with(Path::new(".BaiCode").join("skills")))
             {
                 self.calls
                     .paths
@@ -309,8 +309,8 @@ fn layer_roots_preserve_scope_precedence_and_disabled_projects() {
     let system_folder = absolute(temp_dir.path().join("etc/codex"));
     let home_folder = absolute(temp_dir.path().join("home"));
     let user_folder = home_folder.join("codex");
-    let project_folder = absolute(temp_dir.path().join("repo/.codex"));
-    let nested_project_folder = absolute(temp_dir.path().join("repo/nested/.codex"));
+    let project_folder = absolute(temp_dir.path().join("repo/.BaiCode"));
+    let nested_project_folder = absolute(temp_dir.path().join("repo/nested/.BaiCode"));
     let config_stack = stack(vec![
         ConfigLayerEntry::new(
             ConfigLayerSource::System {
@@ -340,7 +340,7 @@ fn layer_roots_preserve_scope_precedence_and_disabled_projects() {
             (SkillScope::Repo, nested_project_folder.join("skills")),
             (SkillScope::Repo, project_folder.join("skills")),
             (SkillScope::User, user_folder.join("skills")),
-            (SkillScope::User, home_folder.join(".agents/skills")),
+            (SkillScope::User, home_folder.join(".BaiCode/skills")),
             (SkillScope::System, user_folder.join("skills/.system")),
             (SkillScope::Admin, system_folder.join("skills")),
         ]
@@ -470,8 +470,8 @@ async fn repo_ancestry_without_project_marker_does_not_walk_parents() {
     let temp_dir = TempDir::new().expect("temp dir");
     let outer = absolute(temp_dir.path().join("outer"));
     let cwd = outer.join("nested/inner");
-    fs::create_dir_all(outer.join(".agents/skills")).expect("create outer skills");
-    fs::create_dir_all(cwd.join(".agents/skills")).expect("create cwd skills");
+    fs::create_dir_all(outer.join(".BaiCode/skills")).expect("create outer skills");
+    fs::create_dir_all(cwd.join(".BaiCode/skills")).expect("create cwd skills");
 
     // Sandbox runners can put a .git marker above the temporary directory.
     // Probe for an absent fixture marker while retaining the real ancestor search.
@@ -491,7 +491,7 @@ async fn repo_ancestry_without_project_marker_does_not_walk_parents() {
     .map(|root| root.path)
     .collect::<Vec<_>>();
 
-    assert_eq!(roots, vec![cwd.join(".agents/skills")]);
+    assert_eq!(roots, vec![cwd.join(".BaiCode/skills")]);
 }
 
 /// Repeat the two remote metadata rounds with 74 ms per RPC and no repository skills.
@@ -625,7 +625,7 @@ async fn empty_remote_repo_skills_are_reused_until_watch_invalidation() {
     assert!(
         restricted
             .watch_missing(
-                vec![PathUri::from_abs_path(&cwd.join(".agents/skills"))],
+                vec![PathUri::from_abs_path(&cwd.join(".BaiCode/skills"))],
                 Some(PathUri::from_abs_path(&cwd.join(".git"))),
             )
             .await
@@ -633,7 +633,7 @@ async fn empty_remote_repo_skills_are_reused_until_watch_invalidation() {
             .is_none()
     );
 
-    let skills = cwd.join(".agents/skills");
+    let skills = cwd.join(".BaiCode/skills");
     fs::create_dir_all(&skills).unwrap();
     let skill_path = skills.join("SKILL.md");
     let skill_body = "---\nname: remote-skill\ndescription: Remote skill\n---\nBody";
@@ -666,7 +666,7 @@ async fn incomplete_project_marker_probe_is_retried_before_loading_parent_skills
     fs::create_dir(&cwd).unwrap();
     fs::write(root.join(".git"), "").unwrap();
     fs::write(cwd.join(".git"), "").unwrap();
-    let parent_skills = root.join(".agents/skills");
+    let parent_skills = root.join(".BaiCode/skills");
     fs::create_dir_all(&parent_skills).unwrap();
     fs::write(
         parent_skills.join("SKILL.md"),
@@ -712,7 +712,7 @@ async fn incomplete_project_marker_probe_is_retried_before_loading_parent_skills
     );
     assert_eq!(
         *calls.paths.lock().unwrap(),
-        vec![PathUri::from_abs_path(&cwd.join(".agents/skills"))]
+        vec![PathUri::from_abs_path(&cwd.join(".BaiCode/skills"))]
     );
 }
 
@@ -746,7 +746,7 @@ async fn newly_created_roots_are_visible_before_watch_ack_or_without_watch_suppo
             .await
             .is_empty()
         );
-        let skills = cwd.join(".agents/skills");
+        let skills = cwd.join(".BaiCode/skills");
         fs::create_dir_all(&skills).unwrap();
         assert_eq!(
             repo_agents_skill_roots(
@@ -772,9 +772,9 @@ async fn repo_ancestry_stops_at_project_root_and_preserves_root_to_cwd_order() {
     let nested = repository.join("nested/inner");
     fs::create_dir_all(&nested).expect("create nested cwd");
     fs::write(repository.join(".git"), "gitdir: fake\n").expect("write git marker");
-    fs::create_dir_all(outer.join(".agents/skills")).expect("create outer skills");
-    fs::create_dir_all(repository.join(".agents/skills")).expect("create repo skills");
-    fs::create_dir_all(repository.join("nested/.agents/skills")).expect("create nested skills");
+    fs::create_dir_all(outer.join(".BaiCode/skills")).expect("create outer skills");
+    fs::create_dir_all(repository.join(".BaiCode/skills")).expect("create repo skills");
+    fs::create_dir_all(repository.join("nested/.BaiCode/skills")).expect("create nested skills");
     let config_stack = stack(Vec::new());
 
     let roots = repo_agents_skill_roots(
@@ -792,8 +792,8 @@ async fn repo_ancestry_stops_at_project_root_and_preserves_root_to_cwd_order() {
     assert_eq!(
         roots,
         vec![
-            repository.join(".agents/skills"),
-            repository.join("nested/.agents/skills"),
+            repository.join(".BaiCode/skills"),
+            repository.join("nested/.BaiCode/skills"),
         ]
     );
 }
@@ -803,7 +803,7 @@ async fn resolved_project_layer_loads_skill_without_git_marker() {
     let access = FileSystemEnvironmentAccessor::unrestricted(&LOCAL_FS);
     let temp_dir = TempDir::new().expect("temp dir");
     let workspace = absolute(temp_dir.path().join("workspace"));
-    let dot_codex = workspace.join(".codex");
+    let dot_codex = workspace.join(".BaiCode");
     let skill_root = dot_codex.join("skills");
     fs::create_dir_all(&workspace).expect("create workspace");
     let skill_path = write_skill(&skill_root, "local", "local-skill");
@@ -841,7 +841,7 @@ async fn resolved_project_layer_loads_skill_when_cwd_is_file() {
     let access = FileSystemEnvironmentAccessor::unrestricted(&LOCAL_FS);
     let temp_dir = TempDir::new().expect("temp dir");
     let repository = absolute(temp_dir.path().join("repo"));
-    let dot_codex = repository.join(".codex");
+    let dot_codex = repository.join(".BaiCode");
     let skill_root = dot_codex.join("skills");
     fs::create_dir_all(&repository).expect("create repository");
     fs::write(repository.join(".git"), "gitdir: fake\n").expect("write git marker");
@@ -895,13 +895,13 @@ async fn repo_ancestry_limits_concurrent_probes_and_preserves_order() {
     fs::create_dir_all(&cwd).expect("create nested cwd");
 
     let expected_roots = [0, CONCURRENCY_LIMIT / 2, CONCURRENCY_LIMIT].map(|index| {
-        let path = directories[index].join(".agents/skills");
+        let path = directories[index].join(".BaiCode/skills");
         fs::create_dir_all(&path).expect("create repo skill root");
         path
     });
     let expected_probes = directories
         .iter()
-        .map(|directory| PathUri::from_abs_path(&directory.join(".agents/skills")))
+        .map(|directory| PathUri::from_abs_path(&directory.join(".BaiCode/skills")))
         .collect::<Vec<_>>();
     let calls = Arc::new(BlockingMetadataCalls::default());
     let file_system: Arc<dyn ExecutorFileSystem> = Arc::new(BlockingMetadataFileSystem {
@@ -976,8 +976,8 @@ async fn resolved_config_and_repo_roots_preserve_order_and_dedupe_paths_not_name
     fs::create_dir_all(&cwd).expect("create cwd");
     fs::write(repository.join(".git"), "gitdir: fake\n").expect("write git marker");
 
-    let project_dot_codex = repository.join(".codex");
-    let nested_project_dot_codex = repository.join("nested/.codex");
+    let project_dot_codex = repository.join(".BaiCode");
+    let nested_project_dot_codex = repository.join("nested/.BaiCode");
     let user_skills = codex_home.join("skills");
     let root_project_skill = write_skill(
         &project_dot_codex.join("skills"),
@@ -990,16 +990,16 @@ async fn resolved_config_and_repo_roots_preserve_order_and_dedupe_paths_not_name
         "duplicate-skill",
     );
     let user_skill = write_skill(&user_skills, "user-duplicate", "duplicate-skill");
-    let home_skill = write_skill(&home_folder.join(".agents/skills"), "home", "home-skill");
+    let home_skill = write_skill(&home_folder.join(".BaiCode/skills"), "home", "home-skill");
     let system_skill = write_skill(&codex_home.join("skills/.system"), "system", "system-skill");
     let admin_skill = write_skill(&system_folder.join("skills"), "admin", "admin-skill");
     let repo_agent_skill = write_skill(
-        &repository.join(".agents/skills"),
+        &repository.join(".BaiCode/skills"),
         "repo-agent",
         "repo-agent-skill",
     );
     let nested_agent_skill = write_skill(
-        &repository.join("nested/.agents/skills"),
+        &repository.join("nested/.BaiCode/skills"),
         "nested-agent",
         "nested-agent-skill",
     );
@@ -1027,7 +1027,8 @@ async fn resolved_config_and_repo_roots_preserve_order_and_dedupe_paths_not_name
         /*empty_remote_roots*/ None,
     )
     .await;
-    assert_eq!(roots.len(), 8);
+    // Config-layer and ancestor discovery resolve to the same two project skill roots.
+    assert_eq!(roots.len(), 6);
     let outcome = load_and_merge_host_skill_roots(
         roots,
         &Semaphore::new(MAX_CONCURRENT_ROOT_SCANS),

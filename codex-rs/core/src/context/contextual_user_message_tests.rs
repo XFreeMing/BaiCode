@@ -32,8 +32,8 @@ fn detects_skill_instructions_fragment_case_insensitively() {
 #[test]
 fn detects_agents_instructions_fragment() {
     for text in [
-        "# AGENTS.md instructions for /tmp\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>",
-        "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>",
+        "# BAICODE.md instructions for /tmp\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>",
+        "# BAICODE.md instructions\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>",
     ] {
         assert!(is_contextual_user_fragment(&ContentItem::InputText {
             text: text.to_string(),
@@ -50,7 +50,7 @@ fn renders_agents_instructions_with_legacy_directory_header() {
         }
         .render()
         .expect_text(),
-        "# AGENTS.md instructions for /tmp\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
+        "# BAICODE.md instructions for /tmp\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
     );
 }
 
@@ -63,7 +63,7 @@ fn renders_agents_instructions_without_directory_header() {
         }
         .render()
         .expect_text(),
-        "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
+        "# BAICODE.md instructions\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
     );
 }
 

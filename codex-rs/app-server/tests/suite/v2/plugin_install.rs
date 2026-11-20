@@ -257,7 +257,7 @@ async fn plugin_install_writes_remote_plugin_to_cloud_and_cache() -> Result<()> 
     mount_remote_plugin_install_after_cache_write(
         &server,
         REMOTE_PLUGIN_ID,
-        installed_path.join(".codex-plugin/plugin.json"),
+        installed_path.join(".baicode-plugin/plugin.json"),
     )
     .await;
 
@@ -296,9 +296,9 @@ async fn plugin_install_writes_remote_plugin_to_cloud_and_cache() -> Result<()> 
         /*expected_count*/ 1,
     )
     .await?;
-    assert!(installed_path.join(".codex-plugin/plugin.json").is_file());
+    assert!(installed_path.join(".baicode-plugin/plugin.json").is_file());
     let installed_plugin_manifest: serde_json::Value = serde_json::from_str(
-        &std::fs::read_to_string(installed_path.join(".codex-plugin/plugin.json"))?,
+        &std::fs::read_to_string(installed_path.join(".baicode-plugin/plugin.json"))?,
     )?;
     assert_eq!(installed_plugin_manifest["name"], json!("linear"));
     assert_eq!(installed_plugin_manifest["version"], json!("1.2.3"));
@@ -906,7 +906,7 @@ async fn plugin_install_returns_invalid_request_for_not_available_plugin() -> Re
     )?;
     write_plugin_source(repo_root.path(), "sample-plugin", &[])?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -937,9 +937,9 @@ async fn plugin_install_returns_invalid_request_for_not_available_plugin() -> Re
 async fn plugin_install_returns_invalid_request_for_disallowed_product_plugin() -> Result<()> {
     let codex_home = TempDir::new()?;
     let repo_root = TempDir::new()?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "debug",
   "plugins": [
@@ -958,7 +958,7 @@ async fn plugin_install_returns_invalid_request_for_disallowed_product_plugin() 
     )?;
     write_plugin_source(repo_root.path(), "sample-plugin", &[])?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -1011,7 +1011,7 @@ async fn plugin_install_tracks_analytics_event() -> Result<()> {
     )?;
     write_plugin_source(repo_root.path(), "sample-plugin", &[])?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -1077,7 +1077,7 @@ async fn plugin_install_failure_tracks_analytics_event() -> Result<()> {
         /*auth_policy*/ None,
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -1325,7 +1325,7 @@ async fn plugin_install_returns_apps_needing_auth() -> Result<()> {
         r#"{"apps":{"alpha":{"id":"alpha","category":"Communication"},"beta":{"id":"beta"}}}"#,
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -1419,7 +1419,7 @@ async fn plugin_install_skips_mcp_oauth_for_chatgpt_dual_surface_plugin() -> Res
     write_plugin_source(repo_root.path(), "sample-plugin", &["sample-mcp"])?;
     write_plugin_mcp_config(repo_root.path(), "sample-plugin", &oauth_server.uri())?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -1472,7 +1472,7 @@ url = "https://example.com/allowed-mcp"
     write_plugin_source(repo_root.path(), "sample-plugin", &[])?;
     write_plugin_mcp_config(repo_root.path(), "sample-plugin", &oauth_server.uri())?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -1529,7 +1529,7 @@ plugins = true
     write_plugin_source(repo_root.path(), "sample-plugin", &[])?;
     write_plugin_mcp_config(repo_root.path(), "sample-plugin", &oauth_server.uri())?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -1627,7 +1627,7 @@ url = {executor_url}
         }))?,
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -1689,7 +1689,7 @@ async fn plugin_install_starts_mcp_oauth_with_formerly_disallowed_plugin_app() -
     )?;
     write_plugin_mcp_config(repo_root.path(), "sample-plugin", &oauth_server.uri())?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -1806,7 +1806,7 @@ async fn plugin_install_starts_mcp_oauth_through_configured_http_proxy() -> Resu
         }))?,
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let proxy_uri = proxy.uri();
     let mut mcp = TestAppServer::builder()
@@ -1932,7 +1932,7 @@ async fn plugin_oauth_login_preserves_registered_callbacks_or_uses_legacy_fallba
         }))?,
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -2092,7 +2092,7 @@ connectors = true
     write_plugin_source(repo_root.path(), "sample-plugin", &["sample-mcp"])?;
     write_plugin_mcp_config(repo_root.path(), "sample-plugin", &oauth_server.uri())?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -2217,7 +2217,7 @@ async fn plugin_install_remote_auth_setup_respects_activation_policy(
     assert!(
         codex_home
             .path()
-            .join("plugins/cache/openai-curated-remote/linear/1.2.3/.codex-plugin/plugin.json")
+            .join("plugins/cache/openai-curated-remote/linear/1.2.3/.baicode-plugin/plugin.json")
             .is_file()
     );
     assert_eq!(std::fs::read_to_string(config_path)?, expected_config);
@@ -2445,7 +2445,7 @@ async fn plugin_install_includes_formerly_disallowed_apps_needing_auth() -> Resu
         &["alpha", "asdk_app_6938a94a61d881918ef32cb999ff937c"],
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -2532,7 +2532,7 @@ async fn plugin_install_makes_bundled_mcp_servers_available_to_followup_requests
         }))?,
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -3362,9 +3362,9 @@ fn write_plugin_marketplace(
         String::new()
     };
     std::fs::create_dir_all(repo_root.join(".git"))?;
-    std::fs::create_dir_all(repo_root.join(".agents/plugins"))?;
+    std::fs::create_dir_all(repo_root.join(".BaiCode/plugins"))?;
     std::fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         format!(
             r#"{{
   "name": "{marketplace_name}",
@@ -3388,9 +3388,9 @@ fn write_plugin_source(
     app_ids: &[&str],
 ) -> Result<()> {
     let plugin_root = repo_root.join(plugin_name);
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         format!(r#"{{"name":"{plugin_name}"}}"#),
     )?;
 
@@ -3478,7 +3478,7 @@ fn remote_plugin_bundle_tar_gz_bytes_with_entries(
     let mut tar = tar::Builder::new(encoder);
     let mut entries = vec![
         (
-            ".codex-plugin/plugin.json",
+            ".baicode-plugin/plugin.json",
             plugin_manifest.as_bytes(),
             /*mode*/ 0o644,
         ),

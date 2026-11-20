@@ -36,7 +36,7 @@ from app_server_harness import (
     ev_response_created,
     sse,
 )
-from openai_codex import ApprovalMode, Codex, CodexConfig, Sandbox
+from baicode_sdk import ApprovalMode, Codex, CodexConfig, Sandbox
 
 from fixtures import SmokePackage
 

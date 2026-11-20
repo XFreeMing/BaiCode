@@ -419,7 +419,7 @@ async fn marketplace_add_success_refreshes_to_new_marketplace_tab() {
     let cwd = chat.config.cwd.to_path_buf();
     let marketplace_root = plugins_test_absolute_path("marketplaces/debug");
     let marketplace_path =
-        plugins_test_absolute_path("marketplaces/debug/.agents/plugins/marketplace.json");
+        plugins_test_absolute_path("marketplaces/debug/.BaiCode/plugins/marketplace.json");
     let temp = tempdir().expect("tempdir");
     let config_toml_path = temp.path().join("config.toml").abs();
     chat.config.config_layer_stack = ConfigLayerStack::default().with_user_config(
@@ -625,7 +625,7 @@ async fn plugin_detail_popup_snapshot_labels_personal_marketplace_as_local() {
     let personal_marketplace_path = AbsolutePathBuf::try_from(
         dirs::home_dir()
             .expect("home directory")
-            .join(".agents/plugins/marketplace.json"),
+            .join(".BaiCode/plugins/marketplace.json"),
     )
     .expect("absolute personal marketplace path");
     let summary = plugins_test_summary(

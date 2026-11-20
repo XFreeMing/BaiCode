@@ -28,7 +28,7 @@ fn installation(
                 files: DiscoveredPluginFiles {
                     manifest: codex_exec_server::CapabilityTextFile {
                         path: PathUri::parse(
-                            "file:///plugins/local-name/1/.codex-plugin/plugin.json",
+                            "file:///plugins/local-name/1/.baicode-plugin/plugin.json",
                         )?,
                         contents: r#"{"name":"local-name"}"#.to_string(),
                     },

@@ -333,7 +333,7 @@ fn write_scenario_capabilities(home: &TempDir) -> Result<ScenarioSkills> {
     ] {
         let manifest = plugin_cache
             .join(name)
-            .join("local/.codex-plugin/plugin.json");
+            .join("local/.baicode-plugin/plugin.json");
         fs::create_dir_all(manifest.parent().expect("manifest parent"))?;
         fs::write(
             manifest,
@@ -396,7 +396,7 @@ fn configure_catalog_plugin_scenario(config: &mut Config) {
     let stack = &config.config_layer_stack;
     let fixture_config = stack.effective_config();
     // Keep the fixture's plugin and App policy while avoiding discovery of the real
-    // $HOME/.agents/skills, which a User layer adds alongside the fixture's skills.
+    // $HOME/.BaiCode/skills, which a User layer adds alongside the fixture's skills.
     config.config_layer_stack = ConfigLayerStack::new(
         vec![ConfigLayerEntry::new(
             ConfigLayerSource::System {
@@ -1252,7 +1252,7 @@ async fn astra_kickoff_with_skills_plugins_and_remote_compaction() -> Result<()>
         .with_extensions(skills_extensions())
         .with_workspace_setup(|cwd, fs| async move {
             fs.write_file(
-                &executor_path_uri(cwd.join("AGENTS.md"))?,
+                &executor_path_uri(cwd.join("BAICODE.md"))?,
                 b"Kickoff updates must name an owner and a date.".to_vec(),
                 Default::default(),
                 /*sandbox*/ None,
@@ -1486,9 +1486,9 @@ async fn astra_omits_disabled_executor_and_plugin_skills_from_model_context(
         "Use the next workflow",
         "Follow the next workflow.",
     )?;
-    fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"disabled"}"#,
     )?;
     write_skill(
@@ -2896,9 +2896,9 @@ async fn astra_refreshes_plugin_tools_and_skills_in_an_existing_thread(
         .await?;
 
     let plugin_root = home.path().join("plugins/cache/test/notes/local");
-    fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         json!({ "name": "notes", "description": "Look up and summarize team notes" }).to_string(),
     )?;
     fs::write(

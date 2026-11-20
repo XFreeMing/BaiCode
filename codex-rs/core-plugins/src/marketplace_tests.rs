@@ -50,10 +50,10 @@ fn find_marketplace_plugin_finds_repo_marketplace_plugin() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::create_dir_all(repo_root.join("nested")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -70,7 +70,7 @@ fn find_marketplace_plugin_finds_repo_marketplace_plugin() {
     .unwrap();
 
     let resolved = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "local-plugin",
     )
     .unwrap();
@@ -175,9 +175,9 @@ fn find_marketplace_plugin_supports_git_subdir_sources() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -197,7 +197,7 @@ fn find_marketplace_plugin_supports_git_subdir_sources() {
     .unwrap();
 
     let resolved = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "remote-plugin",
     )
     .unwrap();
@@ -230,9 +230,9 @@ fn find_marketplace_plugin_omits_interface_asset_paths_for_git_sources() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -257,7 +257,7 @@ fn find_marketplace_plugin_omits_interface_asset_paths_for_git_sources() {
     .unwrap();
 
     let resolved = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "remote-plugin",
     )
     .unwrap();
@@ -275,9 +275,9 @@ fn find_marketplace_plugin_supports_npm_sources() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -296,7 +296,7 @@ fn find_marketplace_plugin_supports_npm_sources() {
     .unwrap();
 
     let resolved = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "npm-plugin",
     )
     .unwrap();
@@ -373,7 +373,7 @@ fn find_marketplace_plugin_skips_unsafe_npm_sources() {
       "name": "dot-package",
       "source": {
         "source": "npm",
-        "package": ".codex-plugin",
+        "package": ".baicode-plugin",
         "registry": "https://npm.example.com"
       }
     },
@@ -478,9 +478,9 @@ fn find_marketplace_plugin_supports_npm_sources_without_optional_fields() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -497,7 +497,7 @@ fn find_marketplace_plugin_supports_npm_sources_without_optional_fields() {
     .unwrap();
 
     let resolved = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "npm-plugin",
     )
     .unwrap();
@@ -518,11 +518,11 @@ fn find_marketplace_plugin_builds_manifest_fallback_from_entry() {
     let repo_root = tmp.path().join("repo");
     let plugin_root = repo_root.join("plugins/quality-review");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::create_dir_all(plugin_root.join("skills/thermo-nuclear-code-quality-review")).unwrap();
     fs::create_dir_all(plugin_root.join("skills/second-review")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r##"{
   "name": "team-marketplace",
   "plugins": [
@@ -580,7 +580,7 @@ fn find_marketplace_plugin_builds_manifest_fallback_from_entry() {
     .unwrap();
 
     let resolved = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "quality-review",
     )
     .unwrap();
@@ -726,9 +726,9 @@ fn find_marketplace_plugin_normalizes_github_shorthand_with_dot_git_suffix() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -746,7 +746,7 @@ fn find_marketplace_plugin_normalizes_github_shorthand_with_dot_git_suffix() {
     .unwrap();
 
     let resolved = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "remote-plugin",
     )
     .unwrap();
@@ -769,10 +769,10 @@ fn find_marketplace_plugin_normalizes_relative_git_source_urls_to_marketplace_ro
         let repo_root = tmp.path().join("repo");
         let remote_repo = repo_root.join("remotes").join("toolkit.git");
         fs::create_dir_all(repo_root.join(".git")).unwrap();
-        fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+        fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
         fs::create_dir_all(&remote_repo).unwrap();
         fs::write(
-            repo_root.join(".agents/plugins/marketplace.json"),
+            repo_root.join(".BaiCode/plugins/marketplace.json"),
             format!(
                 r#"{{
   "name": "codex-curated",
@@ -793,7 +793,7 @@ fn find_marketplace_plugin_normalizes_relative_git_source_urls_to_marketplace_ro
         .unwrap();
 
         let resolved = find_marketplace_plugin(
-            &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+            &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
             "remote-plugin",
         )
         .unwrap();
@@ -820,7 +820,7 @@ fn normalize_relative_git_plugin_source_url_rejects_parent_traversal() {
     ] {
         let tmp = tempdir().unwrap();
         let repo_root = tmp.path().join("repo");
-        let marketplace_path = repo_root.join(".agents/plugins/marketplace.json");
+        let marketplace_path = repo_root.join(".BaiCode/plugins/marketplace.json");
         let marketplace_path = AbsolutePathBuf::try_from(marketplace_path).unwrap();
         let err =
             normalize_relative_git_plugin_source_url(&marketplace_path, source_url).unwrap_err();
@@ -841,9 +841,9 @@ fn find_marketplace_plugin_skips_root_equivalent_git_subdir_paths() {
         let tmp = tempdir().unwrap();
         let repo_root = tmp.path().join("repo");
         fs::create_dir_all(repo_root.join(".git")).unwrap();
-        fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+        fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
         fs::write(
-            repo_root.join(".agents/plugins/marketplace.json"),
+            repo_root.join(".BaiCode/plugins/marketplace.json"),
             format!(
                 r#"{{
   "name": "codex-curated",
@@ -863,7 +863,7 @@ fn find_marketplace_plugin_skips_root_equivalent_git_subdir_paths() {
         .unwrap();
 
         let err = find_marketplace_plugin(
-            &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+            &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
             "remote-plugin",
         )
         .unwrap_err();
@@ -880,15 +880,15 @@ fn find_marketplace_plugin_reports_missing_plugin() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{"name":"codex-curated","plugins":[]}"#,
     )
     .unwrap();
 
     let err = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "missing",
     )
     .unwrap_err();
@@ -984,10 +984,10 @@ fn list_marketplaces_supports_repo_root_local_plugin_sources() {
         let repo_root = tmp.path().join("repo");
 
         fs::create_dir_all(repo_root.join(".git")).unwrap();
-        fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
-        fs::create_dir_all(repo_root.join(".codex-plugin")).unwrap();
+        fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
+        fs::create_dir_all(repo_root.join(".baicode-plugin")).unwrap();
         fs::write(
-            repo_root.join(".agents/plugins/marketplace.json"),
+            repo_root.join(".BaiCode/plugins/marketplace.json"),
             format!(
                 r#"{{
   "name": "repo-root-marketplace",
@@ -1005,7 +1005,7 @@ fn list_marketplaces_supports_repo_root_local_plugin_sources() {
         )
         .unwrap();
         fs::write(
-            repo_root.join(".codex-plugin/plugin.json"),
+            repo_root.join(".baicode-plugin/plugin.json"),
             r#"{
   "name":"repo-root-plugin",
   "interface": {
@@ -1026,7 +1026,7 @@ fn list_marketplaces_supports_repo_root_local_plugin_sources() {
             marketplaces,
             vec![Marketplace {
                 name: "repo-root-marketplace".to_string(),
-                path: AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json"))
+                path: AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json"))
                     .unwrap(),
                 interface: None,
                 plugins: vec![MarketplacePlugin {
@@ -1123,9 +1123,9 @@ fn list_marketplaces_prefers_first_supported_manifest_layout() {
     let repo_root = tmp.path().join("repo");
 
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "agents-marketplace",
   "plugins": [
@@ -1164,7 +1164,7 @@ fn list_marketplaces_prefers_first_supported_manifest_layout() {
     assert_eq!(marketplaces[0].name, "agents-marketplace");
     assert_eq!(
         marketplaces[0].path,
-        AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap()
+        AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap()
     );
 }
 
@@ -1173,9 +1173,9 @@ fn list_marketplaces_supports_explicit_api_marketplace_manifest_path() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
 
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/api_marketplace.json")).unwrap();
+        AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/api_marketplace.json")).unwrap();
     fs::write(
         marketplace_path.as_path(),
         r#"{
@@ -1232,10 +1232,10 @@ fn list_marketplaces_returns_home_and_repo_marketplaces() {
     let repo_root = tmp.path().join("repo");
 
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(home_root.join(".agents/plugins")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(home_root.join(".BaiCode/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        home_root.join(".agents/plugins/marketplace.json"),
+        home_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -1258,7 +1258,7 @@ fn list_marketplaces_returns_home_and_repo_marketplaces() {
     )
     .unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -1294,7 +1294,7 @@ fn list_marketplaces_returns_home_and_repo_marketplaces() {
             Marketplace {
                 name: "codex-curated".to_string(),
                 path:
-                    AbsolutePathBuf::try_from(home_root.join(".agents/plugins/marketplace.json"),)
+                    AbsolutePathBuf::try_from(home_root.join(".BaiCode/plugins/marketplace.json"),)
                         .unwrap(),
                 interface: None,
                 plugins: vec![
@@ -1333,7 +1333,7 @@ fn list_marketplaces_returns_home_and_repo_marketplaces() {
             Marketplace {
                 name: "codex-curated".to_string(),
                 path:
-                    AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json"),)
+                    AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json"),)
                         .unwrap(),
                 interface: None,
                 plugins: vec![
@@ -1378,12 +1378,12 @@ fn list_marketplaces_keeps_distinct_entries_for_same_name() {
     let tmp = tempdir().unwrap();
     let home_root = tmp.path().join("home");
     let repo_root = tmp.path().join("repo");
-    let home_marketplace = home_root.join(".agents/plugins/marketplace.json");
-    let repo_marketplace = repo_root.join(".agents/plugins/marketplace.json");
+    let home_marketplace = home_root.join(".BaiCode/plugins/marketplace.json");
+    let repo_marketplace = repo_root.join(".BaiCode/plugins/marketplace.json");
 
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(home_root.join(".agents/plugins")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(home_root.join(".BaiCode/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
 
     fs::write(
         home_marketplace.clone(),
@@ -1492,10 +1492,10 @@ fn list_marketplaces_dedupes_multiple_roots_in_same_repo() {
     let nested_root = repo_root.join("nested/project");
 
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::create_dir_all(&nested_root).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -1525,7 +1525,7 @@ fn list_marketplaces_dedupes_multiple_roots_in_same_repo() {
         marketplaces,
         vec![Marketplace {
             name: "codex-curated".to_string(),
-            path: AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json"))
+            path: AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json"))
                 .unwrap(),
             interface: None,
             plugins: vec![MarketplacePlugin {
@@ -1553,9 +1553,9 @@ fn list_marketplaces_reads_marketplace_display_name() {
     let repo_root = tmp.path().join("repo");
 
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "openai-curated",
   "interface": {
@@ -1596,11 +1596,11 @@ fn list_marketplaces_skips_invalid_plugins_but_keeps_marketplace() {
     let invalid_repo_root = tmp.path().join("invalid-repo");
 
     fs::create_dir_all(valid_repo_root.join(".git")).unwrap();
-    fs::create_dir_all(valid_repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(valid_repo_root.join(".BaiCode/plugins")).unwrap();
     fs::create_dir_all(invalid_repo_root.join(".git")).unwrap();
-    fs::create_dir_all(invalid_repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(invalid_repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        valid_repo_root.join(".agents/plugins/marketplace.json"),
+        valid_repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "valid-marketplace",
   "plugins": [
@@ -1616,7 +1616,7 @@ fn list_marketplaces_skips_invalid_plugins_but_keeps_marketplace() {
     )
     .unwrap();
     fs::write(
-        invalid_repo_root.join(".agents/plugins/marketplace.json"),
+        invalid_repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "invalid-marketplace",
   "plugins": [
@@ -1654,9 +1654,9 @@ fn list_marketplaces_skips_plugins_with_invalid_names_but_keeps_marketplace() {
     let repo_root = tmp.path().join("repo");
 
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "invalid-name-marketplace",
   "plugins": [
@@ -1690,7 +1690,7 @@ fn list_marketplaces_skips_plugins_with_invalid_names_but_keeps_marketplace() {
         marketplaces,
         vec![Marketplace {
             name: "invalid-name-marketplace".to_string(),
-            path: AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json"))
+            path: AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json"))
                 .unwrap(),
             interface: None,
             plugins: vec![MarketplacePlugin {
@@ -1719,11 +1719,11 @@ fn list_marketplaces_reports_marketplace_load_errors() {
     let invalid_repo_root = tmp.path().join("invalid-repo");
 
     fs::create_dir_all(valid_repo_root.join(".git")).unwrap();
-    fs::create_dir_all(valid_repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(valid_repo_root.join(".BaiCode/plugins")).unwrap();
     fs::create_dir_all(invalid_repo_root.join(".git")).unwrap();
-    fs::create_dir_all(invalid_repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(invalid_repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        valid_repo_root.join(".agents/plugins/marketplace.json"),
+        valid_repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "valid-marketplace",
   "plugins": [
@@ -1739,7 +1739,7 @@ fn list_marketplaces_reports_marketplace_load_errors() {
     )
     .unwrap();
     let invalid_marketplace_path =
-        AbsolutePathBuf::try_from(invalid_repo_root.join(".agents/plugins/marketplace.json"))
+        AbsolutePathBuf::try_from(invalid_repo_root.join(".BaiCode/plugins/marketplace.json"))
             .unwrap();
     fs::write(invalid_marketplace_path.as_path(), "{not json").unwrap();
 
@@ -1883,10 +1883,10 @@ fn list_marketplaces_resolves_plugin_interface_paths_to_absolute() {
     let repo_root = tmp.path().join("repo");
     let plugin_root = repo_root.join("plugins/demo-plugin");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
-    fs::create_dir_all(plugin_root.join(".codex-plugin")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
+    fs::create_dir_all(plugin_root.join(".baicode-plugin")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -1908,7 +1908,7 @@ fn list_marketplaces_resolves_plugin_interface_paths_to_absolute() {
     )
     .unwrap();
     fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{
   "name": "demo-plugin",
   "interface": {
@@ -1974,9 +1974,9 @@ fn list_marketplaces_ignores_legacy_top_level_policy_fields() {
     let repo_root = tmp.path().join("repo");
 
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -2019,10 +2019,10 @@ fn list_marketplaces_ignores_plugin_interface_assets_without_dot_slash() {
     let plugin_root = repo_root.join("plugins/demo-plugin");
 
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
-    fs::create_dir_all(plugin_root.join(".codex-plugin")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
+    fs::create_dir_all(plugin_root.join(".baicode-plugin")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -2038,7 +2038,7 @@ fn list_marketplaces_ignores_plugin_interface_assets_without_dot_slash() {
     )
     .unwrap();
     fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{
   "name": "demo-plugin",
   "interface": {
@@ -2096,9 +2096,9 @@ fn find_marketplace_plugin_skips_invalid_local_paths() {
         let tmp = tempdir().unwrap();
         let repo_root = tmp.path().join("repo");
         fs::create_dir_all(repo_root.join(".git")).unwrap();
-        fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+        fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
         fs::write(
-            repo_root.join(".agents/plugins/marketplace.json"),
+            repo_root.join(".BaiCode/plugins/marketplace.json"),
             format!(
                 r#"{{
   "name": "codex-curated",
@@ -2117,7 +2117,7 @@ fn find_marketplace_plugin_skips_invalid_local_paths() {
         .unwrap();
 
         let err = find_marketplace_plugin(
-            &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+            &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
             "local-plugin",
         )
         .unwrap_err();
@@ -2134,9 +2134,9 @@ fn find_marketplace_plugin_uses_first_duplicate_entry() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -2160,7 +2160,7 @@ fn find_marketplace_plugin_uses_first_duplicate_entry() {
     .unwrap();
 
     let resolved = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "local-plugin",
     )
     .unwrap();
@@ -2178,9 +2178,9 @@ fn find_installable_marketplace_plugin_rejects_disallowed_product() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -2200,7 +2200,7 @@ fn find_installable_marketplace_plugin_rejects_disallowed_product() {
     .unwrap();
 
     let err = find_installable_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "chatgpt-plugin",
         Some(Product::Atlas),
     )
@@ -2217,9 +2217,9 @@ fn find_marketplace_plugin_allows_missing_products_field() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -2237,7 +2237,7 @@ fn find_marketplace_plugin_allows_missing_products_field() {
     .unwrap();
 
     let resolved = find_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "default-plugin",
     )
     .unwrap();
@@ -2250,9 +2250,9 @@ fn find_installable_marketplace_plugin_rejects_explicit_empty_products() {
     let tmp = tempdir().unwrap();
     let repo_root = tmp.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).unwrap();
-    fs::create_dir_all(repo_root.join(".agents/plugins")).unwrap();
+    fs::create_dir_all(repo_root.join(".BaiCode/plugins")).unwrap();
     fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -2272,7 +2272,7 @@ fn find_installable_marketplace_plugin_rejects_explicit_empty_products() {
     .unwrap();
 
     let err = find_installable_marketplace_plugin(
-        &AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json")).unwrap(),
+        &AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json")).unwrap(),
         "disabled-plugin",
         Some(Product::Codex),
     )

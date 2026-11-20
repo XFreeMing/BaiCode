@@ -11,9 +11,9 @@ async fn authenticated_plugin_migration_uses_chatgpt_curated_marketplace() {
     let curated_root = codex_home.join(".tmp/plugins");
     let plugin_root = curated_root.join("plugins/sample");
     fs::create_dir_all(&external_agent_home).expect("create external agent home");
-    fs::create_dir_all(curated_root.join(".agents/plugins"))
+    fs::create_dir_all(curated_root.join(".BaiCode/plugins"))
         .expect("create curated marketplace directory");
-    fs::create_dir_all(plugin_root.join(".codex-plugin")).expect("create curated plugin directory");
+    fs::create_dir_all(plugin_root.join(".baicode-plugin")).expect("create curated plugin directory");
     fs::write(
         external_agent_home.join("settings.json"),
         r#"{"enabledPlugins":{"sample@openai-curated":true}}"#,
@@ -30,7 +30,7 @@ async fn authenticated_plugin_migration_uses_chatgpt_curated_marketplace() {
     )
     .expect("write curated plugin version");
     fs::write(
-        curated_root.join(".agents/plugins/marketplace.json"),
+        curated_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "openai-curated",
   "plugins": [{
@@ -41,7 +41,7 @@ async fn authenticated_plugin_migration_uses_chatgpt_curated_marketplace() {
     )
     .expect("write curated marketplace");
     fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"sample","version":"0.1.0"}"#,
     )
     .expect("write curated plugin manifest");
@@ -311,7 +311,7 @@ fn marketplace_import_sources_prefers_supported_declaration_over_materialization
 }
 
 #[test]
-fn marketplace_import_sources_infers_bundled_claude_code_marketplace() {
+fn marketplace_import_sources_skips_undeclared_bundled_marketplace() {
     let (_root, external_agent_home, _codex_home) = fixture_paths();
     let settings = serde_json::json!({
         "enabledPlugins": {
@@ -325,13 +325,7 @@ fn marketplace_import_sources_infers_bundled_claude_code_marketplace() {
         &external_agent_home,
     );
 
-    assert_eq!(
-        import_sources.get("claude-code-plugins"),
-        Some(&MarketplaceImportSource {
-            source: "anthropics/claude-code".to_string(),
-            ref_name: None,
-        })
-    );
+    assert!(!import_sources.contains_key("claude-code-plugins"));
 }
 
 #[tokio::test]
@@ -397,7 +391,7 @@ async fn detect_home_plugins_uses_local_settings_over_project_settings() {
 async fn detect_repo_skips_plugins_from_remote_marketplace() {
     let root = TempDir::new().expect("create tempdir");
     let external_agent_home = root.path().join(EXTERNAL_AGENT_DIR);
-    let codex_home = root.path().join(".codex");
+    let codex_home = root.path().join(".BaiCode");
     let repo_root = root.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).expect("create git dir");
     fs::create_dir_all(repo_root.join(EXTERNAL_AGENT_DIR)).expect("create repo external agent dir");
@@ -442,7 +436,7 @@ enabled = true
 async fn detect_repo_skips_plugins_that_are_disabled_in_codex() {
     let root = TempDir::new().expect("create tempdir");
     let external_agent_home = root.path().join(EXTERNAL_AGENT_DIR);
-    let codex_home = root.path().join(".codex");
+    let codex_home = root.path().join(".BaiCode");
     let repo_root = root.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).expect("create git dir");
     fs::create_dir_all(repo_root.join(EXTERNAL_AGENT_DIR)).expect("create repo external agent dir");
@@ -486,7 +480,7 @@ enabled = false
 async fn detect_repo_skips_plugins_without_explicit_enabled_in_codex() {
     let root = TempDir::new().expect("create tempdir");
     let external_agent_home = root.path().join(EXTERNAL_AGENT_DIR);
-    let codex_home = root.path().join(".codex");
+    let codex_home = root.path().join(".BaiCode");
     let repo_root = root.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).expect("create git dir");
     fs::create_dir_all(repo_root.join(EXTERNAL_AGENT_DIR)).expect("create repo external agent dir");
@@ -542,11 +536,11 @@ async fn import_plugins_requires_details() {
 async fn detect_repo_skips_plugins_only_configured_in_project_codex() {
     let root = TempDir::new().expect("create tempdir");
     let external_agent_home = root.path().join(EXTERNAL_AGENT_DIR);
-    let codex_home = root.path().join(".codex");
+    let codex_home = root.path().join(".BaiCode");
     let repo_root = root.path().join("repo");
     fs::create_dir_all(repo_root.join(".git")).expect("create git dir");
     fs::create_dir_all(repo_root.join(EXTERNAL_AGENT_DIR)).expect("create repo external agent dir");
-    fs::create_dir_all(repo_root.join(".codex")).expect("create repo codex dir");
+    fs::create_dir_all(repo_root.join(".BaiCode")).expect("create repo codex dir");
     fs::create_dir_all(&codex_home).expect("create codex home");
     fs::write(
         repo_root.join(EXTERNAL_AGENT_DIR).join("settings.json"),
@@ -563,7 +557,7 @@ async fn detect_repo_skips_plugins_only_configured_in_project_codex() {
     )
     .expect("write repo settings");
     fs::write(
-        repo_root.join(".codex").join("config.toml"),
+        repo_root.join(".BaiCode").join("config.toml"),
         r#"
 [plugins."formatter@acme-tools"]
 enabled = true
@@ -644,25 +638,25 @@ async fn detect_home_skips_plugins_with_invalid_marketplace_source() {
 async fn detect_repo_skips_plugins_even_with_installed_marketplace() {
     let root = TempDir::new().expect("create tempdir");
     let external_agent_home = root.path().join(EXTERNAL_AGENT_DIR);
-    let codex_home = root.path().join(".codex");
+    let codex_home = root.path().join(".BaiCode");
     let repo_root = root.path().join("repo");
     let marketplace_root = codex_home.join(".tmp").join("marketplaces").join("debug");
     fs::create_dir_all(repo_root.join(".git")).expect("create git dir");
     fs::create_dir_all(repo_root.join(EXTERNAL_AGENT_DIR)).expect("create repo external agent dir");
-    fs::create_dir_all(marketplace_root.join(".agents").join("plugins"))
+    fs::create_dir_all(marketplace_root.join(".BaiCode").join("plugins"))
         .expect("create marketplace manifest dir");
     fs::create_dir_all(
         marketplace_root
             .join("plugins")
             .join("sample")
-            .join(".codex-plugin"),
+            .join(".baicode-plugin"),
     )
     .expect("create sample plugin");
     fs::create_dir_all(
         marketplace_root
             .join("plugins")
             .join("available")
-            .join(".codex-plugin"),
+            .join(".baicode-plugin"),
     )
     .expect("create available plugin");
     fs::write(
@@ -692,7 +686,7 @@ source = "owner/debug-marketplace"
     .expect("write codex config");
     fs::write(
         marketplace_root
-            .join(".agents")
+            .join(".BaiCode")
             .join("plugins")
             .join("marketplace.json"),
         r#"{
@@ -723,7 +717,7 @@ source = "owner/debug-marketplace"
         marketplace_root
             .join("plugins")
             .join("sample")
-            .join(".codex-plugin")
+            .join(".baicode-plugin")
             .join("plugin.json"),
         r#"{"name":"sample"}"#,
     )
@@ -732,7 +726,7 @@ source = "owner/debug-marketplace"
         marketplace_root
             .join("plugins")
             .join("available")
-            .join(".codex-plugin")
+            .join(".baicode-plugin")
             .join("plugin.json"),
         r#"{"name":"available"}"#,
     )

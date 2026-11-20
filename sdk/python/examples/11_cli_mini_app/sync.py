@@ -9,10 +9,10 @@ from _bootstrap import ensure_local_sdk_src, runtime_config
 
 ensure_local_sdk_src()
 
-from openai_codex import (
+from baicode_sdk import (
     Codex,
 )
-from openai_codex.types import (
+from baicode_sdk.types import (
     ThreadTokenUsageUpdatedNotification,
     TurnCompletedNotification,
 )

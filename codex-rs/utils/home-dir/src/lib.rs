@@ -20,7 +20,7 @@ pub fn find_codex_home() -> std::io::Result<AbsolutePathBuf> {
 fn find_codex_home_from_env(codex_home_env: Option<&str>) -> std::io::Result<AbsolutePathBuf> {
     // Honor the `BAICODE_HOME` environment variable when it is set to allow users
     // (and tests) to override the default location.
-    match codex_home_env {
+    let resolved = match codex_home_env {
         Some(val) => {
             let path = PathBuf::from(val);
             let metadata = std::fs::metadata(&path).map_err(|err| match err.kind() {
@@ -59,7 +59,23 @@ fn find_codex_home_from_env(codex_home_env: Option<&str>) -> std::io::Result<Abs
             p.push(".BaiCode");
             AbsolutePathBuf::from_absolute_path(p)
         }
+    }?;
+
+    if let Some(home) = home_dir() {
+        let codex_dir = home.join(".codex");
+        let reserved = codex_dir.canonicalize().unwrap_or(codex_dir);
+        let actual = resolved
+            .as_path()
+            .canonicalize()
+            .unwrap_or_else(|_| resolved.to_path_buf());
+        if actual.starts_with(reserved) {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                "BaiCode's home must be outside the Codex configuration directory",
+            ));
+        }
     }
+    Ok(resolved)
 }
 
 #[cfg(test)]

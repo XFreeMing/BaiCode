@@ -52,7 +52,7 @@ host_pattern = '^github[.]com$'
             Some(auth),
         ));
         let manifest = if name == OPENAI_CURATED_MARKETPLACE_NAME {
-            root.join(".agents/plugins/marketplace.json")
+            root.join(".BaiCode/plugins/marketplace.json")
         } else {
             curated_plugins_api_marketplace_path(home.path())
         };

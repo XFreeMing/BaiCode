@@ -80,9 +80,9 @@ struct PackageSummary {
 async fn selected_plugin_servers_use_managed_requirements_for_the_selected_root_id() -> TestResult {
     let codex_home = tempfile::tempdir()?;
     let plugin_root = tempfile::tempdir()?;
-    std::fs::create_dir_all(plugin_root.path().join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.path().join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.path().join(".codex-plugin/plugin.json"),
+        plugin_root.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"different-manifest-name","interface":{"displayName":"Selected Demo"}}"#,
     )?;
     std::fs::write(
@@ -154,10 +154,10 @@ command = "expected-command"
 async fn selected_plugin_package_is_contributed_without_servers_or_connectors() -> TestResult {
     let codex_home = tempfile::tempdir()?;
     let plugin_root = tempfile::tempdir()?;
-    std::fs::create_dir_all(plugin_root.path().join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.path().join(".baicode-plugin"))?;
     std::fs::create_dir_all(plugin_root.path().join("skills/deploy"))?;
     std::fs::write(
-        plugin_root.path().join(".codex-plugin/plugin.json"),
+        plugin_root.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"skill-only","interface":{"displayName":"Skill Only"}}"#,
     )?;
     std::fs::write(
@@ -213,13 +213,13 @@ async fn denied_malformed_plugin_retains_identity_without_capabilities() -> Test
         let skills_root = plugin_root.path().join("skills");
         fs::create_dir_all(&skills_root)?;
         if let Some(manifest) = manifest {
-            fs::create_dir_all(plugin_root.path().join(".codex-plugin"))?;
-            fs::write(plugin_root.path().join(".codex-plugin/plugin.json"), manifest)?;
+            fs::create_dir_all(plugin_root.path().join(".baicode-plugin"))?;
+            fs::write(plugin_root.path().join(".baicode-plugin/plugin.json"), manifest)?;
         } else {
             // A nested package does not own its containing skill root.
-            fs::create_dir_all(plugin_root.path().join("nested/.codex-plugin"))?;
+            fs::create_dir_all(plugin_root.path().join("nested/.baicode-plugin"))?;
             fs::write(
-                plugin_root.path().join("nested/.codex-plugin/plugin.json"),
+                plugin_root.path().join("nested/.baicode-plugin/plugin.json"),
                 r#"{"name":"nested"}"#,
             )?;
         }
@@ -265,8 +265,8 @@ async fn selected_root_ownership_retries_errors_and_caches_success() -> TestResu
     let standalone_root = tempfile::tempdir()?;
     let skills_root = plugin_root.path().join("skills");
     fs::create_dir_all(&skills_root)?;
-    fs::create_dir_all(plugin_root.path().join(".codex-plugin"))?;
-    let manifest = plugin_root.path().join(".codex-plugin/plugin.json");
+    fs::create_dir_all(plugin_root.path().join(".baicode-plugin"))?;
+    let manifest = plugin_root.path().join(".baicode-plugin/plugin.json");
     fs::write(&manifest, r#"{"name":"example"}"#)?;
     fs::write(plugin_root.path().join(".mcp.json"), "{")?;
     let selected_roots = [
@@ -327,9 +327,9 @@ async fn selected_root_ownership_retries_errors_and_caches_success() -> TestResu
         if phase == 4 {
             // Stable ownership must survive refresh without probing these files again.
             fs::remove_file(&manifest)?;
-            fs::create_dir_all(standalone_root.path().join(".codex-plugin"))?;
+            fs::create_dir_all(standalone_root.path().join(".baicode-plugin"))?;
             fs::write(
-                standalone_root.path().join(".codex-plugin/plugin.json"),
+                standalone_root.path().join(".baicode-plugin/plugin.json"),
                 "{",
             )?;
         } else if phase == 5 {
@@ -338,7 +338,7 @@ async fn selected_root_ownership_retries_errors_and_caches_success() -> TestResu
                 plugin_root.path().join(".mcp.json"),
                 r#"{"mcpServers":{"probe":{"command":"probe-command"}}}"#,
             )?;
-            fs::remove_file(standalone_root.path().join(".codex-plugin/plugin.json"))?;
+            fs::remove_file(standalone_root.path().join(".baicode-plugin/plugin.json"))?;
         }
         let policy = enabled_root.map_or_else(
             || default_off.to_string(),
@@ -418,9 +418,9 @@ async fn selected_root_ownership_retries_errors_and_caches_success() -> TestResu
 async fn managed_plugins_requirement_disables_selected_plugin_capabilities() -> TestResult {
     let codex_home = tempfile::tempdir()?;
     let plugin_root = tempfile::tempdir()?;
-    std::fs::create_dir_all(plugin_root.path().join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.path().join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.path().join(".codex-plugin/plugin.json"),
+        plugin_root.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"selected-root","interface":{"displayName":"Selected Root"}}"#,
     )?;
     std::fs::write(
@@ -476,9 +476,9 @@ plugins = false
 async fn high_level_discovery_matches_the_existing_plugin_provider() -> TestResult {
     let codex_home = tempfile::tempdir()?;
     let plugin_root = tempfile::tempdir()?;
-    std::fs::create_dir_all(plugin_root.path().join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.path().join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.path().join(".codex-plugin/plugin.json"),
+        plugin_root.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"demo","interface":{"displayName":"Demo"},"mcpServers":"./servers.json"}"#,
     )?;
     std::fs::write(
@@ -812,8 +812,8 @@ async fn run_cloud_plugin_projection_scenarios() -> anyhow::Result<()> {
                 .context("selected environment missing")?;
             let root = selection.cwd.join("notes")?;
             let root_path = root.to_abs_path()?;
-            fs::create_dir_all(root_path.join(".codex-plugin"))?;
-            fs::write(root_path.join(".codex-plugin/plugin.json"), json!({
+            fs::create_dir_all(root_path.join(".baicode-plugin"))?;
+            fs::write(root_path.join(".baicode-plugin/plugin.json"), json!({
                 "name": "notes", "version": "1", "interface": {"displayName": "Installed Notes"},
                 "mcpServers": "./.mcp.json"
             }).to_string())?;

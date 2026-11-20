@@ -380,7 +380,7 @@ fn skips_user_instructions_and_env() {
                 id: None,
                 role: "user".to_string(),
                 content: vec![ContentItem::InputText {
-                    text: "# AGENTS.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>".to_string(),
+                    text: "# BAICODE.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>".to_string(),
                 }],
             phase: None,
                 internal_chat_message_metadata_passthrough: None,},
@@ -400,7 +400,7 @@ fn skips_user_instructions_and_env() {
                 id: None,
                 role: "user".to_string(),
                 content: vec![ContentItem::InputText {
-                    text: "# AGENTS.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>".to_string(),
+                    text: "# BAICODE.md instructions for test_directory\n\n<INSTRUCTIONS>\ntest_text\n</INSTRUCTIONS>".to_string(),
                 }],
             phase: None,
                 internal_chat_message_metadata_passthrough: None,},
@@ -436,7 +436,7 @@ fn skips_user_instructions_and_env() {
                     },
                     ContentItem::InputText {
                         text:
-                            "# AGENTS.md instructions for dir\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
+                            "# BAICODE.md instructions for dir\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>"
                                 .to_string(),
                     },
                 ],

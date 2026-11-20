@@ -1519,11 +1519,11 @@ async fn serve_instruction_file_requests(
         };
         let is_agents_md = request["params"]["path"]
             .as_str()
-            .is_some_and(|path| path.ends_with("/AGENTS.md"));
+            .is_some_and(|path| path.ends_with("/BAICODE.md"));
         let is_skill_root = skill.is_some()
             && request["params"]["path"]
                 .as_str()
-                .is_some_and(|path| path.ends_with("/.agents/skills"));
+                .is_some_and(|path| path.ends_with("/.BaiCode/skills"));
         let response = match request["method"].as_str() {
             Some("environment/info") => json!({
                 "id": request["id"],
@@ -3544,7 +3544,7 @@ async fn deferred_executor_loads_agents_md_when_environment_becomes_ready() -> R
         }]))
         .await?;
     wait_for_response_request_count(&response_mock, /*expected_count*/ 1).await;
-    let agents_path = PathUri::from_abs_path(&test.config.cwd).join("AGENTS.md")?;
+    let agents_path = PathUri::from_abs_path(&test.config.cwd).join("BAICODE.md")?;
     attach_tx.send(()).expect("attach environment");
     wait_for_event(&test.codex, |event| {
         matches!(event, EventMsg::TurnComplete(_))

@@ -1,6 +1,6 @@
 # Codex self-knowledge
 
-Use this manual-first route only for genuinely broad Codex setup, orientation, customization, troubleshooting, local-state guidance, or system-map synthesis across skills, plugins, MCP, hooks, `AGENTS.md`, automations, and product surfaces. Mixed Chat/Work/Codex comparisons belong to `official-docs.md` instead.
+Use this manual-first route only for genuinely broad Codex setup, orientation, customization, troubleshooting, local-state guidance, or system-map synthesis across skills, plugins, MCP, hooks, `BAICODE.md`, automations, and product surfaces. Mixed Chat/Work/Codex comparisons belong to `official-docs.md` instead.
 
 Narrow Codex documentation questions require official documentation search first, then an actual page open or fetch using an available documentation or official-domain web capability. This includes a single feature such as Codex Goals, a specific setting, documented behavior, exact error, or requested page citation. Search and fetch the exact official topic before inspecting local files or bundled references. Do not fetch the manual, read bundled references, inspect local configuration or caches, or turn a targeted documentation lookup into broad product synthesis. Current or latest model questions follow the model-selection route.
 
@@ -49,8 +49,8 @@ If official documentation conflicts with a callable capability verified in the c
 ## Choose the smallest matching Codex surface
 
 - Prompt or thread context: one-off task constraints.
-- Repository `AGENTS.md`: durable team conventions, commands, and verification expectations; nested files apply more specifically within their subtree.
-- Project `.codex/config.toml`: settings for a trusted repository, including sandbox, MCP, hooks, model, and reasoning defaults.
+- Repository `BAICODE.md`: durable team conventions, commands, and verification expectations; nested files apply more specifically within their subtree.
+- Project `.BaiCode/config.toml`: settings for a trusted repository, including sandbox, MCP, hooks, model, and reasoning defaults.
 - Global config or global guidance: personal defaults across repositories.
 - Skill: a reusable workflow, optionally with focused references or scripts.
 - Plugin: an installable bundle of skills, tools, commands, MCP configuration, hooks, apps, assets, or related metadata.

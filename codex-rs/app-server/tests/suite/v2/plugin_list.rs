@@ -111,10 +111,10 @@ async fn plugin_list_skips_invalid_marketplace_file_and_reports_error() -> Resul
     let codex_home = TempDir::new()?;
     let repo_root = TempDir::new()?;
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
     write_plugins_enabled_config(codex_home.path())?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
     std::fs::write(marketplace_path.as_path(), "{not json")?;
 
     let home = codex_home.path().to_string_lossy().into_owned();
@@ -165,14 +165,14 @@ async fn plugin_rpcs_reject_repository_spoofing_openai_curated() -> Result<()> {
     let codex_home = TempDir::new()?;
     let repository = TempDir::new()?;
     std::fs::create_dir_all(repository.path().join(".git"))?;
-    std::fs::create_dir_all(repository.path().join(".agents/plugins"))?;
-    std::fs::create_dir_all(repository.path().join("attacker/.codex-plugin"))?;
+    std::fs::create_dir_all(repository.path().join(".BaiCode/plugins"))?;
+    std::fs::create_dir_all(repository.path().join("attacker/.baicode-plugin"))?;
     std::fs::write(
-        repository.path().join("attacker/.codex-plugin/plugin.json"),
+        repository.path().join("attacker/.baicode-plugin/plugin.json"),
         r#"{"name":"attacker"}"#,
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repository.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repository.path().join(".BaiCode/plugins/marketplace.json"))?;
     std::fs::write(
         marketplace_path.as_path(),
         r#"{"name":"openai-curated","plugins":[{"name":"attacker","source":{"source":"local","path":"./attacker"}}]}"#,
@@ -583,25 +583,25 @@ async fn plugin_list_keeps_valid_marketplaces_when_another_marketplace_fails_to_
     let valid_repo_root = TempDir::new()?;
     let invalid_repo_root = TempDir::new()?;
     std::fs::create_dir_all(valid_repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(valid_repo_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(valid_repo_root.path().join(".BaiCode/plugins"))?;
     std::fs::create_dir_all(
         valid_repo_root
             .path()
-            .join("plugins/valid-plugin/.codex-plugin"),
+            .join("plugins/valid-plugin/.baicode-plugin"),
     )?;
     std::fs::create_dir_all(invalid_repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(invalid_repo_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(invalid_repo_root.path().join(".BaiCode/plugins"))?;
     write_plugins_enabled_config(codex_home.path())?;
 
     let valid_marketplace_path = AbsolutePathBuf::try_from(
         valid_repo_root
             .path()
-            .join(".agents/plugins/marketplace.json"),
+            .join(".BaiCode/plugins/marketplace.json"),
     )?;
     let invalid_marketplace_path = AbsolutePathBuf::try_from(
         invalid_repo_root
             .path()
-            .join(".agents/plugins/marketplace.json"),
+            .join(".BaiCode/plugins/marketplace.json"),
     )?;
     let valid_plugin_path =
         AbsolutePathBuf::try_from(valid_repo_root.path().join("plugins/valid-plugin"))?;
@@ -624,7 +624,7 @@ async fn plugin_list_keeps_valid_marketplaces_when_another_marketplace_fails_to_
     std::fs::write(
         valid_repo_root
             .path()
-            .join("plugins/valid-plugin/.codex-plugin/plugin.json"),
+            .join("plugins/valid-plugin/.baicode-plugin/plugin.json"),
         r#"{"name":"valid-plugin","keywords":["api-key","developer tools"]}"#,
     )?;
     std::fs::write(invalid_marketplace_path.as_path(), "{not json")?;
@@ -859,17 +859,17 @@ async fn plugin_list_uses_alternate_discoverable_manifest_and_keeps_undiscoverab
 async fn plugin_list_omitted_cwds_excludes_server_project_config() -> Result<()> {
     let codex_home = TempDir::new()?;
     let project_marketplace = TempDir::new()?;
-    std::fs::create_dir_all(codex_home.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(codex_home.path().join(".BaiCode/plugins"))?;
     std::fs::create_dir_all(codex_home.path().join(".git"))?;
-    std::fs::create_dir_all(codex_home.path().join(".codex"))?;
-    std::fs::create_dir_all(project_marketplace.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(codex_home.path().join(".BaiCode"))?;
+    std::fs::create_dir_all(project_marketplace.path().join(".BaiCode/plugins"))?;
     write_installed_plugin(&codex_home, "home-marketplace", "home-plugin")?;
     std::fs::write(
         codex_home.path().join("config.toml"),
         "[features]\nplugins = true\n[plugins.\"home-plugin@home-marketplace\"]\nenabled = true\n",
     )?;
     std::fs::write(
-        codex_home.path().join(".agents/plugins/marketplace.json"),
+        codex_home.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "home-marketplace",
   "plugins": [
@@ -886,12 +886,12 @@ async fn plugin_list_omitted_cwds_excludes_server_project_config() -> Result<()>
     std::fs::write(
         project_marketplace
             .path()
-            .join(".agents/plugins/marketplace.json"),
+            .join(".BaiCode/plugins/marketplace.json"),
         r#"{"name":"project-marketplace","plugins":[{"name":"project-plugin","source":{"source":"local","path":"./project-plugin"}}]}"#,
     )?;
     let source = serde_json::to_string(&project_marketplace.path().to_string_lossy())?;
     std::fs::write(
-        codex_home.path().join(".codex/config.toml"),
+        codex_home.path().join(".BaiCode/config.toml"),
         format!(
             "[marketplaces.project-marketplace]\nsource_type = \"local\"\nsource = {source}\n\n[plugins.\"home-plugin@home-marketplace\"]\nenabled = false\n"
         ),
@@ -949,11 +949,11 @@ async fn plugin_list_returns_share_context_for_shared_local_plugin() -> Result<(
     let repo_root = TempDir::new()?;
     let plugin_root = repo_root.path().join("plugins/demo-plugin");
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     write_plugins_enabled_config(codex_home.path())?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -968,7 +968,7 @@ async fn plugin_list_returns_share_context_for_shared_local_plugin() -> Result<(
 }"#,
     )?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"demo-plugin","version":"1.2.3"}"#,
     )?;
     write_plugin_share_local_path_mapping(
@@ -1020,10 +1020,10 @@ async fn plugin_list_force_refetch_waits_for_same_path_local_plugin_upgrade() ->
     let codex_home = TempDir::new()?;
     let marketplace_root = TempDir::new()?;
     std::fs::create_dir_all(marketplace_root.path().join(".git"))?;
-    std::fs::create_dir_all(marketplace_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(marketplace_root.path().join(".BaiCode/plugins"))?;
     let source_manifest = marketplace_root
         .path()
-        .join("sample-plugin/.codex-plugin/plugin.json");
+        .join("sample-plugin/.baicode-plugin/plugin.json");
     std::fs::create_dir_all(source_manifest.parent().expect("source manifest parent"))?;
     std::fs::write(
         &source_manifest,
@@ -1032,7 +1032,7 @@ async fn plugin_list_force_refetch_waits_for_same_path_local_plugin_upgrade() ->
     std::fs::write(
         marketplace_root
             .path()
-            .join(".agents/plugins/marketplace.json"),
+            .join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "sample-marketplace",
   "plugins": [
@@ -1119,7 +1119,7 @@ enabled = true
     let plugin_cache = codex_home
         .path()
         .join("plugins/cache/sample-marketplace/sample-plugin");
-    let installed_manifest = plugin_cache.join("1.1.0/.codex-plugin/plugin.json");
+    let installed_manifest = plugin_cache.join("1.1.0/.baicode-plugin/plugin.json");
     assert!(
         installed_manifest.is_file(),
         "force-refetched plugin/list must finish installing the newer local plugin before responding"
@@ -1173,15 +1173,15 @@ async fn plugin_list_refreshes_plugins_from_each_cwd(
     };
     let versions = ["1.1.0", "2.0.0"];
     for ((repo, name), version) in repos.iter().zip(names).zip(versions) {
-        for directory in [".git", ".codex", ".agents/plugins", "sample/.codex-plugin"] {
+        for directory in [".git", ".BaiCode", ".BaiCode/plugins", "sample/.baicode-plugin"] {
             std::fs::create_dir_all(repo.join(directory))?;
         }
         std::fs::write(
-            repo.join("sample/.codex-plugin/plugin.json"),
+            repo.join("sample/.baicode-plugin/plugin.json"),
             serde_json::to_vec(&serde_json::json!({"name": "sample", "version": version}))?,
         )?;
         std::fs::write(
-            repo.join(".agents/plugins/marketplace.json"),
+            repo.join(".BaiCode/plugins/marketplace.json"),
             serde_json::to_vec(&serde_json::json!({"name": name, "plugins": [{
                 "name": "sample", "source": {"source": "local", "path": "./sample"}
             }]}))?,
@@ -1194,7 +1194,7 @@ async fn plugin_list_refreshes_plugins_from_each_cwd(
             format!("[plugins.\"sample@{name}\"]\nenabled = true\n")
         };
         std::fs::write(
-            repo.join(".codex/config.toml"),
+            repo.join(".BaiCode/config.toml"),
             format!("[features]\nplugins = true\n{plugin_config}"),
         )?;
         set_project_trust_level(codex_home.path(), repo, TrustLevel::Trusted)?;
@@ -1228,7 +1228,7 @@ async fn plugin_list_refreshes_plugins_from_each_cwd(
         .collect::<Vec<_>>();
     for (name, version) in &expected_sources {
         let manifest = codex_home.path().join(format!(
-            "plugins/cache/{name}/sample/{version}/.codex-plugin/plugin.json"
+            "plugins/cache/{name}/sample/{version}/.baicode-plugin/plugin.json"
         ));
         if !force_refetch {
             wait_for_path_exists(&manifest).await?;
@@ -1268,18 +1268,18 @@ async fn plugin_catalogs_skip_invalid_project_config_and_report_cwd_error() -> R
     let invalid_repo = workspace.path().join("invalid");
     let valid_repo = workspace.path().join("valid");
     for repo in [&invalid_repo, &valid_repo] {
-        for directory in [".git", ".codex", ".agents/plugins"] {
+        for directory in [".git", ".BaiCode", ".BaiCode/plugins"] {
             std::fs::create_dir_all(repo.join(directory))?;
         }
         set_project_trust_level(codex_home.path(), repo, TrustLevel::Trusted)?;
     }
-    std::fs::write(invalid_repo.join(".codex/config.toml"), "invalid = [\n")?;
+    std::fs::write(invalid_repo.join(".BaiCode/config.toml"), "invalid = [\n")?;
     std::fs::write(
-        valid_repo.join(".codex/config.toml"),
+        valid_repo.join(".BaiCode/config.toml"),
         "[plugins.\"sample@valid-marketplace\"]\nenabled = true\n",
     )?;
     std::fs::write(
-        valid_repo.join(".agents/plugins/marketplace.json"),
+        valid_repo.join(".BaiCode/plugins/marketplace.json"),
         r#"{"name":"valid-marketplace","plugins":[{"name":"sample","source":{"source":"local","path":"./sample"}}]}"#,
     )?;
     write_installed_plugin(&codex_home, "valid-marketplace", "sample")?;
@@ -1365,11 +1365,11 @@ async fn plugin_list_includes_install_and_enabled_state_from_config(
     let codex_home = TempDir::new()?;
     let repo_root = TempDir::new()?;
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
     write_installed_plugin(&codex_home, "codex-curated", "enabled-plugin")?;
     write_installed_plugin(&codex_home, "codex-curated", "disabled-plugin")?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "interface": {
@@ -1440,7 +1440,7 @@ enabled = false
             marketplace.path.as_ref()
                 == Some(
                     &AbsolutePathBuf::try_from(
-                        repo_root.path().join(".agents/plugins/marketplace.json"),
+                        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
                     )
                     .expect("absolute marketplace path"),
                 )
@@ -1530,7 +1530,7 @@ enabled = false
 #[tokio::test]
 async fn plugin_list_deduplicates_sources_and_merges_enabled_state() -> Result<()> {
     let codex_home = TempDir::new()?;
-    std::fs::create_dir_all(codex_home.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(codex_home.path().join(".BaiCode/plugins"))?;
     write_installed_plugin(&codex_home, "codex-curated", "shared-plugin")?;
     std::fs::write(
         codex_home.path().join("config.toml"),
@@ -1544,11 +1544,11 @@ enabled = true
 
     let workspace_enabled = TempDir::new()?;
     std::fs::create_dir_all(workspace_enabled.path().join(".git"))?;
-    std::fs::create_dir_all(workspace_enabled.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(workspace_enabled.path().join(".BaiCode/plugins"))?;
     std::fs::write(
         workspace_enabled
             .path()
-            .join(".agents/plugins/marketplace.json"),
+            .join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -1562,9 +1562,9 @@ enabled = true
   ]
 }"#,
     )?;
-    std::fs::create_dir_all(workspace_enabled.path().join(".codex"))?;
+    std::fs::create_dir_all(workspace_enabled.path().join(".BaiCode"))?;
     std::fs::write(
-        workspace_enabled.path().join(".codex/config.toml"),
+        workspace_enabled.path().join(".BaiCode/config.toml"),
         r#"[plugins."shared-plugin@codex-curated"]
 enabled = false
 "#,
@@ -1577,14 +1577,14 @@ enabled = false
 
     let workspace_default = TempDir::new()?;
     std::fs::create_dir_all(workspace_default.path().join(".git"))?;
-    std::fs::create_dir_all(workspace_default.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(workspace_default.path().join(".BaiCode/plugins"))?;
     std::fs::copy(
         workspace_enabled
             .path()
-            .join(".agents/plugins/marketplace.json"),
+            .join(".BaiCode/plugins/marketplace.json"),
         workspace_default
             .path()
-            .join(".agents/plugins/marketplace.json"),
+            .join(".BaiCode/plugins/marketplace.json"),
     )?;
     let home = codex_home.path().to_string_lossy().into_owned();
     let mut mcp = TestAppServer::builder()
@@ -1641,11 +1641,11 @@ async fn plugin_list_returns_plugin_interface_with_absolute_asset_paths() -> Res
     let repo_root = TempDir::new()?;
     let plugin_root = repo_root.path().join("plugins/demo-plugin");
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     write_plugins_enabled_config(codex_home.path())?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -1665,7 +1665,7 @@ async fn plugin_list_returns_plugin_interface_with_absolute_asset_paths() -> Res
 }"#,
     )?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r##"{
   "name": "demo-plugin",
   "interface": {
@@ -1774,11 +1774,11 @@ async fn plugin_list_accepts_legacy_string_default_prompt() -> Result<()> {
     let repo_root = TempDir::new()?;
     let plugin_root = repo_root.path().join("plugins/demo-plugin");
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     write_plugins_enabled_config(codex_home.path())?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -1793,7 +1793,7 @@ async fn plugin_list_accepts_legacy_string_default_prompt() -> Result<()> {
 }"#,
     )?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r##"{
   "name": "demo-plugin",
   "interface": {
@@ -1847,9 +1847,9 @@ async fn plugin_list_returns_installed_git_source_interface_from_cache(
         .expect("temporary repository path should produce a file URL")
         .to_string();
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         format!(
             r#"{{
   "name": "debug",
@@ -1868,9 +1868,9 @@ async fn plugin_list_returns_installed_git_source_interface_from_cache(
         ),
     )?;
     let cached_plugin_root = codex_home.path().join("plugins/cache/debug/toolkit/local");
-    std::fs::create_dir_all(cached_plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(cached_plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        cached_plugin_root.join(".codex-plugin/plugin.json"),
+        cached_plugin_root.join(".baicode-plugin/plugin.json"),
         r##"{
   "name": "toolkit",
   "interface": {
@@ -1898,14 +1898,14 @@ enabled = true
     let later_repo = TempDir::new()?;
     let mut cwds = vec![AbsolutePathBuf::try_from(repo_root.path())?];
     if configured_in_later_cwd {
-        for directory in [".git", ".codex", ".agents/plugins"] {
+        for directory in [".git", ".BaiCode", ".BaiCode/plugins"] {
             std::fs::create_dir_all(later_repo.path().join(directory))?;
         }
         std::fs::copy(
-            repo_root.path().join(".agents/plugins/marketplace.json"),
-            later_repo.path().join(".agents/plugins/marketplace.json"),
+            repo_root.path().join(".BaiCode/plugins/marketplace.json"),
+            later_repo.path().join(".BaiCode/plugins/marketplace.json"),
         )?;
-        std::fs::write(later_repo.path().join(".codex/config.toml"), plugin_config)?;
+        std::fs::write(later_repo.path().join(".BaiCode/config.toml"), plugin_config)?;
         set_project_trust_level(codex_home.path(), later_repo.path(), TrustLevel::Trusted)?;
         cwds.push(AbsolutePathBuf::try_from(later_repo.path())?);
     }
@@ -2035,9 +2035,9 @@ async fn app_server_startup_downloads_installed_plugin_bundles_without_discovery
         .build_initialized_with_timeout(DEFAULT_TIMEOUT)
         .await?;
 
-    wait_for_path_exists(&installed_path.join(".codex-plugin/plugin.json")).await?;
+    wait_for_path_exists(&installed_path.join(".baicode-plugin/plugin.json")).await?;
     let installed_plugin_manifest: serde_json::Value = serde_json::from_str(
-        &std::fs::read_to_string(installed_path.join(".codex-plugin/plugin.json"))?,
+        &std::fs::read_to_string(installed_path.join(".baicode-plugin/plugin.json"))?,
     )?;
     assert_eq!(
         installed_plugin_manifest["version"],
@@ -2138,9 +2138,9 @@ async fn plugin_list_sync_upgrades_and_removes_remote_installed_plugin_bundles()
         vec![("linear@openai-curated-remote".to_string(), true, true)]
     );
 
-    wait_for_path_exists(&new_path.join(".codex-plugin/plugin.json")).await?;
+    wait_for_path_exists(&new_path.join(".baicode-plugin/plugin.json")).await?;
     let installed_plugin_manifest: serde_json::Value = serde_json::from_str(
-        &std::fs::read_to_string(new_path.join(".codex-plugin/plugin.json"))?,
+        &std::fs::read_to_string(new_path.join(".baicode-plugin/plugin.json"))?,
     )?;
     assert_eq!(
         installed_plugin_manifest["version"],
@@ -2204,7 +2204,7 @@ async fn plugin_list_includes_remote_marketplaces_when_remote_plugin_enabled(
 
     let repo = TempDir::new()?;
     let cwds = if project_configuration != ProjectPluginConfiguration::None {
-        for directory in [".git", ".codex", ".agents/plugins"] {
+        for directory in [".git", ".BaiCode", ".BaiCode/plugins"] {
             std::fs::create_dir_all(repo.path().join(directory))?;
         }
         let config = if project_configuration == ProjectPluginConfiguration::Invalid {
@@ -2212,9 +2212,9 @@ async fn plugin_list_includes_remote_marketplaces_when_remote_plugin_enabled(
         } else {
             "[features]\nplugins = false\n[plugins.\"sample@disabled-local\"]\nenabled = true\n"
         };
-        std::fs::write(repo.path().join(".codex/config.toml"), config)?;
+        std::fs::write(repo.path().join(".BaiCode/config.toml"), config)?;
         std::fs::write(
-            repo.path().join(".agents/plugins/marketplace.json"),
+            repo.path().join(".BaiCode/plugins/marketplace.json"),
             r#"{"name":"disabled-local","plugins":[{"name":"sample","source":{"source":"local","path":"./sample"}}]}"#,
         )?;
         set_project_trust_level(codex_home.path(), repo.path(), TrustLevel::Trusted)?;
@@ -3595,7 +3595,7 @@ plugin_sharing = false
     );
     wait_for_path_exists(
         &codex_home.path().join(
-            "plugins/cache/created-by-me-remote/private-linear/1.2.3/.codex-plugin/plugin.json",
+            "plugins/cache/created-by-me-remote/private-linear/1.2.3/.baicode-plugin/plugin.json",
         ),
     )
     .await?;
@@ -3681,7 +3681,7 @@ trusted_hash = "sha256:unrelated"
     wait_for_path_exists(
         &codex_home
             .path()
-            .join("plugins/cache/workspace-directory/no-hooks/1.2.3/.codex-plugin/plugin.json"),
+            .join("plugins/cache/workspace-directory/no-hooks/1.2.3/.baicode-plugin/plugin.json"),
     )
     .await?;
     let config: toml::Value = toml::from_str(&std::fs::read_to_string(
@@ -4617,15 +4617,15 @@ remote_plugin = true
     )?;
 
     let repo = TempDir::new()?;
-    for directory in [".git", ".codex", ".agents/plugins"] {
+    for directory in [".git", ".BaiCode", ".BaiCode/plugins"] {
         std::fs::create_dir_all(repo.path().join(directory))?;
     }
     std::fs::write(
-        repo.path().join(".codex/config.toml"),
+        repo.path().join(".BaiCode/config.toml"),
         "[features]\nplugins = true\n[plugins.\"sample@local\"]\nenabled = true\n",
     )?;
     std::fs::write(
-        repo.path().join(".agents/plugins/marketplace.json"),
+        repo.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{"name":"local","plugins":[{"name":"sample","source":{"source":"local","path":"./sample"}}]}"#,
     )?;
     write_installed_plugin(&codex_home, "local", "sample")?;
@@ -5385,7 +5385,7 @@ fn remote_plugin_bundle_tar_gz_bytes(
     let mut tar = tar::Builder::new(encoder);
     let mut entries = vec![
         (
-            ".codex-plugin/plugin.json",
+            ".baicode-plugin/plugin.json",
             manifest.as_bytes(),
             /*mode*/ 0o644,
         ),
@@ -5432,7 +5432,7 @@ fn write_installed_plugin_with_version(
         .join(marketplace_name)
         .join(plugin_name)
         .join(plugin_version)
-        .join(".codex-plugin");
+        .join(".baicode-plugin");
     std::fs::create_dir_all(&plugin_root)?;
     std::fs::write(
         plugin_root.join("plugin.json"),
@@ -5546,7 +5546,7 @@ fn write_curated_marketplace(
 ) -> std::io::Result<()> {
     let curated_root = codex_home.join(".tmp/plugins");
     std::fs::create_dir_all(curated_root.join(".git"))?;
-    std::fs::create_dir_all(curated_root.join(".agents/plugins"))?;
+    std::fs::create_dir_all(curated_root.join(".BaiCode/plugins"))?;
     let plugins = plugin_names
         .iter()
         .map(|plugin_name| {
@@ -5573,7 +5573,7 @@ fn write_curated_marketplace(
         })
         .unwrap_or_default();
     std::fs::write(
-        curated_root.join(".agents/plugins").join(manifest_name),
+        curated_root.join(".BaiCode/plugins").join(manifest_name),
         format!(
             r#"{{
   "name": "{marketplace_name}",{interface}
@@ -5585,7 +5585,7 @@ fn write_curated_marketplace(
     )?;
 
     for plugin_name in plugin_names {
-        let plugin_root = curated_root.join(format!("plugins/{plugin_name}/.codex-plugin"));
+        let plugin_root = curated_root.join(format!("plugins/{plugin_name}/.baicode-plugin"));
         std::fs::create_dir_all(&plugin_root)?;
         std::fs::write(
             plugin_root.join("plugin.json"),

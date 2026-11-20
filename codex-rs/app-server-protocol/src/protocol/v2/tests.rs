@@ -2243,9 +2243,9 @@ fn config_requirements_granular_allowed_approval_policy_is_marked_experimental()
 fn config_requirements_read_accepts_foreign_path_uris() {
     let response: ConfigRequirementsReadResponse = serde_json::from_value(json!({
         "requirements": {
-            "sqliteHome": "file:///C:/Users/alice/.codex/state",
-            "logDir": "file:///C:/Users/alice/.codex/logs",
-            "modelCatalogJson": "file:///C:/Users/alice/.codex/models.json"
+            "sqliteHome": "file:///C:/Users/alice/.BaiCode/state",
+            "logDir": "file:///C:/Users/alice/.BaiCode/logs",
+            "modelCatalogJson": "file:///C:/Users/alice/.BaiCode/models.json"
         }
     }))
     .expect("requirements response with foreign paths should deserialize");
@@ -2255,15 +2255,15 @@ fn config_requirements_read_accepts_foreign_path_uris() {
 
     assert_eq!(
         requirements.sqlite_home,
-        Some(PathUri::parse("file:///C:/Users/alice/.codex/state").expect("valid URI"))
+        Some(PathUri::parse("file:///C:/Users/alice/.BaiCode/state").expect("valid URI"))
     );
     assert_eq!(
         requirements.log_dir,
-        Some(PathUri::parse("file:///C:/Users/alice/.codex/logs").expect("valid URI"))
+        Some(PathUri::parse("file:///C:/Users/alice/.BaiCode/logs").expect("valid URI"))
     );
     assert_eq!(
         requirements.model_catalog_json,
-        Some(PathUri::parse("file:///C:/Users/alice/.codex/models.json").expect("valid URI"))
+        Some(PathUri::parse("file:///C:/Users/alice/.BaiCode/models.json").expect("valid URI"))
     );
 }
 
@@ -3307,7 +3307,7 @@ fn core_turn_item_into_thread_item_converts_supported_variants() {
             },
             CoreUserInput::Skill {
                 name: "skill-creator".to_string(),
-                path: PathBuf::from("/repo/.codex/skills/skill-creator/SKILL.md"),
+                path: PathBuf::from("/repo/.BaiCode/skills/skill-creator/SKILL.md"),
             },
             CoreUserInput::Mention {
                 name: "Demo App".to_string(),
@@ -3351,7 +3351,7 @@ fn core_turn_item_into_thread_item_converts_supported_variants() {
                 },
                 UserInput::Skill {
                     name: "skill-creator".to_string(),
-                    path: PathBuf::from("/repo/.codex/skills/skill-creator/SKILL.md"),
+                    path: PathBuf::from("/repo/.BaiCode/skills/skill-creator/SKILL.md"),
                 },
                 UserInput::Mention {
                     name: "Demo App".to_string(),
@@ -4697,7 +4697,7 @@ fn plugin_share_params_and_response_serialization_use_camel_case_fields() {
     let marketplace_path = if cfg!(windows) {
         r"C:\Users\me\.agents\plugins\marketplace.json"
     } else {
-        "/Users/me/.agents/plugins/marketplace.json"
+        "/Users/me/.BaiCode/plugins/marketplace.json"
     };
     let marketplace_path = AbsolutePathBuf::try_from(PathBuf::from(marketplace_path)).unwrap();
     let marketplace_path_json = marketplace_path.as_path().display().to_string();
@@ -5275,7 +5275,7 @@ fn thread_lifecycle_responses_default_missing_optional_fields() {
     );
 
     let foreign_source: LegacyAppPathString =
-        serde_json::from_value(json!(r"C:\workspace\AGENTS.md")).expect("foreign source");
+        serde_json::from_value(json!(r"C:\workspace\BAICODE.md")).expect("foreign source");
     let mut response_with_foreign_source = response;
     response_with_foreign_source["instructionSources"] = json!([foreign_source.as_str()]);
     let start: ThreadStartResponse = serde_json::from_value(response_with_foreign_source.clone())
@@ -5288,7 +5288,7 @@ fn thread_lifecycle_responses_default_missing_optional_fields() {
     assert_eq!(resume.instruction_sources, vec![foreign_source.clone()]);
     assert_eq!(fork.instruction_sources, vec![foreign_source]);
     let foreign_source_uri =
-        PathUri::parse("file:///C:/workspace/AGENTS.md").expect("foreign source URI");
+        PathUri::parse("file:///C:/workspace/BAICODE.md").expect("foreign source URI");
     assert_eq!(
         start.instruction_source_path_uris(),
         vec![foreign_source_uri.clone()]

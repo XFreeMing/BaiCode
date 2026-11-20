@@ -3403,7 +3403,7 @@ mod tests {
                 runtime_workspace_roots: Vec::new(),
                 instruction_sources: vec![
                     codex_utils_path_uri::LegacyAppPathString::from_abs_path(&absolute_path(
-                        "/tmp/AGENTS.md",
+                        "/tmp/BAICODE.md",
                     )),
                 ],
                 approval_policy: v2::AskForApproval::OnRequest,
@@ -3465,7 +3465,7 @@ mod tests {
                     "disabledPluginIds": [],
                     "cwd": absolute_path_string("tmp"),
                     "runtimeWorkspaceRoots": [],
-                    "instructionSources": [absolute_path_string("tmp/AGENTS.md")],
+                    "instructionSources": [absolute_path_string("tmp/BAICODE.md")],
                     "approvalPolicy": "on-request",
                     "approvalsReviewer": "user",
                     "sandbox": {

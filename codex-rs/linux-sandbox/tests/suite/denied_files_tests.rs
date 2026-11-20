@@ -50,7 +50,7 @@ async fn sandbox_starts_with_multiple_denied_files(rules: DeniedFileRules) {
     .expect("tempdir");
     let workspace = AbsolutePathBuf::try_from(temp.path()).expect("absolute workspace");
     std::fs::create_dir(workspace.join("nested")).expect("create nested directory");
-    std::fs::write(workspace.join("AGENTS.md"), "project instructions\n")
+    std::fs::write(workspace.join("BAICODE.md"), "project instructions\n")
         .expect("write allowed instructions");
     let denied_files = [
         (workspace.join("one.key"), "dummy first key"),
@@ -68,9 +68,9 @@ async fn sandbox_starts_with_multiple_denied_files(rules: DeniedFileRules) {
     for path in ["notes.txt", "nested/allowed.cfg"] {
         std::fs::write(workspace.join(path), "public").expect("write allowed file");
     }
-    std::os::unix::fs::symlink("AGENTS.md", workspace.join("relative.key"))
+    std::os::unix::fs::symlink("BAICODE.md", workspace.join("relative.key"))
         .expect("relative file symlink");
-    std::os::unix::fs::symlink(workspace.join("AGENTS.md"), workspace.join("absolute.key"))
+    std::os::unix::fs::symlink(workspace.join("BAICODE.md"), workspace.join("absolute.key"))
         .expect("absolute file symlink");
 
     let sandbox_helper = codex_linux_sandbox_exe();
@@ -187,7 +187,7 @@ printf '%s\000' "$BAICODE_TEST_DENIED_PATH_0" "$BAICODE_TEST_DENIED_PATH_1" "$BA
             "-c",
             r#"set -eu
 cd "$1"
-/bin/cat AGENTS.md
+/bin/cat BAICODE.md
 for blocked in one.key nested/two.key .env.local nested/.env '#report-1.csv' '!report.csv' 'notes.txt ' root-only.cfg; do
     if (: < "$blocked") 2>/dev/null; then
         printf 'read unexpectedly allowed: %s\n' "$blocked" >&2

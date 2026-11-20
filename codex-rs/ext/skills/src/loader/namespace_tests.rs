@@ -32,7 +32,7 @@ fn write_skill(root: &Path, directory: &str) -> PathUri {
 }
 
 fn write_manifest(root: &Path, contents: &str) -> PathUri {
-    let path = root.join(".codex-plugin/plugin.json");
+    let path = root.join(".baicode-plugin/plugin.json");
     fs::create_dir_all(path.parent().expect("manifest parent"))
         .expect("create plugin manifest directory");
     fs::write(path, contents).expect("write plugin manifest");

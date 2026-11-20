@@ -4613,7 +4613,7 @@ mod tests {
     async fn config_overrides_forward_explicit_summary_verbosity_and_web_search() -> Result<()> {
         let home = tempfile::tempdir()?;
         let workspace = home.path().join("workspace");
-        std::fs::create_dir_all(workspace.join(".codex"))?;
+        std::fs::create_dir_all(workspace.join(".BaiCode"))?;
         std::fs::write(
             home.path().join("config.toml"),
             format!(
@@ -4655,7 +4655,7 @@ mod tests {
             ),
         ] {
             std::fs::write(
-                workspace.join(".codex/config.toml"),
+                workspace.join(".BaiCode/config.toml"),
                 if project {
                     "model_reasoning_summary = \"concise\"\nmodel_verbosity = \"low\"\nweb_search = \"disabled\"\n"
                 } else {
@@ -5294,7 +5294,7 @@ mod tests {
                 test_path_buf("/tmp/project/extra").abs().into(),
             ],
             instruction_sources: vec![LegacyAppPathString::from_abs_path(
-                &test_path_buf("/tmp/project/AGENTS.md").abs(),
+                &test_path_buf("/tmp/project/BAICODE.md").abs(),
             )],
             approval_policy: codex_app_server_protocol::AskForApproval::Never,
             approvals_reviewer: codex_app_server_protocol::ApprovalsReviewer::User,

@@ -898,7 +898,7 @@ async fn session_hooks_survive_turn_skill_discovery_failure() -> Result<()> {
             "id": "computer-use@openai-bundled", "displayName": "computer-use",
             "remotePluginId": null, "version": "1", "root": "file:///computer-use",
             "files": {
-                "manifest": {"path": "file:///computer-use/.codex-plugin/plugin.json",
+                "manifest": {"path": "file:///computer-use/.baicode-plugin/plugin.json",
                     "contents": computer_use_hook_manifest().to_string()},
                 "mcpConfig": null, "appsConfig": null,
             }, "skills": [],
@@ -1786,7 +1786,7 @@ async fn executor_plugin_hook_fixture(
     for (plugin_id, manifest) in plugins {
         let plugin_root =
             test.workspace_path_uri(manifest["name"].as_str().context("plugin name")?)?;
-        let plugin_directory = plugin_root.join(".codex-plugin")?;
+        let plugin_directory = plugin_root.join(".baicode-plugin")?;
         let manifest_path = plugin_directory.join("plugin.json")?;
         filesystem
             .create_directory(

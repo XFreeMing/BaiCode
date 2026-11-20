@@ -15,12 +15,12 @@ const require = createRequire(import.meta.url);
 const codexPackageRoot = realpathSync(path.join(__dirname, ".."));
 
 const PLATFORM_PACKAGE_BY_TARGET = {
-  "x86_64-unknown-linux-musl": "@openai/codex-linux-x64",
-  "aarch64-unknown-linux-musl": "@openai/codex-linux-arm64",
-  "x86_64-apple-darwin": "@openai/codex-darwin-x64",
-  "aarch64-apple-darwin": "@openai/codex-darwin-arm64",
-  "x86_64-pc-windows-msvc": "@openai/codex-win32-x64",
-  "aarch64-pc-windows-msvc": "@openai/codex-win32-arm64",
+  "x86_64-unknown-linux-musl": "@baicode/cli-linux-x64",
+  "aarch64-unknown-linux-musl": "@baicode/cli-linux-arm64",
+  "x86_64-apple-darwin": "@baicode/cli-darwin-x64",
+  "aarch64-apple-darwin": "@baicode/cli-darwin-arm64",
+  "x86_64-pc-windows-msvc": "@baicode/cli-win32-x64",
+  "aarch64-pc-windows-msvc": "@baicode/cli-win32-arm64",
 };
 
 const { platform, arch } = process;
@@ -127,17 +127,17 @@ function isVitePlusOwnedCodexInstall(packagesDir) {
     const metadata = JSON.parse(
       readFileSync(path.join(packagesDir, "@openai", "codex.json"), "utf8"),
     );
-    if (metadata.name !== "@openai/codex") {
+    if (metadata.name !== "@baicode/cli") {
       return false;
     }
 
-    // Vite+ records the active global installation in packages/@openai/codex.json.
+    // Vite+ records the active global installation in packages/@baicode/cli.json.
     // Older installs have no ID or append a #-prefixed ID to the package name;
     // newer installs put the ID in a subdirectory of the package prefix.
     const installId = metadata.installId || "";
     const installDir = installId.startsWith("#")
-      ? path.join(packagesDir, `@openai/codex${installId}`)
-      : path.join(packagesDir, "@openai/codex", installId);
+      ? path.join(packagesDir, `@baicode/cli${installId}`)
+      : path.join(packagesDir, "@baicode/cli", installId);
     for (const nodeModulesDir of [
       path.join(installDir, "lib", "node_modules"),
       path.join(installDir, "node_modules"),

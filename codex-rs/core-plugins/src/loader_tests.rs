@@ -70,7 +70,7 @@ async fn concurrent_plugin_loads_preserve_mcp_precedence_and_hook_warnings() {
             .path()
             .join(format!("plugins/cache/test/{name}/local"));
         write_file(
-            &root.join(".codex-plugin/plugin.json"),
+            &root.join(".baicode-plugin/plugin.json"),
             &format!(r#"{{"name":"{name}"}}"#),
         );
         write_file(
@@ -162,7 +162,7 @@ async fn agent_plugin_overlay_apps_are_not_runtime_active() {
         &format!(r#"{{"$schema":"{AGENT_PLUGIN_SCHEMA_URI}","name":"plugin"}}"#),
     );
     write_file(
-        &plugin_root.join(".codex-plugin/plugin.json"),
+        &plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"plugin","apps":"./.app.json"}"#,
     );
     write_file(
@@ -227,7 +227,7 @@ async fn agent_plugin_codex_mcp_overlay_only_forwards_matching_stdio_server_env_
     env_vars.extend(["DB_PASSWORD".into(), "API_TOKEN".into()]);
 
     write_file(
-        &plugin_root.join(".codex-plugin/plugin.json"),
+        &plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"legacy-plugin"}"#,
     );
     write_file(
@@ -292,7 +292,7 @@ async fn agent_plugin_codex_mcp_overlay_supports_inline_legacy_servers_without_p
     env_vars.push("TOKEN".into());
 
     write_file(
-        &plugin_root.join(".codex-plugin/plugin.json"),
+        &plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{
   "name": "legacy-plugin",
   "mcpServers": {
@@ -367,9 +367,9 @@ async fn agent_plugin_mcp_rejects_present_nonregular_config() {
 async fn legacy_manifest_can_point_at_root_mcp_json() {
     let temp_dir = TempDir::new().expect("tempdir");
     let plugin_root = temp_dir.path().join("plugin");
-    fs::create_dir_all(plugin_root.join(".codex-plugin")).expect("create manifest directory");
+    fs::create_dir_all(plugin_root.join(".baicode-plugin")).expect("create manifest directory");
     fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"plugin","mcpServers":"./mcp.json"}"#,
     )
     .expect("write legacy manifest");
@@ -489,7 +489,7 @@ fn configured_plugins_from_stack_merges_enabled_effective_layers() {
             ),
             ConfigLayerEntry::new(
                 ConfigLayerSource::Project {
-                    dot_codex_folder: user_config_path(&temp_dir, "project/.codex"),
+                    dot_codex_folder: user_config_path(&temp_dir, "project/.BaiCode"),
                 },
                 toml::from_str(
                     "[plugins.profile]\nenabled = true\n[plugins.profile.mcp_servers.example]\nenabled = false\n",
@@ -498,7 +498,7 @@ fn configured_plugins_from_stack_merges_enabled_effective_layers() {
             ),
             ConfigLayerEntry::new_disabled(
                 ConfigLayerSource::Project {
-                    dot_codex_folder: user_config_path(&temp_dir, "project/untrusted/.codex"),
+                    dot_codex_folder: user_config_path(&temp_dir, "project/untrusted/.BaiCode"),
                 },
                 toml::from_str("[plugins.untrusted]\nenabled = true\n")
                     .expect("untrusted project config toml"),
@@ -569,7 +569,7 @@ async fn legacy_ema_policy_disables_installed_and_selected_plugin_servers() {
     let temp_dir = TempDir::new().expect("tempdir");
     let plugin_root = temp_dir.path().join("plugin");
     write_file(
-        &plugin_root.join(".codex-plugin/plugin.json"),
+        &plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"plugin","mcpServers":"./mcp.json"}"#,
     );
     write_file(
@@ -623,7 +623,7 @@ async fn hooks_only_scope_shares_plugin_resolution_without_loading_other_capabil
     let temp_dir = TempDir::new().expect("tempdir");
     let plugin_root = temp_dir.path().join("plugins/cache/test/valid/local");
     write_file(
-        &plugin_root.join(".codex-plugin/plugin.json"),
+        &plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"valid"}"#,
     );
     write_file(
@@ -658,7 +658,7 @@ async fn hooks_only_scope_shares_plugin_resolution_without_loading_other_capabil
 
     let disabled_root = temp_dir.path().join("plugins/cache/test/disabled/local");
     write_file(
-        &disabled_root.join(".codex-plugin/plugin.json"),
+        &disabled_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"disabled"}"#,
     );
     write_file(
@@ -668,13 +668,13 @@ async fn hooks_only_scope_shares_plugin_resolution_without_loading_other_capabil
 
     let malformed_root = temp_dir.path().join("plugins/cache/test/malformed/local");
     write_file(
-        &malformed_root.join(".codex-plugin/plugin.json"),
+        &malformed_root.join(".baicode-plugin/plugin.json"),
         "not valid json",
     );
 
     let warning_root = temp_dir.path().join("plugins/cache/test/warning/local");
     write_file(
-        &warning_root.join(".codex-plugin/plugin.json"),
+        &warning_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"warning"}"#,
     );
     write_file(&warning_root.join("hooks/hooks.json"), "not valid json");
@@ -880,13 +880,13 @@ fn plugin_root() -> (tempfile::TempDir, AbsolutePathBuf) {
     let tmp = tempfile::tempdir().expect("tempdir");
     let plugin_root =
         AbsolutePathBuf::try_from(tmp.path().join("demo-plugin")).expect("plugin root");
-    fs::create_dir_all(plugin_root.join(".codex-plugin")).expect("create manifest dir");
+    fs::create_dir_all(plugin_root.join(".baicode-plugin")).expect("create manifest dir");
     fs::create_dir_all(plugin_root.join("hooks")).expect("create hooks dir");
     (tmp, plugin_root)
 }
 
 fn write_manifest(plugin_root: &AbsolutePathBuf, manifest: &str) {
-    fs::write(plugin_root.join(".codex-plugin/plugin.json"), manifest).expect("write manifest");
+    fs::write(plugin_root.join(".baicode-plugin/plugin.json"), manifest).expect("write manifest");
 }
 
 fn write_hook_file(plugin_root: &AbsolutePathBuf, relative_path: &str, event: &str, command: &str) {

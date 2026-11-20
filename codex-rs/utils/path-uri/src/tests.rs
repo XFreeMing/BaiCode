@@ -909,8 +909,8 @@ fn join_keeps_canonicalized_posix_double_slash_paths_hierarchical() {
         Some(PathUri::parse("file:///server/share").expect("valid parent URI"))
     );
     assert_eq!(
-        cwd.join("AGENTS.md"),
-        Ok(PathUri::parse("file:///server/share/project/AGENTS.md").expect("valid child URI"))
+        cwd.join("BAICODE.md"),
+        Ok(PathUri::parse("file:///server/share/project/BAICODE.md").expect("valid child URI"))
     );
     #[cfg(unix)]
     assert_eq!(

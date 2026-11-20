@@ -109,7 +109,7 @@ impl ThreadInstructionsProvider for GatedInstructionsProvider {
 async fn instruction_refresh_serializes_reads_and_releases_on_cancellation() {
     let (mut session, turn) = make_session_and_context().await;
     let turn = Arc::new(turn);
-    let source = turn.config.codex_home.join("AGENTS.md");
+    let source = turn.config.codex_home.join("BAICODE.md");
     let instructions = |text: &str| {
         Some(Instructions {
             text: text.to_string(),
@@ -231,7 +231,7 @@ async fn thread_instruction_refresh_serializes_reads_and_releases_on_cancellatio
     let turn = Arc::new(turn);
     let global = global_text.map(|text| Instructions {
         text: text.to_string(),
-        source: Some(turn.config.codex_home.join("AGENTS.md")),
+        source: Some(turn.config.codex_home.join("BAICODE.md")),
     });
     let instructions = |text: &str| {
         Some(Instructions {

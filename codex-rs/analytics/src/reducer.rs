@@ -4426,7 +4426,7 @@ mod tests {
         assert_eq!(
             safe_plugin_relative_script_path(
                 Some("sample@openai-curated"),
-                Some("/home/user/.codex/plugins/cache/openai-curated/sample/scripts/run.py"),
+                Some("/home/user/.BaiCode/plugins/cache/openai-curated/sample/scripts/run.py"),
             ),
             None
         );

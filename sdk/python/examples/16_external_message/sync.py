@@ -11,7 +11,7 @@ from _bootstrap import ensure_local_sdk_src, runtime_config
 
 ensure_local_sdk_src()
 
-from openai_codex import Codex, ExternalMessage, Sandbox
+from baicode_sdk import Codex, ExternalMessage, Sandbox
 
 with Codex(config=runtime_config()) as codex:
     thread = codex.thread_start(sandbox=Sandbox.read_only)

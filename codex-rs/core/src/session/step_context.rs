@@ -56,7 +56,7 @@ pub(crate) struct StepContext {
     pub(crate) mcp: Arc<McpBinding>,
     /// The finalized tool plan advertised and executed for this exact sampling request.
     pub(crate) tool_router: Arc<ToolRouter>,
-    /// The canonical AGENTS.md value observed with this environment snapshot.
+    /// The canonical BAICODE.md value observed with this environment snapshot.
     pub(crate) loaded_agents_md: Option<Arc<LoadedAgentsMd>>,
 }
 

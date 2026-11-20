@@ -75,6 +75,7 @@ use serde::Serialize;
 use supports_color::Stream;
 
 mod background;
+#[cfg(test)]
 mod desktop;
 mod disk;
 mod filesystem_paths;
@@ -546,12 +547,6 @@ async fn build_report(
                 state_check,
             ]);
         }
-    }
-
-    progress.begin("desktop");
-    if let Some(desktop) = desktop::collect().await {
-        progress.finish("desktop", overall_status(&desktop.checks));
-        checks.extend(desktop.checks);
     }
 
     progress.settle();

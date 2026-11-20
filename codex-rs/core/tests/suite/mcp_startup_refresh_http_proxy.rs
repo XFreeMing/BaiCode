@@ -317,7 +317,7 @@ async fn skill_mcp_dependency_oauth_uses_configured_http_client() -> Result<()> 
             }
         })
         .with_workspace_setup(move |cwd, fs| async move {
-            let skill_dir = cwd.join(".agents/skills/proxy-skill");
+            let skill_dir = cwd.join(".BaiCode/skills/proxy-skill");
             let agents_dir = skill_dir.join("agents");
             fs.create_directory(
                 &PathUri::from_host_native_path(&agents_dir)?,
@@ -356,13 +356,13 @@ async fn skill_mcp_dependency_oauth_uses_configured_http_client() -> Result<()> 
     let skill_path = fixture
         .config
         .cwd
-        .join(".agents/skills/proxy-skill/SKILL.md")
+        .join(".BaiCode/skills/proxy-skill/SKILL.md")
         .canonicalize()
         .unwrap_or_else(|_| {
             fixture
                 .config
                 .cwd
-                .join(".agents/skills/proxy-skill/SKILL.md")
+                .join(".BaiCode/skills/proxy-skill/SKILL.md")
         });
     let (sandbox_policy, permission_profile) =
         turn_permission_fields(PermissionProfile::Disabled, fixture.config.cwd.as_path());

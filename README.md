@@ -14,10 +14,16 @@ cargo build --locked -p codex-cli --bin baic
 在 Linux 上，可将构建产物装到用户的命令目录，之后直接运行 `baic`。
 
 ```sh
-install -Dm755 target/debug/baic "$HOME/.local/bin/baic"
+../scripts/install/install.sh target/debug/baic
 export PATH="$HOME/.local/bin:$PATH"
 baic --version
 ```
+
+## 与 Codex 并行使用
+
+直接运行 `baic` 使用内嵌服务。用户配置、凭据文件、会话和内置技能存放在 `~/.BaiCode`。项目配置使用 `.BaiCode/config.toml`，项目技能放在 `.BaiCode/skills/`，项目指令使用 `BAICODE.md` 或 `BAICODE.override.md`。可执行文件更新时，重新构建并运行上面的本地安装脚本。
+
+两个程序若在同一个工作目录执行编程任务，编辑的是该目录中的同一份源码。如需并行编辑不同版本，可使用独立 Git worktree。
 
 ## 使用本机模型
 

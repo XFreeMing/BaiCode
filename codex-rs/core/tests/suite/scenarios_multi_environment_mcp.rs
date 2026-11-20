@@ -175,9 +175,9 @@ async fn same_named_executor_mcps_keep_calls_and_approvals_separate() -> Result<
         )?;
         // Keep config-backed docs and add a separate plugin-backed server on each executor.
         let plugin_root = home.path().join("plugins/cache/market/notes/1.0.0");
-        fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+        fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
         fs::write(
-            plugin_root.join(".codex-plugin/plugin.json"),
+            plugin_root.join(".baicode-plugin/plugin.json"),
             json!({"name": "notes", "description": "Save notes on this computer."}).to_string(),
         )?;
         fs::write(

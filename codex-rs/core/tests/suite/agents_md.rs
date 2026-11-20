@@ -75,8 +75,8 @@ use tempfile::TempDir;
 #[path = "agents_md_refresh.rs"]
 mod refresh;
 
-const GLOBAL_AGENTS_FILENAME: &str = "AGENTS.md";
-const GLOBAL_AGENTS_OVERRIDE_FILENAME: &str = "AGENTS.override.md";
+const GLOBAL_AGENTS_FILENAME: &str = "BAICODE.md";
+const GLOBAL_AGENTS_OVERRIDE_FILENAME: &str = "BAICODE.override.md";
 const GLOBAL_INSTRUCTIONS: &str = "global instructions";
 const NEW_GLOBAL_INSTRUCTIONS: &str = "new global instructions";
 const NEW_PROJECT_INSTRUCTIONS: &str = "new project instructions";
@@ -189,7 +189,7 @@ async fn agents_instructions(mut builder: TestCodexBuilder) -> Result<String> {
     request
         .message_input_texts("user")
         .into_iter()
-        .find(|text| text.starts_with("# AGENTS.md instructions"))
+        .find(|text| text.starts_with("# BAICODE.md instructions"))
         .ok_or_else(|| anyhow::anyhow!("instructions message not found"))
 }
 
@@ -223,7 +223,7 @@ fn remove_agents_md_world_state_section(rollout_path: &Path) -> Result<()> {
         .join("\n");
     anyhow::ensure!(
         removed_section,
-        "rollout did not contain a persisted AGENTS.md WorldState section"
+        "rollout did not contain a persisted BAICODE.md WorldState section"
     );
     std::fs::write(rollout_path, format!("{retained}\n"))?;
     Ok(())
@@ -233,17 +233,17 @@ pub(super) fn instruction_fragments(request: &responses::ResponsesRequest) -> Ve
     request
         .message_input_texts("user")
         .into_iter()
-        .filter(|text| text.starts_with("# AGENTS.md instructions"))
+        .filter(|text| text.starts_with("# BAICODE.md instructions"))
         .collect()
 }
 
 fn expected_instruction_fragment(cwd: &PathUri, contents: &str) -> String {
     let cwd = cwd.inferred_native_path_string();
-    format!("# AGENTS.md instructions for {cwd}\n\n<INSTRUCTIONS>\n{contents}\n</INSTRUCTIONS>")
+    format!("# BAICODE.md instructions for {cwd}\n\n<INSTRUCTIONS>\n{contents}\n</INSTRUCTIONS>")
 }
 
 pub(super) fn expected_provider_only_instruction_fragment(contents: &str) -> String {
-    format!("# AGENTS.md instructions\n\n<INSTRUCTIONS>\n{contents}\n</INSTRUCTIONS>")
+    format!("# BAICODE.md instructions\n\n<INSTRUCTIONS>\n{contents}\n</INSTRUCTIONS>")
 }
 
 fn assert_single_instruction_fragment(request: &responses::ResponsesRequest, expected: &str) {
@@ -318,8 +318,8 @@ fn request_body_contains(request: &wiremock::Request, text: &str) -> bool {
 async fn agents_override_is_preferred_over_agents_md() -> Result<()> {
     let instructions =
         agents_instructions(test_codex().with_workspace_setup(|cwd, fs| async move {
-            let agents_md = cwd.join("AGENTS.md");
-            let override_md = cwd.join("AGENTS.override.md");
+            let agents_md = cwd.join("BAICODE.md");
+            let override_md = cwd.join("BAICODE.override.md");
             let agents_md_uri = executor_path_uri(&agents_md)?;
             let override_md_uri = executor_path_uri(&override_md)?;
             fs.write_file(
@@ -342,11 +342,11 @@ async fn agents_override_is_preferred_over_agents_md() -> Result<()> {
 
     assert!(
         instructions.contains("override doc"),
-        "expected AGENTS.override.md contents: {instructions}"
+        "expected BAICODE.override.md contents: {instructions}"
     );
     assert!(
         !instructions.contains("base doc"),
-        "expected AGENTS.md to be ignored when override exists: {instructions}"
+        "expected BAICODE.md to be ignored when override exists: {instructions}"
     );
 
     Ok(())
@@ -360,7 +360,7 @@ async fn configured_fallback_is_used_when_agents_candidate_is_directory() -> Res
                 config.project_doc_fallback_filenames = vec!["WORKFLOW.md".to_string()];
             })
             .with_workspace_setup(|cwd, fs| async move {
-                let agents_dir = cwd.join("AGENTS.md");
+                let agents_dir = cwd.join("BAICODE.md");
                 let fallback = cwd.join("WORKFLOW.md");
                 let agents_dir_uri = executor_path_uri(&agents_dir)?;
                 let fallback_uri = executor_path_uri(&fallback)?;
@@ -458,9 +458,9 @@ async fn agents_docs_are_concatenated_from_project_root_to_cwd() -> Result<()> {
                     .parent()
                     .and_then(|parent| parent.parent())
                     .expect("nested workspace should have a project root ancestor");
-                let root_agents = root.join("AGENTS.md");
+                let root_agents = root.join("BAICODE.md");
                 let git_marker = root.join(".git");
-                let nested_agents = nested.join("AGENTS.md");
+                let nested_agents = nested.join("BAICODE.md");
                 let nested_uri = executor_path_uri(&nested)?;
                 let root_agents_uri = executor_path_uri(&root_agents)?;
                 let git_marker_uri = executor_path_uri(&git_marker)?;
@@ -536,16 +536,16 @@ async fn symlinked_cwd_uses_logical_parent_for_agents_discovery() -> Result<()> 
             // test-root/
             // |-- logical-repo/
             // |   |-- .git
-            // |   |-- AGENTS.md              ("logical parent doc")
+            // |   |-- BAICODE.md              ("logical parent doc")
             // |   `-- workspace ------------> physical-repo/workspace/
             // `-- physical-repo/
             //     |-- .git
-            //     |-- AGENTS.md              ("physical parent doc")
+            //     |-- BAICODE.md              ("physical parent doc")
             //     `-- workspace/
-            //         `-- AGENTS.md          ("workspace doc")
+            //         `-- BAICODE.md          ("workspace doc")
             //
             // Discovery should walk the lexical path through logical-repo,
-            // while opening logical-repo/workspace/AGENTS.md still follows the
+            // while opening logical-repo/workspace/BAICODE.md still follows the
             // symlink into physical-repo/workspace.
             let logical_root = cwd.parent().expect("symlink should have a parent");
             let test_root = logical_root
@@ -556,12 +556,12 @@ async fn symlinked_cwd_uses_logical_parent_for_agents_discovery() -> Result<()> 
 
             std::fs::create_dir_all(logical_root.as_path())?;
             std::fs::write(logical_root.join(".git"), "")?;
-            std::fs::write(logical_root.join("AGENTS.md"), "logical parent doc")?;
+            std::fs::write(logical_root.join("BAICODE.md"), "logical parent doc")?;
 
             std::fs::create_dir_all(physical_workspace.as_path())?;
             std::fs::write(physical_root.join(".git"), "")?;
-            std::fs::write(physical_root.join("AGENTS.md"), "physical parent doc")?;
-            std::fs::write(physical_workspace.join("AGENTS.md"), "workspace doc")?;
+            std::fs::write(physical_root.join("BAICODE.md"), "physical parent doc")?;
+            std::fs::write(physical_workspace.join("BAICODE.md"), "workspace doc")?;
 
             create_directory_symlink(physical_workspace.as_path(), cwd.as_path());
             Ok(())
@@ -576,8 +576,8 @@ async fn symlinked_cwd_uses_logical_parent_for_agents_discovery() -> Result<()> 
     assert_eq!(
         test.codex.instruction_sources().await,
         vec![
-            PathUri::from_abs_path(&logical_root.join("AGENTS.md")),
-            PathUri::from_abs_path(&test.config.cwd.join("AGENTS.md"))
+            PathUri::from_abs_path(&logical_root.join("BAICODE.md")),
+            PathUri::from_abs_path(&test.config.cwd.join("BAICODE.md"))
         ]
     );
 
@@ -586,7 +586,7 @@ async fn symlinked_cwd_uses_logical_parent_for_agents_discovery() -> Result<()> 
         .single_request()
         .message_input_texts("user")
         .into_iter()
-        .find(|text| text.starts_with("# AGENTS.md instructions"))
+        .find(|text| text.starts_with("# BAICODE.md instructions"))
         .expect("instructions message");
     assert!(instructions.contains("logical parent doc"));
     assert!(instructions.contains("workspace doc"));
@@ -604,13 +604,13 @@ async fn selected_environment_sources_match_model_visible_instructions() -> Resu
     )
     .await;
     let home = Arc::new(TempDir::new()?);
-    let global_agents = home.path().join("AGENTS.md");
+    let global_agents = home.path().join("BAICODE.md");
     std::fs::write(&global_agents, "global doc")?;
 
     let mut builder = test_codex()
         .with_home(home)
         .with_workspace_setup(|cwd, fs| async move {
-            let agents_md_uri = executor_path_uri(cwd.join("AGENTS.md"))?;
+            let agents_md_uri = executor_path_uri(cwd.join("BAICODE.md"))?;
             fs.write_file(
                 &agents_md_uri,
                 b"project doc".to_vec(),
@@ -627,7 +627,7 @@ async fn selected_environment_sources_match_model_visible_instructions() -> Resu
         test.codex.instruction_sources().await,
         vec![
             PathUri::from_abs_path(&global_agents),
-            test.workspace_path_uri("AGENTS.md")?,
+            test.workspace_path_uri("BAICODE.md")?,
         ]
     );
 
@@ -636,7 +636,7 @@ async fn selected_environment_sources_match_model_visible_instructions() -> Resu
         .single_request()
         .message_input_texts("user")
         .into_iter()
-        .find(|text| text.starts_with("# AGENTS.md instructions"))
+        .find(|text| text.starts_with("# BAICODE.md instructions"))
         .expect("instructions message");
     assert!(instructions.contains("global doc\n\n--- project-doc ---\n\nproject doc"));
 
@@ -682,7 +682,7 @@ async fn untrusted_project_excludes_project_instructions() -> Result<()> {
         .single_request()
         .message_input_texts("user")
         .into_iter()
-        .find(|text| text.starts_with("# AGENTS.md instructions"))
+        .find(|text| text.starts_with("# BAICODE.md instructions"))
         .expect("global instructions message");
     assert!(instructions.contains(GLOBAL_INSTRUCTIONS));
     assert!(!instructions.contains(PROJECT_INSTRUCTIONS));
@@ -858,7 +858,7 @@ async fn denied_project_instructions_fail_thread_creation() -> Result<()> {
     };
     let error = format!("{error:#}");
     assert!(
-        error.contains("AGENTS.md"),
+        error.contains("BAICODE.md"),
         "thread creation should report the unreadable project instructions: {error}"
     );
 
@@ -919,7 +919,7 @@ async fn symlinked_writable_root_reports_sandbox_failure_instead_of_session_corr
         .replace(&canonical_home_path, "$BAICODE_HOME")
         .replace(&home_path, "$BAICODE_HOME");
     insta::assert_snapshot!(error, @"
-    failed to load AGENTS.md instructions for environment `local`: failed to prepare fs sandbox: failed to prepare Seatbelt sandbox: writable root $BAICODE_HOME/visualizations contains symlink component $BAICODE_HOME/visualizations; symlinked writable roots are not supported.
+    failed to load BAICODE.md instructions for environment `local`: failed to prepare fs sandbox: failed to prepare Seatbelt sandbox: writable root $BAICODE_HOME/visualizations contains symlink component $BAICODE_HOME/visualizations; symlinked writable roots are not supported.
     If this writable root is at or beneath BAICODE_HOME and you trust its symlink targets, set `allow_symlinked_codex_home = true` at the top level of `$BAICODE_HOME/config.toml` (normally `~/.BaiCode/config.toml`) on the execution host, then restart Codex or its executor. This opt-out trusts targets outside BAICODE_HOME and targets changed between commands. It does not apply to other writable roots.
     ");
 
@@ -1012,7 +1012,7 @@ async fn tightening_environment_read_permissions_invalidates_cached_project_inst
     };
     assert_eq!(warnings_before_error, vec![PROVIDER_WARNING.to_string()]);
     assert!(
-        error.message.contains("AGENTS.md"),
+        error.message.contains("BAICODE.md"),
         "turn should report the unreadable project instructions: {}",
         error.message
     );
@@ -1210,7 +1210,7 @@ async fn thread_provider_composes_and_clears_only_its_instructions() -> Result<(
     let cleared = expected_instruction_fragment(
         cwd,
         &format!(
-            "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{GLOBAL_INSTRUCTIONS}\n\n{PROJECT_SEPARATOR}\n\n{PROJECT_INSTRUCTIONS}"
+            "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{GLOBAL_INSTRUCTIONS}\n\n{PROJECT_SEPARATOR}\n\n{PROJECT_INSTRUCTIONS}"
         ),
     );
     assert_eq!(
@@ -1314,7 +1314,7 @@ async fn thread_provider_refreshes_at_the_next_step_of_an_active_turn() -> Resul
     let updated = expected_instruction_fragment(
         cwd,
         &format!(
-            "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{GLOBAL_INSTRUCTIONS}\n\n{UPDATED_TASK_USER_INSTRUCTIONS}\n\n{PROJECT_SEPARATOR}\n\n{PROJECT_INSTRUCTIONS}"
+            "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{GLOBAL_INSTRUCTIONS}\n\n{UPDATED_TASK_USER_INSTRUCTIONS}\n\n{PROJECT_SEPARATOR}\n\n{PROJECT_INSTRUCTIONS}"
         ),
     );
     assert_eq!(
@@ -1468,7 +1468,7 @@ async fn thread_provider_enforces_its_own_limit_before_startup_and_sampling() ->
     // Changing environments must also remove the previously selected repository docs.
     let host_text = "x".repeat(approx_bytes_for_tokens(/*tokens*/ 10_000));
     let expected = expected_provider_only_instruction_fragment(&format!(
-        "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{GLOBAL_INSTRUCTIONS}\n\n{host_text}"
+        "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{GLOBAL_INSTRUCTIONS}\n\n{host_text}"
     ));
     fixture.provider.set_instructions(Some(Instructions {
         text: host_text,
@@ -1636,7 +1636,7 @@ async fn fork_preserves_thread_instructions(
         vec![
             initial.clone(),
             expected_provider_only_instruction_fragment(&format!(
-                "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{UPDATED_TASK_USER_INSTRUCTIONS}"
+                "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{UPDATED_TASK_USER_INSTRUCTIONS}"
             )),
         ]
     } else {
@@ -1736,7 +1736,7 @@ async fn thread_provider_lives_with_its_session_across_resume() -> Result<()> {
     assert_eq!(
         instruction_fragments(&requests[1]).last(),
         Some(&expected_provider_only_instruction_fragment(
-            "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\ncold session instructions",
+            "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\ncold session instructions",
         )),
     );
     Ok(())
@@ -1767,7 +1767,7 @@ async fn fresh_thread_composes_global_before_project_and_reports_sources() -> Re
     let mut builder = test_codex()
         .with_home(Arc::clone(&home))
         .with_workspace_setup(|cwd, fs| async move {
-            let agents_md_uri = executor_path_uri(cwd.join("AGENTS.md"))?;
+            let agents_md_uri = executor_path_uri(cwd.join("BAICODE.md"))?;
             fs.write_file(
                 &agents_md_uri,
                 PROJECT_INSTRUCTIONS.as_bytes().to_vec(),
@@ -1823,7 +1823,7 @@ async fn fresh_thread_composes_global_before_project_and_reports_sources() -> Re
     let updated_fragment = expected_instruction_fragment(
         &test.executor_environment().selection().cwd,
         &format!(
-            "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{NEW_GLOBAL_INSTRUCTIONS}\n\n{PROJECT_SEPARATOR}\n\n{PROJECT_INSTRUCTIONS}"
+            "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{NEW_GLOBAL_INSTRUCTIONS}\n\n{PROJECT_SEPARATOR}\n\n{PROJECT_INSTRUCTIONS}"
         ),
     );
     assert_eq!(
@@ -1918,7 +1918,7 @@ async fn multi_environment_project_instructions_share_one_byte_budget() -> Resul
         })
         .await?;
 
-    submit_thread_turn(&thread.thread, "inspect the shared AGENTS.md budget").await?;
+    submit_thread_turn(&thread.thread, "inspect the shared BAICODE.md budget").await?;
 
     let contents = format!(
         "for `{REMOTE_ENVIRONMENT_ID}` with root {}\n\nABCDE\n\nfor `{LOCAL_ENVIRONMENT_ID}` with root {}\n\nVW",
@@ -1929,7 +1929,7 @@ async fn multi_environment_project_instructions_share_one_byte_budget() -> Resul
         local_root.path().display(),
     );
     let expected =
-        format!("# AGENTS.md instructions\n\n<INSTRUCTIONS>\n{contents}\n</INSTRUCTIONS>");
+        format!("# BAICODE.md instructions\n\n<INSTRUCTIONS>\n{contents}\n</INSTRUCTIONS>");
     assert_single_instruction_fragment(&response_mock.single_request(), &expected);
 
     Ok(())
@@ -2041,12 +2041,12 @@ async fn multi_environment_thread_refreshes_global_and_keeps_repository_snapshot
         local_root.path().display(),
     );
     let expected =
-        format!("# AGENTS.md instructions\n\n<INSTRUCTIONS>\n{contents}\n</INSTRUCTIONS>");
+        format!("# BAICODE.md instructions\n\n<INSTRUCTIONS>\n{contents}\n</INSTRUCTIONS>");
     let requests = response_mock.requests();
     assert_eq!(requests.len(), 2);
     assert_single_instruction_fragment(&requests[0], &expected);
     let replacement = expected_provider_only_instruction_fragment(&format!(
-        "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{}",
+        "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{}",
         contents.replace(GLOBAL_INSTRUCTIONS, NEW_GLOBAL_INSTRUCTIONS),
     ));
     assert_eq!(
@@ -2097,7 +2097,7 @@ async fn global_instruction_warnings_reappear_only_after_recovery() -> Result<()
     create_unreadable_override()?;
     let read_error = std::fs::read(&override_path).expect_err("symlink loop must be unreadable");
     let expected_warning = format!(
-        "Failed to read global AGENTS.md instructions from `{}`: {read_error}",
+        "Failed to read global BAICODE.md instructions from `{}`: {read_error}",
         override_path.display()
     );
     let mut builder = test_codex().with_home(Arc::clone(&home));
@@ -2233,7 +2233,7 @@ async fn cold_resume_invalidates_deleted_legacy_agents_md_once() -> Result<()> {
     })
     .await;
 
-    // Simulate a rollout written before AGENTS.md had a persisted WorldState section.
+    // Simulate a rollout written before BAICODE.md had a persisted WorldState section.
     remove_agents_md_world_state_section(&rollout_path)?;
 
     std::fs::remove_file(old_source.as_path())?;
@@ -2265,7 +2265,7 @@ async fn cold_resume_invalidates_deleted_legacy_agents_md_once() -> Result<()> {
     );
     let initial = expected_provider_only_instruction_fragment(OLD_GLOBAL_INSTRUCTIONS);
     let removal = expected_provider_only_instruction_fragment(
-        "The previously provided AGENTS.md instructions no longer apply.",
+        "The previously provided BAICODE.md instructions no longer apply.",
     );
     assert_eq!(instruction_fragments(&requests[0]), vec![initial.clone()]);
     assert_eq!(
@@ -2386,7 +2386,7 @@ async fn fork_injects_changed_agents_md_once() -> Result<()> {
     );
     let initial = expected_provider_only_instruction_fragment(OLD_GLOBAL_INSTRUCTIONS);
     let replacement = expected_provider_only_instruction_fragment(&format!(
-        "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{NEW_GLOBAL_INSTRUCTIONS}"
+        "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{NEW_GLOBAL_INSTRUCTIONS}"
     ));
     assert_eq!(instruction_fragments(&requests[0]), vec![initial.clone()]);
     assert_eq!(
@@ -2398,7 +2398,7 @@ async fn fork_injects_changed_agents_md_once() -> Result<()> {
         vec![initial.clone(), replacement.clone()]
     );
     let refreshed = expected_provider_only_instruction_fragment(
-        "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\ninstructions changed after fork",
+        "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\ninstructions changed after fork",
     );
     assert_eq!(
         instruction_fragments(&requests[3]),
@@ -2540,7 +2540,7 @@ async fn run_subagent_global_instruction_case(fork_context: bool) -> Result<()> 
     let expected_fragment = expected_provider_only_instruction_fragment(OLD_GLOBAL_INSTRUCTIONS);
     assert_single_instruction_fragment(&seed_request, &expected_fragment);
     let replacement = expected_provider_only_instruction_fragment(&format!(
-        "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\n{NEW_GLOBAL_INSTRUCTIONS}"
+        "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\n{NEW_GLOBAL_INSTRUCTIONS}"
     ));
     let inherited_fragments = vec![expected_fragment, replacement];
     assert_eq!(instruction_fragments(&spawn_request), inherited_fragments);
@@ -2613,7 +2613,7 @@ async fn run_subagent_global_instruction_case(fork_context: bool) -> Result<()> 
         responses::mount_sse_once(&server, responses::sse_completed("parent-refresh")).await;
     test.submit_turn("refresh the parent independently").await?;
     let refreshed = expected_provider_only_instruction_fragment(
-        "These AGENTS.md instructions replace all previously provided AGENTS.md instructions.\n\ninstructions changed after child creation",
+        "These BAICODE.md instructions replace all previously provided BAICODE.md instructions.\n\ninstructions changed after child creation",
     );
     let mut parent_fragments = instruction_fragments(&spawn_request);
     parent_fragments.push(refreshed);

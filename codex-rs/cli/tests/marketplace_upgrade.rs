@@ -39,9 +39,9 @@ async fn marketplace_upgrade_json_prints_upgrade_outcome() -> Result<()> {
     let codex_home = TempDir::new()?;
     let source = TempDir::new()?;
     let manifest = r#"{"name":"debug","plugins":[]}"#;
-    std::fs::create_dir_all(source.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(source.path().join(".BaiCode/plugins"))?;
     std::fs::write(
-        source.path().join(".agents/plugins/marketplace.json"),
+        source.path().join(".BaiCode/plugins/marketplace.json"),
         manifest,
     )?;
     for args in [
@@ -92,7 +92,7 @@ async fn marketplace_upgrade_json_prints_upgrade_outcome() -> Result<()> {
         })
     );
     assert_eq!(
-        std::fs::read_to_string(installed_root.join(".agents/plugins/marketplace.json"))?,
+        std::fs::read_to_string(installed_root.join(".BaiCode/plugins/marketplace.json"))?,
         manifest
     );
     assert!(!codex_home.path().join("config.toml").exists());

@@ -423,7 +423,7 @@ fn foreign_agents_md_uses_environment_native_paths() {
             r"C:\codex runtime",
         )
     };
-    let source_path = cwd.join("AGENTS.md").expect("AGENTS.md URI");
+    let source_path = cwd.join("BAICODE.md").expect("BAICODE.md URI");
     let loaded = LoadedAgentsMd {
         user_instructions: None,
         thread_instructions: None,
@@ -440,7 +440,7 @@ fn foreign_agents_md_uses_environment_native_paths() {
     assert_eq!(
         loaded.contextual_user_fragment().render().expect_text(),
         format!(
-            "# AGENTS.md instructions for {rendered_cwd}
+            "# BAICODE.md instructions for {rendered_cwd}
 
 <INSTRUCTIONS>
 remote instructions
@@ -454,10 +454,10 @@ remote instructions
 fn multi_environment_agents_md_renders_mixed_path_conventions() {
     let posix_cwd = PathUri::parse("file:///srv/project").expect("POSIX cwd URI");
     let windows_cwd = PathUri::parse("file:///C:/workspace").expect("Windows cwd URI");
-    let posix_source = posix_cwd.join("AGENTS.md").expect("POSIX AGENTS.md URI");
+    let posix_source = posix_cwd.join("BAICODE.md").expect("POSIX BAICODE.md URI");
     let windows_source = windows_cwd
-        .join("AGENTS.md")
-        .expect("Windows AGENTS.md URI");
+        .join("BAICODE.md")
+        .expect("Windows BAICODE.md URI");
     let loaded = LoadedAgentsMd {
         user_instructions: None,
         thread_instructions: None,
@@ -483,7 +483,7 @@ fn multi_environment_agents_md_renders_mixed_path_conventions() {
 
     assert_eq!(
         loaded.contextual_user_fragment().render().expect_text(),
-        r#"# AGENTS.md instructions
+        r#"# BAICODE.md instructions
 
 <INSTRUCTIONS>
 for `posix` with root /srv/project
@@ -502,7 +502,7 @@ Windows instructions
 }
 
 /// Helper that returns a `Config` pointing at `root` and using `limit` as
-/// the maximum number of bytes to embed from AGENTS.md. The caller can
+/// the maximum number of bytes to embed from BAICODE.md. The caller can
 /// optionally specify a custom `instructions` string – when `None` the
 /// value is cleared to mimic a scenario where no system instructions have
 /// been configured.
@@ -576,7 +576,7 @@ async fn make_config_with_project_root_markers(
     }
 }
 
-/// AGENTS.md missing – should yield `None`.
+/// BAICODE.md missing – should yield `None`.
 #[tokio::test]
 async fn no_doc_file_returns_none() {
     let tmp = tempfile::tempdir().expect("tempdir");
@@ -586,15 +586,15 @@ async fn no_doc_file_returns_none() {
             .await;
     assert!(
         res.is_none(),
-        "Expected None when AGENTS.md is absent and no system instructions provided"
+        "Expected None when BAICODE.md is absent and no system instructions provided"
     );
-    assert!(res.is_none(), "Expected None when AGENTS.md is absent");
+    assert!(res.is_none(), "Expected None when BAICODE.md is absent");
 }
 
 #[test]
 fn empty_loaded_instructions_are_empty() {
     let source =
-        AbsolutePathBuf::from_absolute_path("/tmp/AGENTS.md").expect("absolute source path");
+        AbsolutePathBuf::from_absolute_path("/tmp/BAICODE.md").expect("absolute source path");
 
     assert_eq!(
         LoadedAgentsMd::new_user(String::new(), source.clone()),
@@ -641,7 +641,7 @@ fn loaded_instructions_with_only_empty_or_whitespace_entries_are_empty() {
 #[tokio::test]
 async fn doc_smaller_than_limit_is_returned() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "hello world").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "hello world").unwrap();
 
     let res =
         get_user_instructions(&make_config(&tmp, /*limit*/ 4096, /*instructions*/ None).await)
@@ -657,7 +657,7 @@ async fn doc_smaller_than_limit_is_returned() {
 #[tokio::test]
 async fn project_doc_invalid_utf8_uses_lossy_text() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    let path = tmp.path().join("AGENTS.md");
+    let path = tmp.path().join("BAICODE.md");
     fs::write(&path, b"project\xFF doc").unwrap();
 
     let config = make_config(&tmp, /*limit*/ 4096, /*instructions*/ None).await;
@@ -673,7 +673,7 @@ async fn doc_larger_than_limit_is_truncated() {
     let tmp = tempfile::tempdir().expect("tempdir");
 
     let huge = "A".repeat(LIMIT * 2); // 2 KiB
-    fs::write(tmp.path().join("AGENTS.md"), &huge).unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), &huge).unwrap();
 
     let config = make_config(&tmp, LIMIT, /*instructions*/ None).await;
     let environments = resolved_local_environments([("local", config.cwd.clone())]);
@@ -682,18 +682,18 @@ async fn doc_larger_than_limit_is_truncated() {
         .await
         .expect("project instructions should load");
     assert_eq!(loaded.text(), huge[..LIMIT]);
-    let path = config.cwd.join("AGENTS.md");
-    insta::assert_snapshot!(warnings.join("\n").replace(path.to_string_lossy().as_ref(), "AGENTS.md"), @"Loaded only 1024 of 2048 bytes from `AGENTS.md` in environment `local` under the 1024-byte project instruction budget. Trim your project instructions to fit the budget. If you need to keep them all, increase `project_doc_max_bytes`.");
+    let path = config.cwd.join("BAICODE.md");
+    insta::assert_snapshot!(warnings.join("\n").replace(path.to_string_lossy().as_ref(), "BAICODE.md"), @"Loaded only 1024 of 2048 bytes from `BAICODE.md` in environment `local` under the 1024-byte project instruction budget. Trim your project instructions to fit the budget. If you need to keep them all, increase `project_doc_max_bytes`.");
 }
 
 #[tokio::test]
 async fn total_byte_limit_truncates_later_project_docs() {
     let repo = tempfile::tempdir().expect("tempdir");
     fs::write(repo.path().join(".git"), "").unwrap();
-    fs::write(repo.path().join("AGENTS.md"), "root").unwrap();
+    fs::write(repo.path().join("BAICODE.md"), "root").unwrap();
     let nested = repo.path().join("nested");
     fs::create_dir(&nested).unwrap();
-    fs::write(nested.join("AGENTS.md"), "abcdef").unwrap();
+    fs::write(nested.join("BAICODE.md"), "abcdef").unwrap();
 
     let mut config = make_config(&repo, /*limit*/ 7, /*instructions*/ None).await;
     config.cwd = nested.abs();
@@ -706,13 +706,13 @@ async fn total_byte_limit_truncates_later_project_docs() {
             InstructionEntry {
                 contents: "root".to_string(),
                 provenance: project_provenance(
-                    repo.path().join("AGENTS.md").abs(),
+                    repo.path().join("BAICODE.md").abs(),
                     config.cwd.clone(),
                 ),
             },
             InstructionEntry {
                 contents: "abc".to_string(),
-                provenance: project_provenance(config.cwd.join("AGENTS.md"), config.cwd.clone()),
+                provenance: project_provenance(config.cwd.join("BAICODE.md"), config.cwd.clone()),
             },
         ],
     };
@@ -727,7 +727,7 @@ async fn read_agents_md_loads_cwd_instructions_when_parent_markers_are_unreadabl
     let tmp = tempfile::tempdir().expect("tempdir");
     let nested = tmp.path().join("nested");
     fs::create_dir(&nested).unwrap();
-    fs::write(nested.join("AGENTS.md"), "project doc").unwrap();
+    fs::write(nested.join("BAICODE.md"), "project doc").unwrap();
     let mut config = make_config(&tmp, /*limit*/ 4096, /*instructions*/ None).await;
     config.cwd = nested.abs();
     let marker_path = tmp.path().join(".git").abs();
@@ -757,10 +757,10 @@ async fn read_agents_md_loads_cwd_instructions_when_parent_markers_are_unreadabl
 #[tokio::test]
 async fn read_agents_md_propagates_read_errors() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "project doc").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "project doc").unwrap();
     let config = make_config(&tmp, /*limit*/ 4096, /*instructions*/ None).await;
     let fs = FailingFileSystem {
-        path: config.cwd.join("AGENTS.md"),
+        path: config.cwd.join("BAICODE.md"),
         failure: InjectedFailure::Read(io::ErrorKind::PermissionDenied),
         metadata_calls: Arc::default(),
     };
@@ -784,10 +784,10 @@ async fn read_agents_md_propagates_read_errors() {
 #[tokio::test]
 async fn read_agents_md_ignores_files_removed_after_discovery() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "project doc").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "project doc").unwrap();
     let config = make_config(&tmp, /*limit*/ 4096, /*instructions*/ None).await;
     let fs = FailingFileSystem {
-        path: config.cwd.join("AGENTS.md"),
+        path: config.cwd.join("BAICODE.md"),
         failure: InjectedFailure::Read(io::ErrorKind::NotFound),
         metadata_calls: Arc::default(),
     };
@@ -812,7 +812,7 @@ async fn read_agents_md_ignores_files_removed_after_discovery() {
 async fn marker_search_does_not_wait_for_a_higher_ancestor() {
     let tmp = tempfile::tempdir().expect("tempdir");
     fs::write(tmp.path().join(".git"), "").unwrap();
-    fs::write(tmp.path().join("AGENTS.md"), "project doc").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "project doc").unwrap();
     let nested = tmp.path().join("nested");
     fs::create_dir(&nested).unwrap();
 
@@ -837,7 +837,7 @@ async fn marker_search_does_not_wait_for_a_higher_ancestor() {
     )
     .await
     .expect("nearest marker should complete")
-    .expect("AGENTS.md discovery");
+    .expect("BAICODE.md discovery");
 
     assert_eq!(
         paths,
@@ -852,10 +852,10 @@ async fn project_root_marker_search_limits_concurrent_probes_and_preserves_order
     const CONCURRENCY_LIMIT: usize = 256;
 
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "project doc").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "project doc").unwrap();
     let nested = tmp.path().join("nested");
     fs::create_dir_all(&nested).unwrap();
-    fs::write(nested.join("AGENTS.md"), "nested project doc").unwrap();
+    fs::write(nested.join("BAICODE.md"), "nested project doc").unwrap();
 
     let markers = (0..=CONCURRENCY_LIMIT)
         .map(|index| format!(".project-root-{index}"))
@@ -941,7 +941,7 @@ async fn project_root_marker_search_limits_concurrent_probes_and_preserves_order
         super::agents_md_paths(&config.config, &cwd, &fs, /*sandbox*/ None),
         assertions
     );
-    let paths = paths.expect("AGENTS.md discovery");
+    let paths = paths.expect("BAICODE.md discovery");
 
     assert_eq!(
         paths,
@@ -958,7 +958,7 @@ async fn agents_md_search_starts_all_directory_probes() {
 
     let tmp = tempfile::tempdir().expect("tempdir");
     fs::write(tmp.path().join(".git"), "").unwrap();
-    fs::write(tmp.path().join("AGENTS.md"), "project doc").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "project doc").unwrap();
     let mut nested = tmp.path().to_path_buf();
     for depth in 0..NESTING_DEPTH {
         nested.push(format!("nested-{depth}"));
@@ -1024,9 +1024,9 @@ async fn agents_md_search_starts_all_directory_probes() {
     metadata_calls.release.add_permits(1);
     let paths = tokio::time::timeout(std::time::Duration::from_secs(5), search)
         .await
-        .expect("AGENTS.md search should complete")
-        .expect("AGENTS.md search task")
-        .expect("AGENTS.md discovery");
+        .expect("BAICODE.md search should complete")
+        .expect("BAICODE.md search task")
+        .expect("BAICODE.md discovery");
 
     assert_eq!(
         paths,
@@ -1039,10 +1039,10 @@ async fn agents_md_search_starts_all_directory_probes() {
 #[tokio::test]
 async fn empty_project_root_markers_only_probe_cwd_candidates() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "parent doc").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "parent doc").unwrap();
     let nested = tmp.path().join("nested");
     fs::create_dir(&nested).unwrap();
-    fs::write(nested.join("AGENTS.md"), "cwd doc").unwrap();
+    fs::write(nested.join("BAICODE.md"), "cwd doc").unwrap();
 
     let mut config = make_config_with_project_root_markers(
         &tmp,
@@ -1062,7 +1062,7 @@ async fn empty_project_root_markers_only_probe_cwd_candidates() {
 
     let paths = super::agents_md_paths(&config.config, &cwd, &fs, /*sandbox*/ None)
         .await
-        .expect("AGENTS.md discovery");
+        .expect("BAICODE.md discovery");
 
     let override_path = cwd.join(LOCAL_AGENTS_MD_FILENAME).expect("override path");
     let agents_path = cwd.join(DEFAULT_AGENTS_MD_FILENAME).expect("agents path");
@@ -1077,7 +1077,7 @@ async fn empty_project_root_markers_only_probe_cwd_candidates() {
     );
 }
 
-/// When `cwd` is nested inside a repo, the search should locate AGENTS.md
+/// When `cwd` is nested inside a repo, the search should locate BAICODE.md
 /// placed at the repository root (identified by `.git`).
 #[tokio::test]
 async fn finds_doc_in_repo_root() {
@@ -1091,7 +1091,7 @@ async fn finds_doc_in_repo_root() {
     .unwrap();
 
     // Put the doc at the repo root.
-    fs::write(repo.path().join("AGENTS.md"), "root level doc").unwrap();
+    fs::write(repo.path().join("BAICODE.md"), "root level doc").unwrap();
 
     // Now create a nested working directory: repo/workspace/crate_a
     let nested = repo.path().join("workspace/crate_a");
@@ -1109,7 +1109,7 @@ async fn finds_doc_in_repo_root() {
 #[tokio::test]
 async fn zero_byte_limit_disables_docs() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "something").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "something").unwrap();
 
     let res =
         get_user_instructions(&make_config(&tmp, /*limit*/ 0, /*instructions*/ None).await).await;
@@ -1123,7 +1123,7 @@ async fn zero_byte_limit_disables_docs() {
 #[tokio::test]
 async fn merges_existing_instructions_with_agents_md() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "proj document").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "proj document").unwrap();
 
     const INSTRUCTIONS: &str = "base instructions";
     let limit = "proj doc".len();
@@ -1142,11 +1142,11 @@ async fn multiple_environment_docs_use_labeled_layout_and_preserve_source_order(
     let primary = tempfile::tempdir().expect("primary tempdir");
     let secondary = tempfile::tempdir().expect("secondary tempdir");
     fs::create_dir(primary.path().join(".git")).unwrap();
-    fs::write(primary.path().join("AGENTS.md"), "primary root doc").unwrap();
+    fs::write(primary.path().join("BAICODE.md"), "primary root doc").unwrap();
     let primary_nested = primary.path().join("nested");
     fs::create_dir(&primary_nested).unwrap();
-    fs::write(primary_nested.join("AGENTS.md"), "primary nested doc").unwrap();
-    fs::write(secondary.path().join("AGENTS.md"), "secondary doc").unwrap();
+    fs::write(primary_nested.join("BAICODE.md"), "primary nested doc").unwrap();
+    fs::write(secondary.path().join("BAICODE.md"), "secondary doc").unwrap();
     let mut config = make_config(&primary, /*limit*/ 4096, Some("global instructions")).await;
     config.cwd = primary_nested.abs();
     let environments = resolved_local_environments([
@@ -1180,7 +1180,7 @@ secondary doc"#,
     assert_eq!(loaded.environment_labeled_text(), inner);
     assert_eq!(loaded.text(), inner);
     let expected_fragment = format!(
-        r#"# AGENTS.md instructions
+        r#"# BAICODE.md instructions
 
 <INSTRUCTIONS>
 {inner}
@@ -1202,9 +1202,9 @@ secondary doc"#,
                     .as_ref()
                     .expect("global instruction source"),
             ),
-            PathUri::from_abs_path(&primary.path().join("AGENTS.md").abs()),
-            PathUri::from_abs_path(&primary_nested.join("AGENTS.md").abs()),
-            PathUri::from_abs_path(&secondary.path().join("AGENTS.md").abs()),
+            PathUri::from_abs_path(&primary.path().join("BAICODE.md").abs()),
+            PathUri::from_abs_path(&primary_nested.join("BAICODE.md").abs()),
+            PathUri::from_abs_path(&secondary.path().join("BAICODE.md").abs()),
         ]
     );
 }
@@ -1213,7 +1213,7 @@ secondary doc"#,
 async fn secondary_only_project_doc_uses_single_contributor_layout() {
     let primary = tempfile::tempdir().expect("primary tempdir");
     let secondary = tempfile::tempdir().expect("secondary tempdir");
-    fs::write(secondary.path().join("AGENTS.md"), "secondary doc").unwrap();
+    fs::write(secondary.path().join("BAICODE.md"), "secondary doc").unwrap();
     let config = make_config(&primary, /*limit*/ 4096, Some("global instructions")).await;
     let environments = resolved_local_environments([
         ("primary", config.cwd.clone()),
@@ -1232,7 +1232,7 @@ async fn secondary_only_project_doc_uses_single_contributor_layout() {
     assert_eq!(loaded.legacy_text(), inner);
     assert_eq!(loaded.text(), inner);
     let expected_fragment = format!(
-        "# AGENTS.md instructions for {}\n\n<INSTRUCTIONS>\n{inner}\n</INSTRUCTIONS>",
+        "# BAICODE.md instructions for {}\n\n<INSTRUCTIONS>\n{inner}\n</INSTRUCTIONS>",
         secondary.path().display()
     );
     assert_eq!(
@@ -1245,7 +1245,7 @@ async fn secondary_only_project_doc_uses_single_contributor_layout() {
 async fn primary_only_project_doc_preserves_legacy_layout_with_multiple_bound_environments() {
     let primary = tempfile::tempdir().expect("primary tempdir");
     let secondary = tempfile::tempdir().expect("secondary tempdir");
-    fs::write(primary.path().join("AGENTS.md"), "primary doc").unwrap();
+    fs::write(primary.path().join("BAICODE.md"), "primary doc").unwrap();
     let config = make_config(&primary, /*limit*/ 4096, Some("global instructions")).await;
     let environments = resolved_local_environments([
         ("primary", config.cwd.clone()),
@@ -1264,7 +1264,7 @@ async fn primary_only_project_doc_preserves_legacy_layout_with_multiple_bound_en
     assert_eq!(loaded.legacy_text(), inner);
     assert_eq!(loaded.text(), inner);
     let expected_fragment = format!(
-        "# AGENTS.md instructions for {}\n\n<INSTRUCTIONS>\n{inner}\n</INSTRUCTIONS>",
+        "# BAICODE.md instructions for {}\n\n<INSTRUCTIONS>\n{inner}\n</INSTRUCTIONS>",
         primary.path().display()
     );
     assert_eq!(
@@ -1277,8 +1277,8 @@ async fn primary_only_project_doc_preserves_legacy_layout_with_multiple_bound_en
 async fn project_doc_byte_limit_is_shared_across_environments() {
     let primary = tempfile::tempdir().expect("primary tempdir");
     let secondary = tempfile::tempdir().expect("secondary tempdir");
-    fs::write(primary.path().join("AGENTS.md"), "ABCDE").unwrap();
-    fs::write(secondary.path().join("AGENTS.md"), "VWXYZ").unwrap();
+    fs::write(primary.path().join("BAICODE.md"), "ABCDE").unwrap();
+    fs::write(secondary.path().join("BAICODE.md"), "VWXYZ").unwrap();
     let config = make_config(&primary, /*limit*/ 7, /*instructions*/ None).await;
     let environments = resolved_local_environments([
         ("primary", config.cwd.clone()),
@@ -1305,13 +1305,13 @@ async fn full_primary_environment_budget_skips_later_files_and_environments() {
     let secondary = tempfile::tempdir().expect("secondary tempdir");
     let primary_doc = "P".repeat(LIMIT);
     let secondary_doc = "S".repeat(LIMIT);
-    fs::write(primary.path().join("AGENTS.md"), &primary_doc).unwrap();
-    fs::write(secondary.path().join("AGENTS.md"), &secondary_doc).unwrap();
+    fs::write(primary.path().join("BAICODE.md"), &primary_doc).unwrap();
+    fs::write(secondary.path().join("BAICODE.md"), &secondary_doc).unwrap();
     let config = make_config(&primary, LIMIT, /*instructions*/ None).await;
     fs::create_dir(primary.path().join(".git")).unwrap();
     let nested = config.cwd.join("nested");
     fs::create_dir(&nested).unwrap();
-    let skipped = nested.join("AGENTS.md");
+    let skipped = nested.join("BAICODE.md");
     fs::write(&skipped, "nested instructions").unwrap();
     let environments =
         resolved_local_environments([("primary", nested), ("secondary", secondary.abs())]);
@@ -1320,8 +1320,8 @@ async fn full_primary_environment_budget_skips_later_files_and_environments() {
     let loaded = load_project_instructions(&config, &environments, &mut warnings)
         .await
         .expect("project instructions should load");
-    insta::assert_snapshot!(warnings.join("\n").replace(skipped.to_string_lossy().as_ref(), "nested/AGENTS.md"), @r"
-    Skipped project instructions in environment `primary` starting at `nested/AGENTS.md` because the 8-byte budget was exhausted. Trim your project instructions to fit the budget. If you need to keep them all, increase `project_doc_max_bytes`.
+    insta::assert_snapshot!(warnings.join("\n").replace(skipped.to_string_lossy().as_ref(), "nested/BAICODE.md"), @r"
+    Skipped project instructions in environment `primary` starting at `nested/BAICODE.md` because the 8-byte budget was exhausted. Trim your project instructions to fit the budget. If you need to keep them all, increase `project_doc_max_bytes`.
     The 8-byte project instruction budget was exhausted before checking environment `secondary` or any later environments. Trim your project instructions to fit the budget. If you need to keep them all, increase `project_doc_max_bytes`.
     ");
     assert_eq!(loaded.text(), primary_doc);
@@ -1331,8 +1331,8 @@ async fn full_primary_environment_budget_skips_later_files_and_environments() {
 async fn secondary_environment_invalid_utf8_does_not_suppress_other_docs() {
     let primary = tempfile::tempdir().expect("primary tempdir");
     let secondary = tempfile::tempdir().expect("secondary tempdir");
-    fs::write(primary.path().join("AGENTS.md"), "primary doc").unwrap();
-    fs::write(secondary.path().join("AGENTS.md"), b"secondary\xFFdoc").unwrap();
+    fs::write(primary.path().join("BAICODE.md"), "primary doc").unwrap();
+    fs::write(secondary.path().join("BAICODE.md"), b"secondary\xFFdoc").unwrap();
     let config = make_config(&primary, /*limit*/ 4096, /*instructions*/ None).await;
     let environments = resolved_local_environments([
         ("primary", config.cwd.clone()),
@@ -1347,7 +1347,7 @@ async fn secondary_environment_invalid_utf8_does_not_suppress_other_docs() {
     assert!(loaded.text().contains("secondary\u{FFFD}doc"));
 }
 
-/// If there are existing system instructions but AGENTS.md docs are
+/// If there are existing system instructions but BAICODE.md docs are
 /// missing we expect the original instructions to be returned unchanged.
 #[tokio::test]
 async fn keeps_existing_instructions_when_doc_missing() {
@@ -1361,7 +1361,7 @@ async fn keeps_existing_instructions_when_doc_missing() {
 }
 
 /// When both the repository root and the working directory contain
-/// AGENTS.md files, their contents are concatenated from root to cwd.
+/// BAICODE.md files, their contents are concatenated from root to cwd.
 #[tokio::test]
 async fn concatenates_root_and_cwd_docs() {
     let repo = tempfile::tempdir().expect("tempdir");
@@ -1374,19 +1374,19 @@ async fn concatenates_root_and_cwd_docs() {
     .unwrap();
 
     // Repo root doc.
-    fs::write(repo.path().join("AGENTS.md"), "root doc").unwrap();
+    fs::write(repo.path().join("BAICODE.md"), "root doc").unwrap();
 
     // Nested working directory with its own doc.
     let nested = repo.path().join("workspace/crate_a");
     std::fs::create_dir_all(&nested).unwrap();
-    fs::write(nested.join("AGENTS.md"), "crate doc").unwrap();
+    fs::write(nested.join("BAICODE.md"), "crate doc").unwrap();
 
     let mut cfg = make_config(&repo, /*limit*/ 4096, /*instructions*/ None).await;
     cfg.cwd = nested.abs();
 
     let loaded = load_agents_md(&cfg).await.expect("doc expected");
-    let root_agents = repo.path().join("AGENTS.md").abs();
-    let crate_agents = cfg.cwd.join("AGENTS.md");
+    let root_agents = repo.path().join("BAICODE.md").abs();
+    let crate_agents = cfg.cwd.join("BAICODE.md");
     let expected = LoadedAgentsMd {
         user_instructions: None,
         thread_instructions: None,
@@ -1417,11 +1417,11 @@ async fn concatenates_root_and_cwd_docs() {
 async fn project_root_markers_are_honored_for_agents_discovery() {
     let root = tempfile::tempdir().expect("tempdir");
     fs::write(root.path().join(".codex-root"), "").unwrap();
-    fs::write(root.path().join("AGENTS.md"), "parent doc").unwrap();
+    fs::write(root.path().join("BAICODE.md"), "parent doc").unwrap();
 
     let nested = root.path().join("dir1");
     fs::create_dir_all(nested.join(".git")).unwrap();
-    fs::write(nested.join("AGENTS.md"), "child doc").unwrap();
+    fs::write(nested.join("BAICODE.md"), "child doc").unwrap();
 
     let mut cfg = make_config_with_project_root_markers(
         &root,
@@ -1433,8 +1433,8 @@ async fn project_root_markers_are_honored_for_agents_discovery() {
     cfg.cwd = nested.abs();
 
     let discovery = agents_md_paths(&cfg).await.expect("discover paths");
-    let expected_parent = root.path().join("AGENTS.md").abs();
-    let expected_child = cfg.cwd.join("AGENTS.md");
+    let expected_parent = root.path().join("BAICODE.md").abs();
+    let expected_child = cfg.cwd.join("BAICODE.md");
     assert_eq!(discovery.len(), 2);
     assert_eq!(discovery[0], PathUri::from_abs_path(&expected_parent));
     assert_eq!(discovery[1], PathUri::from_abs_path(&expected_child));
@@ -1447,10 +1447,10 @@ async fn project_root_markers_are_honored_for_agents_discovery() {
 async fn project_layers_do_not_override_project_root_markers() {
     let root = tempfile::tempdir().expect("tempdir");
     fs::write(root.path().join(".git"), "").unwrap();
-    fs::write(root.path().join("AGENTS.md"), "root doc").unwrap();
+    fs::write(root.path().join("BAICODE.md"), "root doc").unwrap();
     let nested = root.path().join("nested");
     fs::create_dir(&nested).unwrap();
-    fs::write(nested.join("AGENTS.md"), "nested doc").unwrap();
+    fs::write(nested.join("BAICODE.md"), "nested doc").unwrap();
 
     let mut config = make_config(&root, /*limit*/ 4096, /*instructions*/ None).await;
     config.cwd = nested.abs();
@@ -1469,8 +1469,8 @@ async fn project_layers_do_not_override_project_root_markers() {
     };
     config.config_layer_stack = ConfigLayerStack::new(
         vec![
-            project_layer(root.path().join(".codex").abs(), ".ignored-root-marker"),
-            project_layer(config.cwd.join(".codex"), ".ignored-nested-marker"),
+            project_layer(root.path().join(".BaiCode").abs(), ".ignored-root-marker"),
+            project_layer(config.cwd.join(".BaiCode"), ".ignored-nested-marker"),
         ],
         ConfigRequirements::default(),
         ConfigRequirementsToml::default(),
@@ -1482,8 +1482,8 @@ async fn project_layers_do_not_override_project_root_markers() {
     assert_eq!(
         discovery,
         vec![
-            PathUri::from_abs_path(&root.path().join("AGENTS.md").abs()),
-            PathUri::from_abs_path(&config.cwd.join("AGENTS.md")),
+            PathUri::from_abs_path(&root.path().join("BAICODE.md").abs()),
+            PathUri::from_abs_path(&config.cwd.join("BAICODE.md")),
         ]
     );
 }
@@ -1493,7 +1493,7 @@ async fn agents_md_paths_preserve_symlinked_cwd() {
     let tmp = tempfile::tempdir().expect("tempdir");
     let target = tmp.path().join("target");
     fs::create_dir(&target).unwrap();
-    fs::write(target.join("AGENTS.md"), "project doc").unwrap();
+    fs::write(target.join("BAICODE.md"), "project doc").unwrap();
 
     let linked_cwd = tmp.path().join("linked");
     create_directory_symlink(&target, &linked_cwd);
@@ -1504,7 +1504,7 @@ async fn agents_md_paths_preserve_symlinked_cwd() {
     let discovery = agents_md_paths(&cfg).await.expect("discover paths");
     assert_eq!(
         discovery,
-        vec![PathUri::from_abs_path(&cfg.cwd.join("AGENTS.md"))]
+        vec![PathUri::from_abs_path(&cfg.cwd.join("BAICODE.md"))]
     );
 
     let res = get_user_instructions(&cfg).await.expect("doc expected");
@@ -1514,7 +1514,7 @@ async fn agents_md_paths_preserve_symlinked_cwd() {
 #[tokio::test]
 async fn instruction_sources_include_global_before_agents_md_docs() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "project doc").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "project doc").unwrap();
 
     let cfg = make_config(&tmp, /*limit*/ 4096, Some("global doc")).await;
     let global_agents = cfg.codex_home.join(DEFAULT_AGENTS_MD_FILENAME);
@@ -1522,7 +1522,7 @@ async fn instruction_sources_include_global_before_agents_md_docs() {
     fs::write(&global_agents, "global doc").unwrap();
 
     let loaded = load_agents_md(&cfg).await.expect("instructions expected");
-    let project_agents = cfg.cwd.join("AGENTS.md");
+    let project_agents = cfg.cwd.join("BAICODE.md");
 
     let expected = LoadedAgentsMd {
         user_instructions: Some(Instructions {
@@ -1549,7 +1549,7 @@ async fn instruction_sources_include_global_before_agents_md_docs() {
     );
 }
 
-/// AGENTS.override.md is preferred over AGENTS.md when both are present.
+/// BAICODE.override.md is preferred over BAICODE.md when both are present.
 #[tokio::test]
 async fn agents_local_md_preferred() {
     let tmp = tempfile::tempdir().expect("tempdir");
@@ -1583,24 +1583,24 @@ async fn fallback_paths_are_rejected_before_filesystem_probes() {
     )
     .await;
     let windows_paths = [
-        r"..\AGENTS.md",
-        r"nested\AGENTS.md",
-        r"\AGENTS.md",
-        r"C:\AGENTS.md",
-        "C:AGENTS.md",
-        r"\\server\share\AGENTS.md",
-        r"\\?\UNC\server\share\AGENTS.md",
+        r"..\BAICODE.md",
+        r"nested\BAICODE.md",
+        r"\BAICODE.md",
+        r"C:\BAICODE.md",
+        "C:BAICODE.md",
+        r"\\server\share\BAICODE.md",
+        r"\\?\UNC\server\share\BAICODE.md",
         r"\\.\pipe\instructions",
-        "AGENTS.md:stream",
+        "BAICODE.md:stream",
     ];
     cfg.project_doc_fallback_filenames = [
         "",
         ".",
         "..",
-        "/AGENTS.md",
-        "../AGENTS.md",
-        "nested/AGENTS.md",
-        "//server/share/AGENTS.md",
+        "/BAICODE.md",
+        "../BAICODE.md",
+        "nested/BAICODE.md",
+        "//server/share/BAICODE.md",
         "AGENTS\0.md",
     ]
     .into_iter()
@@ -1628,7 +1628,7 @@ async fn fallback_paths_are_rejected_before_filesystem_probes() {
         assert_eq!(paths, Vec::<PathUri>::new());
         assert_eq!(
             *metadata_calls.paths.lock().expect("metadata paths lock"),
-            ["AGENTS.override.md", "AGENTS.md"]
+            ["BAICODE.override.md", "BAICODE.md"]
                 .into_iter()
                 .chain(extra_filenames.iter().copied())
                 .chain(["WORKFLOW.md", ".instructions.md"])
@@ -1638,7 +1638,7 @@ async fn fallback_paths_are_rejected_before_filesystem_probes() {
     }
 }
 
-/// When AGENTS.md is absent but a configured fallback exists, the fallback is used.
+/// When BAICODE.md is absent but a configured fallback exists, the fallback is used.
 #[tokio::test]
 async fn uses_configured_fallback_when_agents_missing() {
     let tmp = tempfile::tempdir().expect("tempdir");
@@ -1659,11 +1659,11 @@ async fn uses_configured_fallback_when_agents_missing() {
     assert_eq!(res, "example instructions");
 }
 
-/// AGENTS.md remains preferred when both AGENTS.md and fallbacks are present.
+/// BAICODE.md remains preferred when both BAICODE.md and fallbacks are present.
 #[tokio::test]
 async fn agents_md_preferred_over_fallbacks() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "primary").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "primary").unwrap();
     fs::write(tmp.path().join("EXAMPLE.md"), "secondary").unwrap();
 
     let cfg = make_config_with_fallback(
@@ -1676,7 +1676,7 @@ async fn agents_md_preferred_over_fallbacks() {
 
     let res = get_user_instructions(&cfg)
         .await
-        .expect("AGENTS.md should win");
+        .expect("BAICODE.md should win");
 
     assert_eq!(res, "primary");
 
@@ -1691,7 +1691,7 @@ async fn agents_md_preferred_over_fallbacks() {
 #[tokio::test]
 async fn agents_md_directory_is_ignored() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::create_dir(tmp.path().join("AGENTS.md")).unwrap();
+    fs::create_dir(tmp.path().join("BAICODE.md")).unwrap();
 
     let cfg = make_config(&tmp, /*limit*/ 4096, /*instructions*/ None).await;
 
@@ -1709,7 +1709,7 @@ async fn agents_md_special_file_is_ignored() {
     use std::os::unix::ffi::OsStrExt;
 
     let tmp = tempfile::tempdir().expect("tempdir");
-    let path = tmp.path().join("AGENTS.md");
+    let path = tmp.path().join("BAICODE.md");
     let c_path = CString::new(path.as_os_str().as_bytes()).expect("path without nul");
     // SAFETY: `c_path` is a valid, nul-terminated path and `mkfifo` does not
     // retain the pointer after the call.
@@ -1735,7 +1735,7 @@ async fn override_directory_falls_back_to_agents_md_file() {
 
     let res = get_user_instructions(&cfg)
         .await
-        .expect("AGENTS.md should be used when override is a directory");
+        .expect("BAICODE.md should be used when override is a directory");
     assert_eq!(res, "primary");
 
     let discovery = agents_md_paths(&cfg).await.expect("discover paths");
@@ -1749,7 +1749,7 @@ async fn override_directory_falls_back_to_agents_md_file() {
 #[tokio::test]
 async fn skills_are_not_appended_to_agents_md() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "base doc").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "base doc").unwrap();
 
     let cfg = make_config(&tmp, /*limit*/ 4096, /*instructions*/ None).await;
     create_skill(
@@ -1779,7 +1779,7 @@ async fn apps_feature_does_not_emit_user_instructions_by_itself() {
 #[tokio::test]
 async fn apps_feature_does_not_append_to_agents_md_user_instructions() {
     let tmp = tempfile::tempdir().expect("tempdir");
-    fs::write(tmp.path().join("AGENTS.md"), "base doc").unwrap();
+    fs::write(tmp.path().join("BAICODE.md"), "base doc").unwrap();
 
     let mut cfg = make_config(&tmp, /*limit*/ 4096, /*instructions*/ None).await;
     cfg.features

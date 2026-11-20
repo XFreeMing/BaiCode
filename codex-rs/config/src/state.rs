@@ -222,7 +222,7 @@ impl ConfigLayerEntry {
         }
     }
 
-    // Get the `.codex/` folder associated with this config layer, if any.
+    // Get the `.BaiCode/` folder associated with this config layer, if any.
     pub fn config_folder(&self) -> Option<AbsolutePathBuf> {
         match &self.name {
             ConfigLayerSource::PackagedDefaults { .. } => None,
@@ -237,7 +237,7 @@ impl ConfigLayerEntry {
         }
     }
 
-    /// Returns the `.codex/` folder that should be used for hook declarations.
+    /// Returns the `.BaiCode/` folder that should be used for hook declarations.
     ///
     /// Project layers normally use their own config folder. Linked Git worktrees
     /// can instead point hook discovery at the matching folder from the root

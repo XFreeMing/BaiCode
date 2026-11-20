@@ -30,8 +30,8 @@ fn configured_marketplace_update() -> MarketplaceConfigUpdate<'static> {
 
 fn write_installed_marketplace(codex_home: &std::path::Path, marketplace_name: &str) -> Result<()> {
     let root = marketplace_install_root(codex_home).join(marketplace_name);
-    std::fs::create_dir_all(root.join(".agents/plugins"))?;
-    std::fs::write(root.join(".agents/plugins/marketplace.json"), "{}")?;
+    std::fs::create_dir_all(root.join(".BaiCode/plugins"))?;
+    std::fs::write(root.join(".BaiCode/plugins/marketplace.json"), "{}")?;
     Ok(())
 }
 
@@ -129,14 +129,14 @@ async fn marketplace_remove_ignores_startup_project_config() -> Result<()> {
     // TestAppServer starts in BAICODE_HOME, so put project config there to verify
     // that the global marketplace RPC does not use it.
     std::fs::create_dir_all(codex_home.path().join(".git"))?;
-    std::fs::create_dir_all(codex_home.path().join(".codex"))?;
-    let project_config_path = codex_home.path().join(".codex/config.toml");
+    std::fs::create_dir_all(codex_home.path().join(".BaiCode"))?;
+    let project_config_path = codex_home.path().join(".BaiCode/config.toml");
     let project_config = "[marketplaces.debug]\nsource_type = \"git\"\nsource = \"https://github.com/owner/repo.git\"\n";
     std::fs::write(&project_config_path, project_config)?;
     set_project_trust_level(codex_home.path(), codex_home.path(), TrustLevel::Trusted)?;
     write_installed_marketplace(codex_home.path(), "debug")?;
     let snapshot_path =
-        marketplace_install_root(codex_home.path()).join("debug/.agents/plugins/marketplace.json");
+        marketplace_install_root(codex_home.path()).join("debug/.BaiCode/plugins/marketplace.json");
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())

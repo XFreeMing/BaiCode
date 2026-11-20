@@ -131,7 +131,7 @@ const FULL_HISTORY_SHARED_USAGE_HINT: &str = "Shared delegation guidance.";
 const FULL_HISTORY_PROACTIVE_PROMPT: &str = "switch to proactive delegation";
 const FULL_HISTORY_EXPLICIT_PROMPT: &str = "restore explicit-only delegation";
 const FULL_HISTORY_PROACTIVE_POLICY: &str = "Proactive multi-agent delegation is active.";
-const FULL_HISTORY_EXPLICIT_POLICY: &str = "Do not spawn sub-agents unless the user or applicable AGENTS.md/skill instructions explicitly ask";
+const FULL_HISTORY_EXPLICIT_POLICY: &str = "Do not spawn sub-agents unless the user or applicable BAICODE.md/skill instructions explicitly ask";
 
 fn body_contains(req: &wiremock::Request, text: &str) -> bool {
     decoded_body(req)
@@ -3359,7 +3359,7 @@ async fn skill_instructions_in_parent_and_spawned_child(include_instructions: bo
         })
         .with_config(move |config| {
             config.include_skill_instructions = include_instructions;
-            // Discover only the fixture's skill, independently of the user's ~/.agents/skills.
+            // Discover only the fixture's skill, independently of the user's ~/.BaiCode/skills.
             config.config_layer_stack = ConfigLayerStack::new(
                 vec![ConfigLayerEntry::new(
                     ConfigLayerSource::System {

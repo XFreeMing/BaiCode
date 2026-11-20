@@ -79,7 +79,7 @@ def resolve_release(
     # The runtime builder downloads these six wheels and builds the two musl
     # wheels from the release's package archives.
     required_assets = {
-        f"openai_codex_cli_bin-{match[1]}-py3-none-{platform}.whl"
+        f"baicode_cli_bin-{match[1]}-py3-none-{platform}.whl"
         for platform in (
             "macosx_10_9_x86_64",
             "macosx_11_0_arm64",

@@ -57,7 +57,7 @@ async fn concurrent_operations_share_the_workspace_lock() -> Result<()> {
     let lock = fs::File::options()
         .read(true)
         .write(true)
-        .open(baseline_control(root).join("codex-baseline.lock"))?;
+        .open(baseline_control(root).join("baicode-baseline.lock"))?;
     let contended = matches!(lock.try_lock(), Err(fs::TryLockError::WouldBlock));
     drop(lock);
 

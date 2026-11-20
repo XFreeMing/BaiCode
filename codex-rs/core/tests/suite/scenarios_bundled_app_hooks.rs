@@ -54,9 +54,9 @@ async fn bundled_memory_hook_injects_context() -> Result<()> {
     let root = home
         .path()
         .join("plugins/cache/openai-bundled/codex-dream-memory/local");
-    fs::create_dir_all(root.join(".codex-plugin"))?;
+    fs::create_dir_all(root.join(".baicode-plugin"))?;
     fs::write(
-        root.join(".codex-plugin/plugin.json"),
+        root.join(".baicode-plugin/plugin.json"),
         serde_json::to_vec(&json!({
             "name": "codex-dream-memory",
             "hooks": { "hooks": { "SessionStart": [{

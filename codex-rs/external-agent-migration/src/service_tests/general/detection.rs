@@ -5,10 +5,7 @@ use pretty_assertions::assert_eq;
 #[tokio::test]
 async fn detect_home_lists_config_skills_and_agents_md() {
     let (_root, external_agent_home, codex_home) = fixture_paths();
-    let agents_skills = codex_home
-        .parent()
-        .map(|parent| parent.join(".agents").join("skills"))
-        .unwrap_or_else(|| PathBuf::from(".agents").join("skills"));
+    let agents_skills = codex_home.join("skills");
     fs::create_dir_all(external_agent_home.join("skills").join("skill-a")).expect("create skills");
     fs::write(
         external_agent_home.join(EXTERNAL_AGENT_CONFIG_MD),
@@ -59,7 +56,7 @@ async fn detect_home_lists_config_skills_and_agents_md() {
             description: format!(
                 "Migrate {} to {}",
                 external_agent_home.join(EXTERNAL_AGENT_CONFIG_MD).display(),
-                codex_home.join("AGENTS.md").display()
+                codex_home.join("BAICODE.md").display()
             ),
             cwd: None,
             details: None,
@@ -80,12 +77,12 @@ async fn detect_and_import_claude_commands_without_frontmatter() {
         (
             None,
             external_agent_home.join("commands"),
-            root.path().join(".agents").join("skills"),
+            root.path().join(".BaiCode").join("skills"),
         ),
         (
             Some(repo_root.clone()),
             repo_root.join(EXTERNAL_AGENT_DIR).join("commands"),
-            repo_root.join(".agents").join("skills"),
+            repo_root.join(".BaiCode").join("skills"),
         ),
     ] {
         fs::create_dir_all(source_commands.join("pr")).expect("create commands");
@@ -128,7 +125,7 @@ async fn detect_and_import_claude_commands_without_frontmatter() {
                     .join("SKILL.md")
             )
             .expect("read migrated command"),
-            "---\nname: \"source-command-pr-review\"\ndescription: \"Migrated source command `pr-review`\"\n---\n\n# source-command-pr-review\n\nUse this skill when the user asks to run the migrated source command `pr-review`.\n\n## Command Template\n\nReview changes with Codex and AGENTS.md.\n"
+            "---\nname: \"source-command-pr-review\"\ndescription: \"Migrated source command `pr-review`\"\n---\n\n# source-command-pr-review\n\nUse this skill when the user asks to run the migrated source command `pr-review`.\n\n## Command Template\n\nReview changes with Codex and BAICODE.md.\n"
         );
         assert!(!target_skills.join("source-command-deploy").exists());
         assert_eq!(
@@ -149,12 +146,12 @@ async fn detect_and_import_claude_commands_preserves_described_commands_on_colli
         (
             None,
             external_agent_home.join("commands"),
-            root.path().join(".agents").join("skills"),
+            root.path().join(".BaiCode").join("skills"),
         ),
         (
             Some(repo_root.clone()),
             repo_root.join(EXTERNAL_AGENT_DIR).join("commands"),
-            repo_root.join(".agents").join("skills"),
+            repo_root.join(".BaiCode").join("skills"),
         ),
     ] {
         fs::create_dir_all(source_commands.join("foo")).expect("create commands");
@@ -257,13 +254,10 @@ async fn detect_and_import_claude_commands_preserves_described_commands_on_colli
 async fn detect_cursor_home_lists_user_and_managed_skills() {
     let root = TempDir::new().expect("create tempdir");
     let external_agent_home = root.path().join(".cursor");
-    let codex_home = root.path().join(".codex");
+    let codex_home = root.path().join(".BaiCode");
     let user_skills = external_agent_home.join("skills");
     let managed_skills = external_agent_home.join("skills-cursor");
-    let target_skills = codex_home
-        .parent()
-        .map(|parent| parent.join(".agents").join("skills"))
-        .unwrap_or_else(|| PathBuf::from(".agents").join("skills"));
+    let target_skills = codex_home.join("skills");
     fs::create_dir_all(user_skills.join("user-skill")).expect("create user skill");
     fs::create_dir_all(managed_skills.join("managed-skill")).expect("create managed skill");
     let mut service = service_for_paths(external_agent_home, codex_home);
@@ -304,7 +298,7 @@ async fn detect_cursor_home_lists_user_and_managed_skills() {
 async fn detect_cursor_repo_lists_skills_from_skills() {
     let root = TempDir::new().expect("create tempdir");
     let repo_root = root.path().join("repo");
-    let codex_home = root.path().join(".codex");
+    let codex_home = root.path().join(".BaiCode");
     let source_skills = repo_root.join(".cursor").join("skills");
     fs::create_dir_all(repo_root.join(".git")).expect("create git dir");
     fs::create_dir_all(source_skills.join("skill-a")).expect("create repo skill");
@@ -327,7 +321,7 @@ async fn detect_cursor_repo_lists_skills_from_skills() {
             description: format!(
                 "Migrate skills from {} to {}",
                 source_skills.display(),
-                repo_root.join(".agents").join("skills").display()
+                repo_root.join(".BaiCode").join("skills").display()
             ),
             cwd: Some(repo_root),
             details: Some(MigrationDetails {
@@ -407,7 +401,7 @@ async fn detect_repo_lists_agents_md_for_each_cwd() {
 
     let items = service_for_paths(
         root.path().join(EXTERNAL_AGENT_DIR),
-        root.path().join(".codex"),
+        root.path().join(".BaiCode"),
     )
     .detect(ExternalAgentConfigDetectOptions {
         include_home: false,
@@ -423,7 +417,7 @@ async fn detect_repo_lists_agents_md_for_each_cwd() {
             description: format!(
                 "Migrate {} to {}",
                 repo_root.join(EXTERNAL_AGENT_CONFIG_MD).display(),
-                repo_root.join("AGENTS.md").display(),
+                repo_root.join("BAICODE.md").display(),
             ),
             cwd: Some(repo_root.clone()),
             details: None,
@@ -433,7 +427,7 @@ async fn detect_repo_lists_agents_md_for_each_cwd() {
             description: format!(
                 "Migrate {} to {}",
                 repo_root.join(EXTERNAL_AGENT_CONFIG_MD).display(),
-                repo_root.join("AGENTS.md").display(),
+                repo_root.join("BAICODE.md").display(),
             ),
             cwd: Some(repo_root),
             details: None,
@@ -447,7 +441,7 @@ async fn detect_repo_lists_agents_md_for_each_cwd() {
 async fn detect_repo_still_reports_non_plugin_items_when_home_config_is_invalid() {
     let root = TempDir::new().expect("create tempdir");
     let repo_root = root.path().join("repo");
-    let codex_home = root.path().join(".codex");
+    let codex_home = root.path().join(".BaiCode");
     fs::create_dir_all(repo_root.join(".git")).expect("create git dir");
     fs::create_dir_all(
         repo_root
@@ -503,7 +497,7 @@ async fn detect_repo_still_reports_non_plugin_items_when_home_config_is_invalid(
                         .join(EXTERNAL_AGENT_DIR)
                         .join("settings.json")
                         .display(),
-                    repo_root.join(".codex").join("config.toml").display()
+                    repo_root.join(".BaiCode").join("config.toml").display()
                 ),
                 cwd: Some(repo_root.clone()),
                 details: None,
@@ -513,7 +507,7 @@ async fn detect_repo_still_reports_non_plugin_items_when_home_config_is_invalid(
                 description: format!(
                     "Migrate skills from {} to {}",
                     repo_root.join(EXTERNAL_AGENT_DIR).join("skills").display(),
-                    repo_root.join(".agents").join("skills").display()
+                    repo_root.join(".BaiCode").join("skills").display()
                 ),
                 cwd: Some(repo_root.clone()),
                 details: Some(MigrationDetails {
@@ -529,7 +523,7 @@ async fn detect_repo_still_reports_non_plugin_items_when_home_config_is_invalid(
                         .join(EXTERNAL_AGENT_DIR)
                         .join(EXTERNAL_AGENT_CONFIG_MD)
                         .display(),
-                    repo_root.join("AGENTS.md").display(),
+                    repo_root.join("BAICODE.md").display(),
                 ),
                 cwd: Some(repo_root),
                 details: None,
@@ -581,7 +575,7 @@ async fn detect_repo_lists_mcp_hooks_commands_and_subagents() {
 
     let items = service_for_paths(
         root.path().join(EXTERNAL_AGENT_DIR),
-        root.path().join(".codex"),
+        root.path().join(".BaiCode"),
     )
     .detect(ExternalAgentConfigDetectOptions {
         include_home: false,
@@ -599,7 +593,7 @@ async fn detect_repo_lists_mcp_hooks_commands_and_subagents() {
                 description: format!(
                     "Migrate MCP servers from {} into {}",
                     repo_root.display(),
-                    repo_root.join(".codex").join("config.toml").display()
+                    repo_root.join(".BaiCode").join("config.toml").display()
                 ),
                 cwd: Some(repo_root.clone()),
                 details: Some(MigrationDetails {
@@ -614,7 +608,7 @@ async fn detect_repo_lists_mcp_hooks_commands_and_subagents() {
                 description: format!(
                     "Migrate hooks from {} to {}",
                     repo_root.join(EXTERNAL_AGENT_DIR).display(),
-                    repo_root.join(".codex").join("hooks.json").display()
+                    repo_root.join(".BaiCode").join("hooks.json").display()
                 ),
                 cwd: Some(repo_root.clone()),
                 details: Some(MigrationDetails {
@@ -632,7 +626,7 @@ async fn detect_repo_lists_mcp_hooks_commands_and_subagents() {
                         .join(EXTERNAL_AGENT_DIR)
                         .join("commands")
                         .display(),
-                    repo_root.join(".agents").join("skills").display()
+                    repo_root.join(".BaiCode").join("skills").display()
                 ),
                 cwd: Some(repo_root.clone()),
                 details: Some(MigrationDetails {
@@ -647,7 +641,7 @@ async fn detect_repo_lists_mcp_hooks_commands_and_subagents() {
                 description: format!(
                     "Migrate subagents from {} to {}",
                     repo_root.join(EXTERNAL_AGENT_DIR).join("agents").display(),
-                    repo_root.join(".codex").join("agents").display()
+                    repo_root.join(".BaiCode").join("agents").display()
                 ),
                 cwd: Some(repo_root),
                 details: Some(MigrationDetails {
@@ -675,7 +669,7 @@ async fn detect_repo_skips_hooks_when_only_unsupported_hooks_exist() {
 
     let items = service_for_paths(
         root.path().join(EXTERNAL_AGENT_DIR),
-        root.path().join(".codex"),
+        root.path().join(".BaiCode"),
     )
     .detect(ExternalAgentConfigDetectOptions {
         include_home: false,
@@ -749,7 +743,7 @@ async fn import_repo_migrates_mcp_hooks_commands_and_subagents() {
 
     service_for_paths(
         root.path().join(EXTERNAL_AGENT_DIR),
-        root.path().join(".codex"),
+        root.path().join(".BaiCode"),
     )
     .import(vec![
         ExternalAgentConfigMigrationItem {
@@ -780,7 +774,7 @@ async fn import_repo_migrates_mcp_hooks_commands_and_subagents() {
     .await;
 
     let config: TomlValue = toml::from_str(
-        &fs::read_to_string(repo_root.join(".codex").join("config.toml")).expect("read config"),
+        &fs::read_to_string(repo_root.join(".BaiCode").join("config.toml")).expect("read config"),
     )
     .expect("parse config");
     let expected_config: TomlValue = toml::from_str(
@@ -816,7 +810,7 @@ STATIC = "yes"
         .expect("migrated MCP config should be supported");
 
     let hooks: JsonValue = serde_json::from_str(
-        &fs::read_to_string(repo_root.join(".codex").join("hooks.json")).expect("read hooks"),
+        &fs::read_to_string(repo_root.join(".BaiCode").join("hooks.json")).expect("read hooks"),
     )
     .expect("parse hooks");
     let _supported_hooks: codex_config::HooksFile =
@@ -844,7 +838,7 @@ STATIC = "yes"
     );
     assert!(
         !repo_root
-            .join(".codex")
+            .join(".BaiCode")
             .join("hooks.migration-notes.md")
             .exists()
     );
@@ -852,7 +846,7 @@ STATIC = "yes"
     assert_eq!(
         fs::read_to_string(
             repo_root
-                .join(".agents")
+                .join(".BaiCode")
                 .join("skills")
                 .join("source-command-pr-review")
                 .join("SKILL.md")
@@ -864,7 +858,7 @@ STATIC = "yes"
     let agent: TomlValue = toml::from_str(
         &fs::read_to_string(
             repo_root
-                .join(".codex")
+                .join(".BaiCode")
                 .join("agents")
                 .join("researcher.toml"),
         )

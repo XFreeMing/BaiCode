@@ -21,7 +21,7 @@ pub use local::LocalSecretsNamespace;
 pub use local::LocalSecretsSnapshot;
 pub use sanitizer::redact_secrets;
 
-const KEYRING_SERVICE: &str = "codex";
+const KEYRING_SERVICE: &str = "BaiCode";
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SecretName(String);

@@ -18,10 +18,6 @@ use crate::model::MigrationDetails;
 use crate::model::PluginsMigration;
 
 pub(super) const KNOWN_MARKETPLACES_PATH: &str = "plugins/known_marketplaces.json";
-pub(super) const OFFICIAL_MARKETPLACE_NAME: &str = "claude-plugins-official";
-pub(super) const OFFICIAL_MARKETPLACE_SOURCE: &str = "anthropics/claude-plugins-official";
-pub(super) const CLAUDE_CODE_MARKETPLACE_NAME: &str = "claude-code-plugins";
-pub(super) const CLAUDE_CODE_MARKETPLACE_SOURCE: &str = "anthropics/claude-code";
 pub(super) const REWRITE_PROFILE: RewriteProfile = ClaSource::REWRITE_PROFILE;
 const COMMAND_REWRITE_PROFILE: CommandRewriteProfile = CommandRewriteProfile::new(
     REWRITE_PROFILE.doc_file_name(),
@@ -109,23 +105,6 @@ pub(super) fn marketplace_import_sources(
             &scoped_marketplaces,
             source_root,
         ));
-    }
-
-    for (marketplace_name, marketplace_source) in [
-        (OFFICIAL_MARKETPLACE_NAME, OFFICIAL_MARKETPLACE_SOURCE),
-        (CLAUDE_CODE_MARKETPLACE_NAME, CLAUDE_CODE_MARKETPLACE_SOURCE),
-    ] {
-        if has_enabled_plugin_for_marketplace(settings, marketplace_name)
-            && !import_sources.contains_key(marketplace_name)
-        {
-            import_sources.insert(
-                marketplace_name.to_string(),
-                MarketplaceImportSource {
-                    source: marketplace_source.to_string(),
-                    ref_name: None,
-                },
-            );
-        }
     }
 
     import_sources
@@ -262,16 +241,6 @@ fn collect_enabled_plugins(settings: &JsonValue) -> Vec<String> {
                 .map(|plugin_id| plugin_id.as_key())
         })
         .collect()
-}
-
-fn has_enabled_plugin_for_marketplace(settings: &JsonValue, marketplace_name: &str) -> bool {
-    collect_enabled_plugins(settings)
-        .into_iter()
-        .any(|plugin_id| {
-            PluginId::parse(&plugin_id)
-                .map(|plugin_id| plugin_id.marketplace_name == marketplace_name)
-                .unwrap_or(false)
-        })
 }
 
 fn collect_marketplace_import_sources(

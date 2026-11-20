@@ -34,7 +34,7 @@ pub(crate) struct CapabilityLocationRequest {
 const MAX_LOCATIONS: usize = 512;
 const MAX_REMOTE_INSTALL_METADATA_BYTES: u64 = 16 * 1024;
 const MAX_REMOTE_PLUGIN_ID_BYTES: usize = 1024;
-const AGENTS_SKILLS_SUFFIX: &str = ".agents/skills";
+const AGENTS_SKILLS_SUFFIX: &str = ".BaiCode/skills";
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct CapabilityLocation {

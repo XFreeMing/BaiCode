@@ -107,7 +107,7 @@ fn is_home_owned_plugin_capability(
     let root_manifest = plugin_root.join("plugin.json");
     let manifest_path = [
         root_manifest.clone(),
-        plugin_root.join(".codex-plugin").join("plugin.json"),
+        plugin_root.join(".baicode-plugin").join("plugin.json"),
         plugin_root.join(".claude-plugin").join("plugin.json"),
         plugin_root.join(".cursor-plugin").join("plugin.json"),
     ]

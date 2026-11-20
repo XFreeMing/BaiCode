@@ -79,7 +79,7 @@ pub use windows::WindowsSystemConfigNamespaceProbe;
 pub use windows::probe_windows_system_config_namespace;
 
 #[cfg(unix)]
-const SYSTEM_CONFIG_TOML_FILE_UNIX: &str = "/etc/codex/config.toml";
+const SYSTEM_CONFIG_TOML_FILE_UNIX: &str = "/etc/baicode/config.toml";
 
 #[cfg(windows)]
 const DEFAULT_PROGRAM_DATA_DIR_WINDOWS: &str = r"C:\ProgramData";
@@ -108,28 +108,28 @@ const PROJECT_LOCAL_CONFIG_DENYLIST: &[&str] = &[
 /// composed with config-style TOML merging plus field-specific handling for
 /// hooks, rules, deny-read permissions, and remote sandbox config:
 ///
-/// - system    `/etc/codex/requirements.toml` (Unix) or
-///   `%ProgramData%\OpenAI\Codex\requirements.toml` (Windows)
+/// - system    `/etc/baicode/requirements.toml` (Unix) or
+///   `%ProgramData%\BaiCode\requirements.toml` (Windows)
 /// - cloud:    enterprise-managed cloud config bundle requirements
-/// - legacy:   `/etc/codex/managed_config.toml` (Unix) reinterpreted as
+/// - legacy:   `/etc/baicode/managed_config.toml` (Unix) reinterpreted as
 ///   requirements.toml
 /// - admin:    managed preferences (*)
 ///
 /// For backwards compatibility, Unix continues to load
-/// `/etc/codex/managed_config.toml` and map it to `requirements.toml`.
+/// `/etc/baicode/managed_config.toml` and map it to `requirements.toml`.
 ///
 /// Configuration is built up from multiple layers in the following order:
 ///
 /// - package:  optional default configuration supplied with the Codex package
 /// - admin:    managed preferences (*)
-/// - system    `/etc/codex/config.toml` (Unix) or
-///   `%ProgramData%\OpenAI\Codex\config.toml` (Windows)
+/// - system    `/etc/baicode/config.toml` (Unix) or
+///   `%ProgramData%\BaiCode\config.toml` (Windows)
 /// - cloud     enterprise-managed cloud config bundle fragments
 /// - user      `${BAICODE_HOME}/config.toml`
 /// - profile   `${BAICODE_HOME}/<name>.config.toml`, when selected
 /// - cwd       `${PWD}/config.toml` (loaded but disabled when the directory is untrusted)
-/// - tree      parent directories up to root looking for `./.codex/config.toml` (loaded but disabled when untrusted)
-/// - repo      `$(git rev-parse --show-toplevel)/.codex/config.toml` (loaded but disabled when untrusted)
+/// - tree      parent directories up to root looking for `./.BaiCode/config.toml` (loaded but disabled when untrusted)
+/// - repo      `$(git rev-parse --show-toplevel)/.BaiCode/config.toml` (loaded but disabled when untrusted)
 /// - runtime   e.g., --config flags, model selector in UI
 ///
 /// (*) Only available on macOS via managed device profiles.
@@ -764,7 +764,7 @@ pub async fn load_requirements_toml(
 
 #[cfg(unix)]
 fn system_requirements_toml_file() -> io::Result<AbsolutePathBuf> {
-    AbsolutePathBuf::from_absolute_path(Path::new("/etc/codex/requirements.toml"))
+    AbsolutePathBuf::from_absolute_path(Path::new("/etc/baicode/requirements.toml"))
 }
 
 #[cfg(windows)]
@@ -845,14 +845,14 @@ fn windows_codex_system_dir() -> PathBuf {
         );
         PathBuf::from(DEFAULT_PROGRAM_DATA_DIR_WINDOWS)
     });
-    program_data.join("OpenAI").join("Codex")
+    program_data.join("BaiCode")
 }
 
 #[cfg(windows)]
 fn windows_system_requirements_toml_file() -> io::Result<AbsolutePathBuf> {
     if let Ok(path) = winreg::RegKey::predef(winreg::enums::HKEY_LOCAL_MACHINE)
         .open_subkey_with_flags(
-            r"SOFTWARE\Policies\OpenAI\Codex",
+            r"SOFTWARE\Policies\BaiCode",
             winreg::enums::KEY_READ | winreg::enums::KEY_WOW64_64KEY,
         )
         .and_then(|key| key.get_value::<std::ffi::OsString, _>("RequirementsPath"))
@@ -1169,7 +1169,7 @@ impl ProjectTrustContext {
         }
 
         let relative_dir = dir.as_path().strip_prefix(checkout_root.as_path()).ok()?;
-        Some(repo_root.join(relative_dir).join(".codex"))
+        Some(repo_root.join(relative_dir).join(".BaiCode"))
     }
 }
 
@@ -1897,13 +1897,13 @@ async fn discover_project_layers(
 
     let mut layers = Vec::new();
     let mut startup_warnings = Vec::new();
-    // The user's ~/.codex belongs to Codex even when HOME is the working directory.
+    // The user configuration is already represented by its own layer.
     let user_home = AbsolutePathBufGuard::home_directory();
     for dir in dirs {
         if user_home.as_deref() == Some(dir.as_path()) {
             continue;
         }
-        let dot_codex_abs = dir.join(".codex");
+        let dot_codex_abs = dir.join(".BaiCode");
         let dot_codex_uri = PathUri::from_abs_path(&dot_codex_abs);
         if !fs
             .get_metadata(&dot_codex_uri, Default::default(), /*sandbox*/ None)
@@ -2084,7 +2084,7 @@ async fn load_root_checkout_project_config(
     )
 }
 /// The legacy mechanism for specifying admin-enforced configuration is to read
-/// from a file like `/etc/codex/managed_config.toml` that has the same
+/// from a file like `/etc/baicode/managed_config.toml` that has the same
 /// structure as `config.toml` where fields like `approval_policy` can specify
 /// exactly one value rather than a list of allowed values.
 ///
@@ -2209,10 +2209,9 @@ foo = "xyzzy"
     fn windows_codex_system_dir_uses_expected_suffix() {
         let expected = windows_program_data_dir_from_known_folder()
             .unwrap_or_else(|_| PathBuf::from(DEFAULT_PROGRAM_DATA_DIR_WINDOWS))
-            .join("OpenAI")
-            .join("Codex");
+            .join("BaiCode");
         assert_eq!(windows_codex_system_dir(), expected);
-        assert!(windows_codex_system_dir().ends_with(Path::new("OpenAI").join("Codex")));
+        assert!(windows_codex_system_dir().ends_with(Path::new("BaiCode")));
     }
 
     #[cfg(windows)]
@@ -2220,8 +2219,7 @@ foo = "xyzzy"
     fn windows_system_config_toml_file_uses_expected_suffix() {
         let expected = windows_program_data_dir_from_known_folder()
             .unwrap_or_else(|_| PathBuf::from(DEFAULT_PROGRAM_DATA_DIR_WINDOWS))
-            .join("OpenAI")
-            .join("Codex")
+            .join("BaiCode")
             .join("config.toml");
         assert_eq!(
             windows_system_config_toml_file()
@@ -2233,7 +2231,7 @@ foo = "xyzzy"
             windows_system_config_toml_file()
                 .expect("config.toml path")
                 .as_path()
-                .ends_with(Path::new("OpenAI").join("Codex").join("config.toml"))
+                .ends_with(Path::new("BaiCode").join("config.toml"))
         );
     }
 }

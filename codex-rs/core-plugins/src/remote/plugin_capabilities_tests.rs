@@ -75,7 +75,7 @@ async fn capabilities_union_cached_versions_and_sync_reports_removal() -> anyhow
     let plugin_id = PluginId::parse("example@openai-curated-remote")?;
     let old_root = store.plugin_root(&plugin_id, "1.0.0");
     for (path, contents) in [
-        (".codex-plugin/plugin.json", r#"{"name":"example"}"#),
+        (".baicode-plugin/plugin.json", r#"{"name":"example"}"#),
         (
             ".mcp.json",
             r#"{"mcpServers":{"example":{"command":"unused"}}}"#,
@@ -97,7 +97,7 @@ async fn capabilities_union_cached_versions_and_sync_reports_removal() -> anyhow
     // Accumulate the old and new declarations without involving bundle transport.
     let new_root = store.plugin_root(&plugin_id, "2.0.0");
     write_file(
-        new_root.join(".codex-plugin/plugin.json").as_path(),
+        new_root.join(".baicode-plugin/plugin.json").as_path(),
         r#"{"name":"example"}"#,
     );
     write_file(

@@ -229,7 +229,7 @@ async fn tmpdir_uses_command_environment_over_rpc(
         let proxy = RemoteNetworkProxyConfig::from_effective_config(&config)?;
         // A token without the proxy route SID is disconnected before it can receive a 403.
         let probe = concat!(
-            r" & %SystemRoot%\System32\whoami.exe | %SystemRoot%\System32\findstr.exe /i /e /l CodexSandboxOffline >NUL || exit /b 2",
+            r" & %SystemRoot%\System32\whoami.exe | %SystemRoot%\System32\findstr.exe /i /e /l BaiCodeSandboxOffline >NUL || exit /b 2",
             r" & %SystemRoot%\System32\curl.exe -q -sS --max-time 10 --proxy %HTTP_PROXY% -i http://denied.invalid/",
             r" | %SystemRoot%\System32\findstr.exe /b /r HTTP/1[.]1.403 >NUL || exit /b 3",
         );

@@ -274,10 +274,10 @@ mod tests {
         config.cwd = home.join("workspace").join("project").abs();
 
         let paths = [
-            home.join(".codex").join("AGENTS.md"),
-            home.join("workspace").join("AGENTS.md"),
-            config.cwd.join("AGENTS.md").to_path_buf(),
-            config.cwd.join("nested").join("AGENTS.md").to_path_buf(),
+            home.join(".BaiCode").join("BAICODE.md"),
+            home.join("workspace").join("BAICODE.md"),
+            config.cwd.join("BAICODE.md").to_path_buf(),
+            config.cwd.join("nested").join("BAICODE.md").to_path_buf(),
         ]
         .map(|path| PathUri::from_abs_path(&path.abs()));
 
@@ -285,7 +285,7 @@ mod tests {
 
         insta::assert_snapshot!(
             summary.replace('\\', "/"),
-            @"~/.codex/AGENTS.md, ../AGENTS.md, AGENTS.md, nested/AGENTS.md"
+            @"~/.BaiCode/BAICODE.md, ../BAICODE.md, BAICODE.md, nested/BAICODE.md"
         );
     }
 
@@ -307,20 +307,20 @@ mod tests {
         let codex_home = TempDir::new().expect("temp codex home");
         let cwd = TempDir::new().expect("temp cwd");
         let config = test_config(&codex_home, &cwd).await;
-        let native_source = PathUri::from_abs_path(&config.cwd.join("AGENTS.md"));
+        let native_source = PathUri::from_abs_path(&config.cwd.join("BAICODE.md"));
         let foreign_source = if cfg!(windows) {
-            PathUri::parse("file:///remote%20workspace/AGENTS.md")
+            PathUri::parse("file:///remote%20workspace/BAICODE.md")
                 .expect("POSIX instruction source")
         } else {
-            PathUri::parse("file:///C:/remote%20workspace/AGENTS.md")
+            PathUri::parse("file:///C:/remote%20workspace/BAICODE.md")
                 .expect("Windows instruction source")
         };
 
         let summary = compose_agents_summary(&config, &[native_source, foreign_source]);
         if cfg!(windows) {
-            insta::assert_snapshot!(summary, @r"AGENTS.md, /remote workspace/AGENTS.md");
+            insta::assert_snapshot!(summary, @r"BAICODE.md, /remote workspace/BAICODE.md");
         } else {
-            insta::assert_snapshot!(summary, @r"AGENTS.md, C:\remote workspace\AGENTS.md");
+            insta::assert_snapshot!(summary, @r"BAICODE.md, C:\remote workspace\BAICODE.md");
         }
     }
 

@@ -903,10 +903,10 @@ async fn mcp_server_status_list_returns_raw_server_and_tool_names(plugin: bool) 
     let plugin_root = TempDir::new()?;
     if plugin {
         std::fs::create_dir_all(plugin_root.path().join(".git"))?;
-        std::fs::create_dir_all(plugin_root.path().join(".agents/plugins"))?;
-        std::fs::create_dir_all(plugin_root.path().join("sample/.codex-plugin"))?;
+        std::fs::create_dir_all(plugin_root.path().join(".BaiCode/plugins"))?;
+        std::fs::create_dir_all(plugin_root.path().join("sample/.baicode-plugin"))?;
         std::fs::write(
-            plugin_root.path().join("sample/.codex-plugin/plugin.json"),
+            plugin_root.path().join("sample/.baicode-plugin/plugin.json"),
             serde_json::to_vec(&json!({"name": "sample"}))?,
         )?;
         std::fs::write(
@@ -915,7 +915,7 @@ async fn mcp_server_status_list_returns_raw_server_and_tool_names(plugin: bool) 
                 &json!({"mcpServers": {"some-server": {"type": "http", "url": endpoint}}}),
             )?,
         )?;
-        let marketplace_path = plugin_root.path().join(".agents/plugins/marketplace.json");
+        let marketplace_path = plugin_root.path().join(".BaiCode/plugins/marketplace.json");
         std::fs::write(
             &marketplace_path,
             serde_json::to_vec(&json!({
@@ -1187,7 +1187,7 @@ async fn mcp_server_status_list_uses_thread_project_local_config() -> Result<()>
         })
         .await?;
 
-    let project_config_dir = workspace.path().join(".codex");
+    let project_config_dir = workspace.path().join(".BaiCode");
     std::fs::create_dir_all(&project_config_dir)?;
     std::fs::write(
         project_config_dir.join("config.toml"),

@@ -50,7 +50,7 @@ fn curated_catalogs_apply_the_existing_git_source_policy() {
         for (name, manifest) in [
             (
                 OPENAI_CURATED_MARKETPLACE_NAME,
-                curated_plugins_repo_path(home.path()).join(".agents/plugins/marketplace.json"),
+                curated_plugins_repo_path(home.path()).join(".BaiCode/plugins/marketplace.json"),
             ),
             (
                 OPENAI_API_CURATED_MARKETPLACE_NAME,
@@ -99,7 +99,7 @@ fn a_local_allowlist_cannot_authorize_curated_but_other_managed_sources_remain_a
     .chain(primary_runtime)
     {
         let manifest =
-            AbsolutePathBuf::try_from(root.join(".agents/plugins/marketplace.json")).unwrap();
+            AbsolutePathBuf::try_from(root.join(".BaiCode/plugins/marketplace.json")).unwrap();
         assert_eq!(
             policy.validate_install(&stack, home.path(), &manifest, name),
             Ok(())

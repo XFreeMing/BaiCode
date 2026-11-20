@@ -18,8 +18,8 @@ use std::path::PathBuf;
 use tracing::warn;
 
 const MARKETPLACE_MANIFEST_RELATIVE_PATHS: &[&str] = &[
-    ".agents/plugins/marketplace.json",
-    ".agents/plugins/api_marketplace.json",
+    ".BaiCode/plugins/marketplace.json",
+    ".BaiCode/plugins/api_marketplace.json",
     ".claude-plugin/marketplace.json",
     ".cursor-plugin/marketplace.json",
 ];
@@ -1137,7 +1137,7 @@ fn resolve_marketplace_interface(
 }
 
 fn fallback_plugin_manifest_path(plugin_root: &Path) -> PathBuf {
-    plugin_root.join(".codex-plugin/plugin.json")
+    plugin_root.join(".baicode-plugin/plugin.json")
 }
 
 fn marketplace_plugin_manifest_fallback(

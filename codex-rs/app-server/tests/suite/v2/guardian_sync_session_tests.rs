@@ -273,7 +273,7 @@ async fn managed_reviewer_refreshes_global_instructions_before_reuse() -> Result
     let (server, _completions) = start_streaming_sse_server(responses).await;
     let (mcp_url, mcp_server) = start_mcp_server(/*sensitive_action*/ None).await?;
     let codex_home = TempDir::new()?;
-    let instructions_path = codex_home.path().join("AGENTS.md");
+    let instructions_path = codex_home.path().join("BAICODE.md");
     sync_config(server.uri())
         .with_provider_name("OpenAI")
         .enable_feature(Feature::ContentItemKinds)
@@ -421,7 +421,7 @@ async fn managed_reviewers_reuse_fork_and_resume_after_parent_shutdown(
     let (mcp_url, mcp_server) = start_mcp_server(/*sensitive_action*/ None).await?;
     let codex_home = TempDir::new()?;
     std::fs::write(
-        codex_home.path().join("AGENTS.md"),
+        codex_home.path().join("BAICODE.md"),
         "Keep this project private.",
     )?;
     sync_config(server.uri())
@@ -926,7 +926,7 @@ async fn v3_routes_the_first_live_message_while_the_actor_is_still_sampling(
     env.environment()
         .get_filesystem()
         .write_file(
-            &env.selection().cwd.join("AGENTS.md")?,
+            &env.selection().cwd.join("BAICODE.md")?,
             project_rule.as_bytes().to_vec(),
             Default::default(),
             /*sandbox*/ None,
@@ -993,7 +993,7 @@ async fn v3_routes_the_first_live_message_while_the_actor_is_still_sampling(
         assert_eq!(
             has_project_rule,
             routing_input.is_none(),
-            "only the actor receives AGENTS.md"
+            "only the actor receives BAICODE.md"
         );
         if let Some(input) = routing_input {
             let output = input["output"].as_str().expect("housekeeper input text");

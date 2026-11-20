@@ -75,9 +75,9 @@ async fn native_stop_hook_uses_plugin_policy_refreshed_during_turn(
         .await;
     let home = Arc::new(TempDir::new()?);
     let plugin_root = home.path().join("plugins/cache/test/example/local");
-    fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         serde_json::to_vec(&json!({
             "name": "example",
             "hooks": { "hooks": { "Stop": [{ "hooks": [{

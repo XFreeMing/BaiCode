@@ -383,7 +383,7 @@ fn synthetic_mount_registry_root_is_unique_to_effective_user() {
             .canonicalize()
             .expect("resolve temp directory")
             .join(format!(
-                "codex-bwrap-synthetic-mount-targets-{effective_uid}"
+                "baicode-bwrap-synthetic-mount-targets-{effective_uid}"
             ))
     );
 }

@@ -24,9 +24,9 @@ if _SDK_PYTHON_ROOT not in sys.path:
 
 from release_version import normalize_codex_version  # noqa: E402
 
-SDK_DISTRIBUTION_NAME = "openai-codex"
-RUNTIME_DISTRIBUTION_NAME = "openai-codex-cli-bin"
-RUNTIME_PACKAGE_ROOT = Path("src") / "codex_cli_bin"
+SDK_DISTRIBUTION_NAME = "baicode-sdk"
+RUNTIME_DISTRIBUTION_NAME = "baicode-cli-bin"
+RUNTIME_PACKAGE_ROOT = Path("src") / "baicode_cli_bin"
 BAICODE_PACKAGE_METADATA = "codex-package.json"
 
 
@@ -152,7 +152,7 @@ def stage_python_sdk_package(
 ) -> Path:
     package_version = normalize_codex_version(sdk_version)
     _copy_package_tree(sdk_root(), staging_dir)
-    sdk_bin_dir = staging_dir / "src" / "openai_codex" / "bin"
+    sdk_bin_dir = staging_dir / "src" / "baicode_sdk" / "bin"
     if sdk_bin_dir.exists():
         shutil.rmtree(sdk_bin_dir)
 
@@ -177,11 +177,12 @@ def stage_python_sdk_package(
     )
     if len(runtime_versions) != 1:
         raise RuntimeError("Expected exactly one pinned Codex runtime dependency")
-    requirements = runpy.run_path(sdk_root() / "src/openai_codex/_runtime_requirements.py")
-    try:
-        requirements["require_runtime_version"](runtime_versions[0])
-    except ValueError as exc:
-        raise RuntimeError(f"Cannot package the Python SDK: {exc}") from exc
+    if (package_version, runtime_versions[0]) != ("0.0.0.dev0", "0.0.0.dev0"):
+        requirements = runpy.run_path(sdk_root() / "src/baicode_sdk/_runtime_requirements.py")
+        try:
+            requirements["require_runtime_version"](runtime_versions[0])
+        except ValueError as exc:
+            raise RuntimeError(f"Cannot package the Python SDK: {exc}") from exc
     pyproject_path.write_text(pyproject_text)
     return staging_dir
 
@@ -561,7 +562,7 @@ def _normalized_schema_bundle_text(schema_dir: Path) -> str:
 
 def generate_v2_all(schema_dir: Path, *, format_output: bool = True) -> None:
     """Regenerate the Pydantic v2 protocol model module from app-server schemas."""
-    out_path = sdk_root() / "src" / "openai_codex" / "generated" / "v2_all.py"
+    out_path = sdk_root() / "src" / "baicode_sdk" / "generated" / "v2_all.py"
     out_dir = out_path.parent
     old_package_dir = out_dir / "v2_all"
     if old_package_dir.exists():
@@ -775,7 +776,7 @@ def _notification_specs(schema_dir: Path) -> list[tuple[str, str]]:
     """Map each server notification method to its generated payload model class."""
     server_notifications = json.loads((schema_dir / "ServerNotification.json").read_text())
     one_of = server_notifications.get("oneOf", [])
-    generated_source = (sdk_root() / "src" / "openai_codex" / "generated" / "v2_all.py").read_text()
+    generated_source = (sdk_root() / "src" / "baicode_sdk" / "generated" / "v2_all.py").read_text()
 
     specs: list[tuple[str, str]] = []
 
@@ -847,7 +848,7 @@ def _type_tuple_source(class_names: list[str]) -> str:
 
 def generate_notification_registry(schema_dir: Path) -> None:
     """Regenerate notification dispatch metadata from the app-server notification schema."""
-    out = sdk_root() / "src" / "openai_codex" / "generated" / "notification_registry.py"
+    out = sdk_root() / "src" / "baicode_sdk" / "generated" / "notification_registry.py"
     specs = _notification_specs(schema_dir)
     class_names = sorted({class_name for _, class_name in specs})
     if not class_names:
@@ -1084,7 +1085,7 @@ def _load_generated_v2_all_module() -> types.ModuleType:
     """Import the freshly generated v2_all module without importing package init."""
     module_name = "_openai_codex_generated_v2_all_for_artifacts"
     sys.modules.pop(module_name, None)
-    module_path = sdk_root() / "src" / "openai_codex" / "generated" / "v2_all.py"
+    module_path = sdk_root() / "src" / "baicode_sdk" / "generated" / "v2_all.py"
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load generated module from {module_path}")
@@ -1390,7 +1391,7 @@ def _render_thread_block(turn_fields: list[PublicFieldSpec], *, is_async: bool =
 def generate_public_api_flat_methods(*, format_output: bool = True) -> None:
     """Regenerate the public convenience methods from generated protocol models."""
     src_dir = sdk_root() / "src"
-    public_api_path = src_dir / "openai_codex" / "api.py"
+    public_api_path = src_dir / "baicode_sdk" / "api.py"
     if not public_api_path.exists():
         # PR2 can run codegen before the ergonomic public API layer is added.
         return

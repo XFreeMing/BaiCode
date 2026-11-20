@@ -723,8 +723,8 @@ fn write_local_marketplace(
     plugins: &[LocalPluginFixture<'_>],
 ) -> Result<AbsolutePathBuf> {
     std::fs::create_dir_all(root.join(".git"))?;
-    std::fs::create_dir_all(root.join(".agents/plugins"))?;
-    let marketplace_path = root.join(".agents/plugins").join(manifest_name);
+    std::fs::create_dir_all(root.join(".BaiCode/plugins"))?;
+    let marketplace_path = root.join(".BaiCode/plugins").join(manifest_name);
     let entries = plugins
         .iter()
         .map(|plugin| {
@@ -746,7 +746,7 @@ fn write_local_marketplace(
     )?;
 
     for plugin in plugins {
-        let plugin_manifest = root.join("plugins").join(plugin.name).join(".codex-plugin");
+        let plugin_manifest = root.join("plugins").join(plugin.name).join(".baicode-plugin");
         std::fs::create_dir_all(&plugin_manifest)?;
         std::fs::write(
             plugin_manifest.join("plugin.json"),
@@ -806,7 +806,7 @@ fn write_installed_plugin(
         .join(marketplace_name)
         .join(plugin_name)
         .join("1.2.3")
-        .join(".codex-plugin");
+        .join(".baicode-plugin");
     std::fs::create_dir_all(&plugin_manifest)?;
     std::fs::write(
         plugin_manifest.join("plugin.json"),

@@ -437,7 +437,7 @@ pub(super) async fn model_catalog_refresh_requests(
     if multi_agent_version == MultiAgentVersion::V1 {
         assert!(
         description.contains(
-            "Do not spawn sub-agents unless the user or applicable AGENTS.md/skill instructions explicitly ask for sub-agents, delegation, or parallel agent work."
+            "Do not spawn sub-agents unless the user or applicable BAICODE.md/skill instructions explicitly ask for sub-agents, delegation, or parallel agent work."
         ),
         "expected explicit authorization rule in spawn_agent description: {description:?}"
     );

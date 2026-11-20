@@ -53,7 +53,7 @@ use pretty_assertions::assert_eq;
 async fn discovers_a_complete_capability_bundle_in_one_request() -> anyhow::Result<()> {
     let root = tempfile::tempdir()?;
     write_file(
-        &root.path().join(".codex-plugin/plugin.json"),
+        &root.path().join(".baicode-plugin/plugin.json"),
         r#"{
   "name": "demo",
   "interface": {"displayName": "Demo Plugin"},
@@ -118,7 +118,7 @@ async fn discovers_a_complete_capability_bundle_in_one_request() -> anyhow::Resu
     let plugin = discovery.plugin.as_ref().expect("root plugin");
     assert_eq!(
         plugin.manifest.path,
-        root_uri.join(".codex-plugin/plugin.json")?
+        root_uri.join(".baicode-plugin/plugin.json")?
     );
     assert!(plugin.manifest.contents.contains("Demo Plugin"));
     assert_eq!(
@@ -136,7 +136,7 @@ async fn discovers_a_complete_capability_bundle_in_one_request() -> anyhow::Resu
             .map(|file| file.path.clone())
             .collect::<Vec<_>>(),
         vec![
-            root_uri.join(".codex-plugin/plugin.json")?,
+            root_uri.join(".baicode-plugin/plugin.json")?,
             root_uri.join("nested/.claude-plugin/plugin.json")?,
             root_uri.join("nested-cursor/.cursor-plugin/plugin.json")?,
         ]
@@ -170,7 +170,7 @@ async fn discovers_a_complete_capability_bundle_in_one_request() -> anyhow::Resu
         .ok_or_else(|| anyhow::anyhow!("manifest must be an object"))?
         .remove("apps");
     write_file(
-        &root.path().join(".codex-plugin/plugin.json"),
+        &root.path().join(".baicode-plugin/plugin.json"),
         &serde_json::to_string(&manifest)?,
     )?;
     let fallback = discover_root(&mut server, "demo@1", root_uri.clone()).await?;
@@ -956,7 +956,7 @@ async fn v2_helper_batches_roots_and_bounds_its_response() -> anyhow::Result<()>
     for index in 0..5 {
         let root = workspace.path().join(format!("plugin-{index}"));
         write_file(
-            &root.join(".codex-plugin/plugin.json"),
+            &root.join(".baicode-plugin/plugin.json"),
             r#"{"name":"demo"}"#,
         )?;
         write_file(&root.join(".mcp.json"), &config)?;
@@ -975,7 +975,7 @@ async fn v2_helper_batches_roots_and_bounds_its_response() -> anyhow::Result<()>
     }
     let small_root = workspace.path().join("plugin-small");
     write_file(
-        &small_root.join(".codex-plugin/plugin.json"),
+        &small_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"small"}"#,
     )?;
     write_file(
@@ -1255,7 +1255,7 @@ async fn sandboxed_discovery_follows_only_permitted_external_symlinks() -> anyho
     let root = tempfile::tempdir()?;
     let external = tempfile::tempdir()?;
     write_file(
-        &root.path().join(".codex-plugin/plugin.json"),
+        &root.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"linked-plugin","mcpServers":"./external-mcp.json"}"#,
     )?;
     write_file(

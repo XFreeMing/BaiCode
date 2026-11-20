@@ -284,7 +284,7 @@ fn up_to_date_fast_path_validates_marketplace_name() {
     let codex_home = TempDir::new().expect("create Codex home");
     let install_root = marketplace_install_root(codex_home.path());
     let destination = install_root.join("good");
-    let manifest_dir = destination.join(".agents/plugins");
+    let manifest_dir = destination.join(".BaiCode/plugins");
     std::fs::create_dir_all(&manifest_dir).expect("create marketplace manifest directory");
     std::fs::write(
         manifest_dir.join("marketplace.json"),
@@ -596,7 +596,7 @@ fn automatic_upgrade_skips_known_name_mismatch_until_the_ref_or_revision_changes
     assert!(staging.is_dir());
 
     std::fs::write(
-        remote.path().join(".agents/plugins/marketplace.json"),
+        remote.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{"name":"original","plugins":[]}"#,
     )
     .unwrap();
@@ -610,7 +610,7 @@ fn automatic_upgrade_skips_known_name_mismatch_until_the_ref_or_revision_changes
 }
 
 fn init_marketplace_repo(repo: &Path, marketplace_name: &str) {
-    let manifest_dir = repo.join(".agents/plugins");
+    let manifest_dir = repo.join(".BaiCode/plugins");
     std::fs::create_dir_all(&manifest_dir).expect("create marketplace manifest directory");
     std::fs::write(
         manifest_dir.join("marketplace.json"),

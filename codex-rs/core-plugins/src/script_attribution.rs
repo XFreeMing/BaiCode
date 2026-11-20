@@ -225,7 +225,7 @@ impl TrustedPluginRoots {
                     store.plugin_root(plugin_id, &curated_plugin_cache_version(&curated_sha));
                 let marketplace_path = match plugin_id.marketplace_name.as_str() {
                     OPENAI_CURATED_MARKETPLACE_NAME => curated_plugins_repo_path(codex_home)
-                        .join(".agents/plugins/marketplace.json"),
+                        .join(".BaiCode/plugins/marketplace.json"),
                     OPENAI_API_CURATED_MARKETPLACE_NAME => {
                         curated_plugins_api_marketplace_path(codex_home)
                     }
@@ -243,7 +243,7 @@ impl TrustedPluginRoots {
                 )
                 .ok()?;
                 let marketplace_plugin = Self::marketplace_plugin(
-                    marketplace_root.join(".agents/plugins/marketplace.json"),
+                    marketplace_root.join(".BaiCode/plugins/marketplace.json"),
                     plugin_id,
                 )?;
                 let MarketplacePluginSource::Local { path: source_root } =

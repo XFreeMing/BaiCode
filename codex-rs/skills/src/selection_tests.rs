@@ -114,11 +114,11 @@ fn collect_explicit_skill_mentions_accepts_structured_discovery_path() {
     let skill = make_skill("linked-skill", "/tmp/shared/linked-skill/SKILL.md");
     let loaded_skills = skill_outcome_with_discovery_path(
         skill.clone(),
-        "/tmp/project/.agents/skills/linked-skill/SKILL.md",
+        "/tmp/project/.BaiCode/skills/linked-skill/SKILL.md",
     );
     let inputs = vec![UserInput::Skill {
         name: "linked-skill".to_string(),
-        path: test_path_buf("/tmp/project/.agents/skills/linked-skill/SKILL.md"),
+        path: test_path_buf("/tmp/project/.BaiCode/skills/linked-skill/SKILL.md"),
     }];
 
     let selected = collect_explicit_skill_mentions(&inputs, &loaded_skills, &HashMap::new());
@@ -131,12 +131,12 @@ fn collect_explicit_skill_mentions_accepts_linked_discovery_path() {
     let skill = make_skill("linked-skill", "/tmp/shared/linked-skill/SKILL.md");
     let loaded_skills = skill_outcome_with_discovery_path(
         skill.clone(),
-        "/tmp/project/.agents/skills/linked-skill/SKILL.md",
+        "/tmp/project/.BaiCode/skills/linked-skill/SKILL.md",
     );
     let inputs = vec![UserInput::Text {
         text: linked_skill_mention(
             "linked-skill",
-            "/tmp/project/.agents/skills/linked-skill/SKILL.md",
+            "/tmp/project/.BaiCode/skills/linked-skill/SKILL.md",
         ),
         text_elements: Vec::new(),
     }];
@@ -151,12 +151,12 @@ fn collect_explicit_skill_mentions_rejects_disabled_discovery_path() {
     let skill = make_skill("linked-skill", "/tmp/shared/linked-skill/SKILL.md");
     let mut loaded_skills = skill_outcome_with_discovery_path(
         skill.clone(),
-        "/tmp/project/.agents/skills/linked-skill/SKILL.md",
+        "/tmp/project/.BaiCode/skills/linked-skill/SKILL.md",
     );
     loaded_skills.disabled_paths.insert(skill.path_to_skills_md);
     let inputs = vec![UserInput::Skill {
         name: "linked-skill".to_string(),
-        path: test_path_buf("/tmp/project/.agents/skills/linked-skill/SKILL.md"),
+        path: test_path_buf("/tmp/project/.BaiCode/skills/linked-skill/SKILL.md"),
     }];
 
     let selected = collect_explicit_skill_mentions(&inputs, &loaded_skills, &HashMap::new());
@@ -362,7 +362,7 @@ fn collect_explicit_skill_mentions_matches_windows_path_identity() {
     let loaded_skills = TestLookup {
         skill_discovery_path_by_path: HashMap::from([(
             skill.path_to_skills_md.clone(),
-            PathUri::parse("file:///C:/Project/.agents/skills/Demo/SKILL.md").unwrap(),
+            PathUri::parse("file:///C:/Project/.BaiCode/skills/Demo/SKILL.md").unwrap(),
         )]),
         skills: vec![skill.clone()],
         ..Default::default()
@@ -371,7 +371,7 @@ fn collect_explicit_skill_mentions_matches_windows_path_identity() {
     for path in [
         r"c:\skills\demo\skill.md",
         "C:/SKILLS/DEMO/skill.md",
-        "skill://c:/project/.agents/skills/demo/skill.md",
+        "skill://c:/project/.BaiCode/skills/demo/skill.md",
     ] {
         let inputs = vec![UserInput::Text {
             text: format!("use [$demo-skill]({path})"),

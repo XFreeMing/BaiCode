@@ -26,8 +26,8 @@ fn configured_marketplace_update() -> MarketplaceConfigUpdate<'static> {
 
 fn write_installed_marketplace(codex_home: &Path, marketplace_name: &str) -> Result<()> {
     let root = marketplace_install_root(codex_home).join(marketplace_name);
-    std::fs::create_dir_all(root.join(".agents/plugins"))?;
-    std::fs::write(root.join(".agents/plugins/marketplace.json"), "{}")?;
+    std::fs::create_dir_all(root.join(".BaiCode/plugins"))?;
+    std::fs::write(root.join(".BaiCode/plugins/marketplace.json"), "{}")?;
     std::fs::write(root.join("marker.txt"), "installed")?;
     Ok(())
 }

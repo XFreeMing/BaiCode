@@ -14,14 +14,14 @@ const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 async fn marketplace_add_local_directory_source() -> Result<()> {
     let codex_home = TempDir::new()?;
     let source = codex_home.path().join("alice@example.com/marketplace");
-    std::fs::create_dir_all(source.join(".agents/plugins"))?;
-    std::fs::create_dir_all(source.join("plugins/sample/.codex-plugin"))?;
+    std::fs::create_dir_all(source.join(".BaiCode/plugins"))?;
+    std::fs::create_dir_all(source.join("plugins/sample/.baicode-plugin"))?;
     std::fs::write(
-        source.join(".agents/plugins/marketplace.json"),
+        source.join(".BaiCode/plugins/marketplace.json"),
         r#"{"name":"debug","plugins":[]}"#,
     )?;
     std::fs::write(
-        source.join("plugins/sample/.codex-plugin/plugin.json"),
+        source.join("plugins/sample/.baicode-plugin/plugin.json"),
         r#"{"name":"sample"}"#,
     )?;
     std::fs::write(source.join("plugins/sample/marker.txt"), "local ref")?;

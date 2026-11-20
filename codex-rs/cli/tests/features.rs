@@ -25,6 +25,26 @@ fn codex_command(codex_home: &Path) -> Result<assert_cmd::Command> {
     Ok(cmd)
 }
 
+#[cfg(unix)]
+#[test]
+fn baicode_rejects_a_home_redirected_to_codex() -> Result<()> {
+    let home = TempDir::new()?;
+    let foreign = home.path().join(".codex");
+    std::fs::create_dir(&foreign)?;
+    let config = foreign.join("config.toml");
+    std::fs::write(&config, "# belongs to Codex\n")?;
+    let alias = home.path().join(".BaiCode");
+    std::os::unix::fs::symlink(&foreign, &alias)?;
+    codex_command(&alias)?
+        .env("HOME", home.path())
+        .args(["exec", "--skip-git-repo-check", "unused"])
+        .assert()
+        .failure()
+        .stderr(contains("outside the Codex configuration directory"));
+    assert_eq!(std::fs::read_to_string(config)?, "# belongs to Codex\n");
+    Ok(())
+}
+
 #[test]
 fn strict_config_rejects_unknown_config_override() -> Result<()> {
     for (config_override, ignored_path) in [

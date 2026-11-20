@@ -77,7 +77,7 @@ plugins = true
 
 fn write_marketplace_source_with_manifest(source: &Path, marketplace_manifest: &str) -> Result<()> {
     std::fs::create_dir_all(source.join(".agents").join("plugins"))?;
-    std::fs::create_dir_all(source.join("plugins").join("sample").join(".codex-plugin"))?;
+    std::fs::create_dir_all(source.join("plugins").join("sample").join(".baicode-plugin"))?;
     std::fs::write(
         source
             .join(".agents")
@@ -89,7 +89,7 @@ fn write_marketplace_source_with_manifest(source: &Path, marketplace_manifest: &
         source
             .join("plugins")
             .join("sample")
-            .join(".codex-plugin")
+            .join(".baicode-plugin")
             .join("plugin.json"),
         r#"{"name":"sample","version":"1.2.3","description":"Sample plugin"}"#,
     )?;
@@ -578,7 +578,7 @@ async fn marketplace_list_fails_when_home_marketplace_is_malformed() -> Result<(
     let codex_home = TempDir::new()?;
     let home = TempDir::new()?;
     write_plugins_enabled_config(codex_home.path())?;
-    std::fs::create_dir_all(home.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(home.path().join(".BaiCode/plugins"))?;
     let home_marketplace_path = home
         .path()
         .join(".agents")
@@ -1119,7 +1119,7 @@ async fn plugin_add_reinstalls_from_configured_marketplace_snapshot() -> Result<
     assert!(
         codex_home
             .path()
-            .join("plugins/cache/debug/sample/1.2.3/.codex-plugin/plugin.json")
+            .join("plugins/cache/debug/sample/1.2.3/.baicode-plugin/plugin.json")
             .is_file()
     );
 
@@ -1172,7 +1172,7 @@ async fn plugin_add_rejects_cached_plugins_without_authorizing_marketplace_snaps
     assert!(
         codex_home
             .path()
-            .join("plugins/cache/debug/sample/1.2.3/.codex-plugin/plugin.json")
+            .join("plugins/cache/debug/sample/1.2.3/.baicode-plugin/plugin.json")
             .is_file()
     );
 
@@ -1195,7 +1195,7 @@ fn sample_remote_plugin_bundle() -> Result<Vec<u8>> {
     let mut archive = tar::Builder::new(GzEncoder::new(Vec::new(), Compression::default()));
     for (path, contents) in [
         (
-            ".codex-plugin/plugin.json",
+            ".baicode-plugin/plugin.json",
             r#"{"name":"sample","version":"1.2.3"}"#,
         ),
         (
@@ -1440,7 +1440,7 @@ async fn remote_plugin_add_list_and_remove() -> Result<()> {
         .join(MARKETPLACE)
         .join("sample")
         .join("1.2.3");
-    let manifest = installed_root.join(".codex-plugin/plugin.json");
+    let manifest = installed_root.join(".baicode-plugin/plugin.json");
     let installed_for_add = Arc::clone(&installed);
     Mock::given(method("POST"))
         .and(path(format!("/backend-api/ps/plugins/{REMOTE_ID}/install")))

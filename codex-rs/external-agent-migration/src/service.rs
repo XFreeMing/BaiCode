@@ -32,8 +32,6 @@ use crate::sessions::ExternalAgentSessionMigration;
 use crate::sessions::SessionMetadataMode;
 #[cfg(test)]
 use crate::source_cla::KNOWN_MARKETPLACES_PATH as EXTERNAL_AGENT_KNOWN_MARKETPLACES_PATH;
-#[cfg(test)]
-use crate::source_cla::OFFICIAL_MARKETPLACE_NAME as EXTERNAL_OFFICIAL_MARKETPLACE_NAME;
 use crate::utils::copy_dir_recursive;
 use crate::utils::display_source_paths;
 use crate::utils::invalid_data_error;
@@ -482,10 +480,7 @@ impl ExternalAgentConfigService {
     }
 
     pub(crate) fn home_target_skills_dir(&self) -> PathBuf {
-        self.codex_home
-            .parent()
-            .map(|parent| parent.join(".agents").join("skills"))
-            .unwrap_or_else(|| PathBuf::from(".agents").join("skills"))
+        self.codex_home.join("skills").to_path_buf()
     }
 
     pub(crate) fn source_config_dir(&self, scope: &MigrationScope) -> PathBuf {
@@ -577,7 +572,7 @@ impl ExternalAgentConfigService {
         let source_settings = self.source_settings(&scope);
         let target_config = match &scope {
             MigrationScope::Home => self.codex_home.join("config.toml"),
-            MigrationScope::Repository { root } => root.join(".codex").join("config.toml"),
+            MigrationScope::Repository { root } => root.join(".BaiCode").join("config.toml"),
         };
         let Some(settings) = self.effective_source_settings(&scope)? else {
             return Ok(None);
@@ -625,7 +620,7 @@ impl ExternalAgentConfigService {
         };
         let target_config = match &scope {
             MigrationScope::Home => self.codex_home.join("config.toml"),
-            MigrationScope::Repository { root } => root.join(".codex").join("config.toml"),
+            MigrationScope::Repository { root } => root.join(".BaiCode").join("config.toml"),
         };
         let settings = self.effective_source_settings(&scope)?;
         let migrated = self.build_mcp_config(&scope, settings)?;
@@ -668,7 +663,7 @@ impl ExternalAgentConfigService {
             ),
             MigrationScope::Repository { root } => (
                 root.join(self.source.config_dir()).join("agents"),
-                root.join(".codex").join("agents"),
+                root.join(".BaiCode").join("agents"),
             ),
         };
 
@@ -681,7 +676,7 @@ impl ExternalAgentConfigService {
         };
         let target_hooks = match &scope {
             MigrationScope::Home => self.codex_home.join("hooks.json"),
-            MigrationScope::Repository { root } => root.join(".codex").join("hooks.json"),
+            MigrationScope::Repository { root } => root.join(".BaiCode").join("hooks.json"),
         };
         let source_external_agent_dir = self.source_config_dir(&scope);
 
@@ -709,7 +704,7 @@ impl ExternalAgentConfigService {
             ),
             MigrationScope::Repository { root } => (
                 root.join(self.source.config_dir()).join("commands"),
-                root.join(".agents").join("skills"),
+                root.join(".BaiCode").join("skills"),
             ),
         };
 
@@ -729,7 +724,7 @@ impl ExternalAgentConfigService {
             ),
             MigrationScope::Repository { root } => (
                 root.join(self.source.config_dir()),
-                root.join(".agents").join("skills"),
+                root.join(".BaiCode").join("skills"),
             ),
         };
         let source_skills = source_skills_dir_names
@@ -790,7 +785,7 @@ impl ExternalAgentConfigService {
                 else {
                     return Ok(None);
                 };
-                let target_agents_md = group.scope.join("AGENTS.md");
+                let target_agents_md = group.scope.join("BAICODE.md");
                 (group.sources, target_agents_md)
             }
             MigrationScope::Home => {
@@ -798,7 +793,7 @@ impl ExternalAgentConfigService {
                 if source_agents_md.is_empty() {
                     return Ok(None);
                 }
-                (source_agents_md, self.codex_home.join("AGENTS.md"))
+                (source_agents_md, self.codex_home.join("BAICODE.md"))
             }
         };
         if !is_missing_or_empty_text_file(&target_agents_md)? {
@@ -806,7 +801,7 @@ impl ExternalAgentConfigService {
         }
 
         let Some(target_parent) = target_agents_md.parent() else {
-            return Err(invalid_data_error("AGENTS.md target path has no parent"));
+            return Err(invalid_data_error("BAICODE.md target path has no parent"));
         };
         fs::create_dir_all(target_parent)?;
 

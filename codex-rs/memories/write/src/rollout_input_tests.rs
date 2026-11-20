@@ -83,11 +83,11 @@ fn extraction_chunks_preserve_unicode_evidence_with_bounded_messages() {
 fn classifies_memory_excluded_fragments() {
     let cases = [
         (
-            "# AGENTS.md instructions for /tmp\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>",
+            "# BAICODE.md instructions for /tmp\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>",
             true,
         ),
         (
-            "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>",
+            "# BAICODE.md instructions\n\n<INSTRUCTIONS>\nbody\n</INSTRUCTIONS>",
             true,
         ),
         (

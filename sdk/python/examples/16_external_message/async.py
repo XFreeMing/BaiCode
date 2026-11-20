@@ -12,7 +12,7 @@ from _bootstrap import ensure_local_sdk_src, runtime_config
 
 ensure_local_sdk_src()
 
-from openai_codex import AsyncCodex, ExternalMessage, Sandbox
+from baicode_sdk import AsyncCodex, ExternalMessage, Sandbox
 
 
 async def main() -> None:

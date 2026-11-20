@@ -42,7 +42,7 @@ async fn uninstall_serializes_backend_mutations_and_preserves_cache_on_failure()
         .unwrap();
         let cache = manager.store.plugin_base_root(&plugin_id);
         write_file(
-            cache.join("1.0.0/.codex-plugin/plugin.json").as_path(),
+            cache.join("1.0.0/.baicode-plugin/plugin.json").as_path(),
             r#"{"name":"sample","version":"1.0.0"}"#,
         );
         Mock::given(method("GET"))
@@ -333,7 +333,7 @@ async fn plugin_share_keeps_account_binding_through_storage_upload() {
             let fixture = PluginTransferTest::new(home.path(), mode, account_changed).await;
             let plugin_path = home.path().join("sample");
             write_file(
-                &plugin_path.join(".codex-plugin/plugin.json"),
+                &plugin_path.join(".baicode-plugin/plugin.json"),
                 r#"{"name":"sample"}"#,
             );
             Mock::given(method("POST"))

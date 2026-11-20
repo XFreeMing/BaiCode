@@ -533,7 +533,7 @@ mod tests {
             .join(REMOTE_GLOBAL_MARKETPLACE_NAME)
             .join("linear")
             .join("1.2.3")
-            .join(".codex-plugin")
+            .join(".baicode-plugin")
             .join("plugin.json");
         std::fs::create_dir_all(cached_manifest.parent().expect("manifest parent"))
             .expect("create cached plugin manifest parent");
@@ -648,7 +648,7 @@ mod tests {
         let store = PluginStore::new(codex_home.path().to_path_buf());
         let manifest = store
             .plugin_root(&plugin_id, "1.2.3")
-            .join(".codex-plugin/plugin.json");
+            .join(".baicode-plugin/plugin.json");
         std::fs::create_dir_all(manifest.as_path().parent().expect("manifest parent"))
             .expect("create cached plugin directory");
         std::fs::write(manifest.as_path(), r#"{"name":"linear","version":"1.2.3"}"#)
@@ -756,7 +756,7 @@ mod tests {
                     .join(marketplace_name)
                     .join(cached_plugin_name)
                     .join("1.2.3")
-                    .join(".codex-plugin")
+                    .join(".baicode-plugin")
                     .join("plugin.json");
                 std::fs::create_dir_all(manifest.parent().expect("manifest parent"))
                     .expect("create cached plugin manifest parent");
@@ -871,7 +871,7 @@ mod tests {
                 .join(plugin_name);
             assert!(
                 plugin_root
-                    .join("1.2.3/.codex-plugin/plugin.json")
+                    .join("1.2.3/.baicode-plugin/plugin.json")
                     .is_file()
             );
             assert_eq!(
@@ -905,7 +905,7 @@ mod tests {
             .join(REMOTE_GLOBAL_MARKETPLACE_NAME)
             .join("linear")
             .join("1.2.3")
-            .join(".codex-plugin")
+            .join(".baicode-plugin")
             .join("plugin.json");
         std::fs::create_dir_all(cached_manifest.parent().expect("manifest parent"))
             .expect("create cached plugin manifest parent");
@@ -990,7 +990,7 @@ mod tests {
             .join(REMOTE_CREATED_BY_ME_MARKETPLACE_NAME)
             .join("created-by-me-plugin")
             .join("1.2.3")
-            .join(".codex-plugin")
+            .join(".baicode-plugin")
             .join("plugin.json");
         std::fs::create_dir_all(
             created_by_me_cached_manifest
@@ -1009,7 +1009,7 @@ mod tests {
             .join(REMOTE_WORKSPACE_SHARED_WITH_ME_PRIVATE_MARKETPLACE_NAME)
             .join("private-plugin")
             .join("1.2.3")
-            .join(".codex-plugin")
+            .join(".baicode-plugin")
             .join("plugin.json");
         std::fs::create_dir_all(cached_manifest.parent().expect("manifest parent"))
             .expect("create cached plugin manifest parent");
@@ -1021,7 +1021,7 @@ mod tests {
             .join(REMOTE_WORKSPACE_SHARED_WITH_ME_MARKETPLACE_NAME)
             .join("shared-plugin")
             .join("1.2.3")
-            .join(".codex-plugin")
+            .join(".baicode-plugin")
             .join("plugin.json");
         std::fs::create_dir_all(canonical_cached_manifest.parent().expect("manifest parent"))
             .expect("create canonical cached plugin manifest parent");

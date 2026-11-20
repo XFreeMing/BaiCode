@@ -1,17 +1,9 @@
 # FAQ
 
-## Is the Python SDK stable?
+## Which runtime does the SDK use?
 
-`openai-codex` publishes stable releases. Install the latest one with
-`pip install openai-codex`.
-
-## Why does the SDK install a runtime package?
-
-Stable CLI releases publish the SDK with the same version and an exact runtime
-pin. CLI prereleases do not trigger Python package publishing. Independent SDK
-beta releases can still be published manually with a different version number,
-but must pin a compatible runtime. The dependency is installed automatically.
-See [Python SDK releases](../RELEASING.md) for publishing and retry instructions.
+The SDK starts the `baic` executable from its pinned `baicode-cli-bin` package.
+To use a local build, set `CodexConfig.codex_bin` to its absolute path.
 
 ## Thread vs turn
 
@@ -42,7 +34,7 @@ If your app is not already async, stay with `Codex`.
 Use `ExternalMessage` for messages from other agents, tools, or applications:
 
 ```python
-from openai_codex import ExternalMessage
+from baicode_sdk import ExternalMessage
 
 result = thread.run(ExternalMessage(
     tool_name="notifications",
@@ -113,7 +105,7 @@ If you are migrating older code, update these names:
 Use the same `sandbox=` keyword for threads and turns:
 
 ```python
-from openai_codex import Sandbox
+from baicode_sdk import Sandbox
 
 thread = codex.thread_start(sandbox=Sandbox.workspace_write)
 result = thread.run("Review only.", sandbox=Sandbox.read_only)
@@ -143,7 +135,7 @@ This avoids duplicate ways to do the same operation and keeps behavior explicit.
 
 Common causes:
 
-- installation is incomplete and the pinned `openai-codex-cli-bin` dependency is missing
+- installation is incomplete and the pinned `baicode-cli-bin` dependency is missing
 - local `codex_bin` override points to a missing file
 - a custom local Codex executable does not support the SDK operation being used
 

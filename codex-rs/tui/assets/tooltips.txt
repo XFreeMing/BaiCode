@@ -11,7 +11,7 @@ Use **/status** to see the current model, approvals, and token usage.
 Use **/statusline** to configure which items appear in the status line.
 Use **/fork** to branch the current chat into a new thread.
 Use **/side** to start a side conversation in a temporary fork without polluting the main thread.
-Use **/init** to create an `AGENTS.md` with project-specific guidance.
+Use **/init** to create an `BAICODE.md` with project-specific guidance.
 Use **/mcp** to list configured MCP tools.
 Use **/rename** to rename your threads for easier thread resuming.
 Use the OpenAI docs MCP for API questions; enable it with `codex mcp add openaiDeveloperDocs --url https://developers.openai.com/mcp`.

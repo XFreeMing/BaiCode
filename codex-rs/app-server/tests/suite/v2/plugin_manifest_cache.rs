@@ -17,7 +17,7 @@ async fn plugin_list_observes_manifest_and_overlay_revisions_in_one_server() -> 
     let codex_home = TempDir::new()?;
     let repository = TempDir::new()?;
     let root = repository.path();
-    for directory in [".git", ".agents/plugins", "sample/.codex-plugin"] {
+    for directory in [".git", ".BaiCode/plugins", "sample/.baicode-plugin"] {
         std::fs::create_dir_all(root.join(directory))?;
     }
     std::fs::write(
@@ -25,7 +25,7 @@ async fn plugin_list_observes_manifest_and_overlay_revisions_in_one_server() -> 
         "[features]\nplugins = true\nremote_plugin = false\n",
     )?;
     std::fs::write(
-        root.join(".agents/plugins/marketplace.json"),
+        root.join(".BaiCode/plugins/marketplace.json"),
         serde_json::to_vec(&json!({
             "name": "cache-test", "plugins": [{"name": "sample", "source": {"source": "local", "path": "./sample"}}]
         }))?,
@@ -34,7 +34,7 @@ async fn plugin_list_observes_manifest_and_overlay_revisions_in_one_server() -> 
         .with_codex_home(codex_home.path())
         .build_initialized_with_timeout(Duration::from_secs(30))
         .await?;
-    let overlay_path = root.join("sample/.codex-plugin/plugin.json");
+    let overlay_path = root.join("sample/.baicode-plugin/plugin.json");
     for (version, overlay_name, expected_name) in [
         ("1.0.0", Some("First"), "First"),
         ("2.0.0", Some("First"), "First"),

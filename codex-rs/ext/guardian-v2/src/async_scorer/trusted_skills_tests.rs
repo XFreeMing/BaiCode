@@ -18,11 +18,11 @@ async fn trusts_only_user_owned_skill_roots() -> Result<()> {
     let agents_skill = test
         .home
         .path()
-        .join("user/.agents/skills/also-trusted/SKILL.md");
+        .join("user/.BaiCode/skills/also-trusted/SKILL.md");
     let repo_skill = test
         .home
         .path()
-        .join("workspace/.agents/skills/untrusted/SKILL.md");
+        .join("workspace/.BaiCode/skills/untrusted/SKILL.md");
     for path in [&codex_skill, &agents_skill, &repo_skill] {
         std::fs::create_dir_all(path.parent().expect("skill parent"))?;
         std::fs::write(path, "trusted skill instructions")?;
@@ -31,7 +31,7 @@ async fn trusts_only_user_owned_skill_roots() -> Result<()> {
     let roots = TrustedSkillRoots {
         roots: vec![
             test.home.path().join("skills"),
-            test.home.path().join("user/.agents/skills"),
+            test.home.path().join("user/.BaiCode/skills"),
         ],
     };
     for trusted_path in [&codex_skill, &agents_skill] {
@@ -84,7 +84,7 @@ async fn rejects_skills_that_escape_user_roots_through_symlinks() -> Result<()> 
 fn invoked_skill_paths_are_deduplicated_and_bounded() {
     let mut skills = TrustedSkillInvocations::default();
     for index in 0..MAX_TRUSTED_SKILLS.saturating_mul(2) {
-        let path = format!("/home/user/.codex/skills/{index:03}/SKILL.md");
+        let path = format!("/home/user/.BaiCode/skills/{index:03}/SKILL.md");
         skills.record(path.clone());
         skills.record(path);
     }
@@ -92,7 +92,7 @@ fn invoked_skill_paths_are_deduplicated_and_bounded() {
     assert_eq!(
         skills.into_paths(),
         (0..MAX_TRUSTED_SKILLS)
-            .map(|index| format!("/home/user/.codex/skills/{index:03}/SKILL.md"))
+            .map(|index| format!("/home/user/.BaiCode/skills/{index:03}/SKILL.md"))
             .collect::<Vec<_>>()
     );
 

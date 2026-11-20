@@ -15,7 +15,7 @@ pub(crate) fn write_file(path: &Path, contents: &str) {
 pub(crate) fn write_curated_plugin(root: &Path, plugin_name: &str) {
     let plugin_root = root.join("plugins").join(plugin_name);
     write_file(
-        &plugin_root.join(".codex-plugin/plugin.json"),
+        &plugin_root.join(".baicode-plugin/plugin.json"),
         &format!(
             r#"{{
   "name": "{plugin_name}",
@@ -67,7 +67,7 @@ pub(crate) fn write_openai_api_curated_marketplace(root: &Path, plugin_names: &[
         .collect::<Vec<_>>()
         .join(",\n");
     write_file(
-        &root.join(".agents/plugins/api_marketplace.json"),
+        &root.join(".BaiCode/plugins/api_marketplace.json"),
         &format!(
             r#"{{
   "name": "{OPENAI_API_CURATED_MARKETPLACE_NAME}",

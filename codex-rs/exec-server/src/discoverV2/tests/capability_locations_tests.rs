@@ -44,16 +44,16 @@ async fn prewarming_resolves_global_locations_without_cwd_or_config() -> anyhow:
     write(temp.path(), "codex/config.toml", "invalid TOML [")?;
     for root in [
         "codex/skills",
-        "home/.agents/skills",
+        "home/.BaiCode/skills",
         "etc/codex/skills",
-        "project/.agents/skills",
+        "project/.BaiCode/skills",
     ] {
         write(temp.path(), &format!("{root}/demo/SKILL.md"), "unparsed")?;
     }
     for version in ["1.9.0", "1.10.0"] {
         write(
             temp.path(),
-            &format!("codex/plugins/cache/team/demo/{version}/.codex-plugin/plugin.json"),
+            &format!("codex/plugins/cache/team/demo/{version}/.baicode-plugin/plugin.json"),
             MANIFEST,
         )?;
     }
@@ -76,7 +76,7 @@ async fn prewarming_resolves_global_locations_without_cwd_or_config() -> anyhow:
     }];
     for (id, root) in [
         ("codex-home-skills", "codex/skills"),
-        ("user-agent-skills", "home/.agents/skills"),
+        ("user-agent-skills", "home/.BaiCode/skills"),
         ("system-skills", "etc/codex/skills"),
     ] {
         expected.push(CapabilityLocation {

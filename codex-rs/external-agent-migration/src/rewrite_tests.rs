@@ -8,7 +8,7 @@ const PROFILE: RewriteProfile = RewriteProfile::new("SOURCE.md", &["source agent
 fn rewrites_terms_only_at_word_boundaries() {
     assert_eq!(
         PROFILE.rewrite("SOURCE.md Source source agent source_agent Source: café ‘Source’"),
-        "AGENTS.md Codex Codex source_agent Codex: café ‘Codex’"
+        "BAICODE.md Codex Codex source_agent Codex: café ‘Codex’"
     );
 }
 
@@ -48,22 +48,22 @@ SOURCE.md?section=details
 <http://Source.example/SOURCE.md>，Codex
 “https://Source.example/é/SOURCE.md” Codex
 `file:///Source/SOURCE.md` Source://Source/SOURCE.md
-[Codex](mailto:Source@example.com) [AGENTS.md](./AGENTS.md)
+[Codex](mailto:Source@example.com) [BAICODE.md](./BAICODE.md)
 WWW.Source.example/SOURCE.md Codex
 https://Source.example/it's/SOURCE.md Codex
 <Source@example.com> Source@example.com support@Source.example Codex
-[Codex](/Codex/reference) [AGENTS.md](./Codex/AGENTS.md)
-AGENTS.md?section=details
+[Codex](/Codex/reference) [BAICODE.md](./Codex/BAICODE.md)
+BAICODE.md?section=details
 [Codex](#Codex)
 <a id="Codex"></a>
 ![Codex](https://example.com/Source/SOURCE.md "Codex")
-[![logo][AGENTS.md logo]](https://Source.example/Source)
+[![logo][BAICODE.md logo]](https://Source.example/Source)
 
-[AGENTS.md logo]: ./logo.svg
+[BAICODE.md logo]: ./logo.svg
 
 | URL | Agent | Instructions |
 | --- | --- | --- |
-|https://example.com|Codex|[docs](AGENTS.md)|
+|https://example.com|Codex|[docs](BAICODE.md)|
 
 [Codex][Codex] [Codex][] [Codex]
 

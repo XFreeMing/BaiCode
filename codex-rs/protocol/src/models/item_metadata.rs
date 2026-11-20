@@ -64,7 +64,7 @@ pub enum ContentItemProvenance {
     DeveloperInstructions { from_additional_requirements: bool },
     /// Skill catalogs, usage guidance, and selected skill contents.
     Skills,
-    /// Instructions loaded from AGENTS.md.
+    /// Instructions loaded from BAICODE.md.
     AgentsMd,
     /// Harness-managed context; command-hook output is distinguished from built-in context.
     Harness {

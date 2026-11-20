@@ -151,7 +151,7 @@ exclude = ["LEGACY_*"]
 fn disabled_layers_do_not_validate_shell_environment_policy() {
     let layer = ConfigLayerEntry::new_disabled(
         ConfigLayerSource::Project {
-            dot_codex_folder: AbsolutePathBuf::from_absolute_path("/untrusted/.codex")
+            dot_codex_folder: AbsolutePathBuf::from_absolute_path("/untrusted/.BaiCode")
                 .expect("project path should be absolute"),
         },
         toml::from_str(
@@ -293,7 +293,7 @@ fn a_project_setting_only_the_provider_preserves_the_user_tui_value() -> anyhow:
     let dir = TempDir::new()?;
     let project = ConfigLayerEntry::new(
         ConfigLayerSource::Project {
-            dot_codex_folder: test_user_config_path(&dir, ".codex"),
+            dot_codex_folder: test_user_config_path(&dir, ".BaiCode"),
         },
         toml::toml! { [tui] status_line_provider = "default" }.into(),
     );
@@ -324,7 +324,7 @@ fn layer_iterators_preserve_precedence_and_disabled_layers() {
         profile: None,
     };
     let project_source = ConfigLayerSource::Project {
-        dot_codex_folder: test_user_config_path(&temp_dir, ".codex"),
+        dot_codex_folder: test_user_config_path(&temp_dir, ".BaiCode"),
     };
     let session_source = ConfigLayerSource::SessionFlags;
     let empty_config = TomlValue::Table(toml::map::Map::new());

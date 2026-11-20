@@ -110,7 +110,7 @@ async fn verified_plugin_install_completed_requires_installed_plugin() {
             PluginInstallRequest {
                 plugin_name: "sample".to_string(),
                 marketplace_path: AbsolutePathBuf::try_from(
-                    curated_root.join(".agents/plugins/api_marketplace.json"),
+                    curated_root.join(".BaiCode/plugins/api_marketplace.json"),
                 )
                 .expect("marketplace path"),
             },

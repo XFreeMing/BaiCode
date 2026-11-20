@@ -11,7 +11,7 @@ to another agent.
 
 ## Review the change
 
-1. Read the applicable `AGENTS.md` instructions.
+1. Read the applicable `BAICODE.md` instructions.
 2. Inspect the complete diff for the requested target and enough surrounding code to understand
    each changed path.
 3. Identify concrete regressions introduced by the change. Continue through the whole diff after

@@ -1571,7 +1571,7 @@ impl Session {
                 thread_name_lookup,
             );
             let (agents_md_result, instruction_warnings) = instruction_refresh;
-            // TODO(anp): Present AGENTS.md discovery errors more clearly to the user.
+            // TODO(anp): Present BAICODE.md discovery errors more clearly to the user.
             agents_md_result?;
             post_session_configured_events.extend(instruction_warnings.into_iter().map(
                 |message| Event {

@@ -296,7 +296,7 @@ fn write_curated_marketplace(
     marketplace_name: &str,
     plugin_names: &[&str],
 ) -> Result<()> {
-    let manifest_root = repo_root.join(".agents/plugins");
+    let manifest_root = repo_root.join(".BaiCode/plugins");
     std::fs::create_dir_all(&manifest_root)?;
     let plugins = plugin_names
         .iter()
@@ -326,9 +326,9 @@ fn write_plugin(
     server_name: &str,
     mcp_server_url: &str,
 ) -> Result<()> {
-    std::fs::create_dir_all(root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(root.join(".baicode-plugin"))?;
     std::fs::write(
-        root.join(".codex-plugin/plugin.json"),
+        root.join(".baicode-plugin/plugin.json"),
         serde_json::to_vec_pretty(&json!({"name": plugin_name}))?,
     )?;
     std::fs::write(

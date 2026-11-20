@@ -112,9 +112,9 @@ fn resolves_primary_runtime_scripts_from_the_installed_plugin_cache() {
     let temp = TempDir::new().expect("temp dir");
     let marketplace_root = temp.path().join("openai-primary-runtime");
     let source_root = marketplace_root.join("plugins/presentations");
-    fs::create_dir_all(source_root.join(".codex-plugin")).expect("create manifest directory");
+    fs::create_dir_all(source_root.join(".baicode-plugin")).expect("create manifest directory");
     fs::write(
-        source_root.join(".codex-plugin/plugin.json"),
+        source_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"presentations","version":"0.1.29"}"#,
     )
     .expect("write plugin manifest");
@@ -123,10 +123,10 @@ fn resolves_primary_runtime_scripts_from_the_installed_plugin_cache() {
     let source_script = source_root.join(relative_script_path);
     fs::create_dir_all(source_script.parent().expect("script parent")).expect("create scripts");
     fs::write(&source_script, "#!/usr/bin/env node\n").expect("write script");
-    fs::create_dir_all(marketplace_root.join(".agents/plugins"))
+    fs::create_dir_all(marketplace_root.join(".BaiCode/plugins"))
         .expect("create marketplace directory");
     fs::write(
-        marketplace_root.join(".agents/plugins/marketplace.json"),
+        marketplace_root.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "openai-primary-runtime",
   "plugins": [
@@ -249,7 +249,7 @@ fn recognizes_windows_executor_plugin_cache_root() {
     };
     let relative_path = "skills/presentations/container_tools/mark_artifact_operation_started.mjs";
     let script = PathUri::parse(
-        "file:///C:/Users/user/.codex/plugins/cache/openai-primary-runtime/presentations/0.1.29/skills/presentations/container_tools/mark_artifact_operation_started.mjs",
+        "file:///C:/Users/user/.BaiCode/plugins/cache/openai-primary-runtime/presentations/0.1.29/skills/presentations/container_tools/mark_artifact_operation_started.mjs",
     )
     .expect("Windows script URI");
 
@@ -260,7 +260,7 @@ fn recognizes_windows_executor_plugin_cache_root() {
         PluginVersionMatch::Exact,
     ));
     let wrong_version = PathUri::parse(
-        "file:///C:/Users/user/.codex/plugins/cache/openai-primary-runtime/presentations/0.1.28/skills/presentations/container_tools/mark_artifact_operation_started.mjs",
+        "file:///C:/Users/user/.BaiCode/plugins/cache/openai-primary-runtime/presentations/0.1.28/skills/presentations/container_tools/mark_artifact_operation_started.mjs",
     )
     .expect("other-version Windows script URI");
     assert!(!executor_plugin_root_matches(
@@ -643,7 +643,7 @@ fn only_emits_safe_normalized_relative_script_paths() {
     );
     assert_eq!(
         normalized_relative_script_path(Path::new(
-            "/home/user/.codex/plugins/cache/openai-curated/sample/scripts/run.py"
+            "/home/user/.BaiCode/plugins/cache/openai-curated/sample/scripts/run.py"
         )),
         None
     );
@@ -821,7 +821,7 @@ fn executor_cache_identity_obeys_windows_and_posix_case_conventions() {
     let (_reference, roots) =
         reference_fixture(&[("sites", "2.0.0-RC1", "selected", "printf shared\\n\n")]);
     let plugin_id = PluginId::parse("sites@openai-curated-remote").expect("plugin id");
-    for prefix in ["file:///C:/Users/user/.codex", "file://server/share/.codex"] {
+    for prefix in ["file:///C:/Users/user/.BaiCode", "file://server/share/.BaiCode"] {
         let script = PathUri::parse(&format!(
             "{prefix}/PLUGINS/CACHE/OPENAI-CURATED-REMOTE/SITES/2.0.0-rc1/{REFERENCE_HELPER}"
         ))
@@ -859,16 +859,16 @@ fn executor_cache_identity_obeys_windows_and_posix_case_conventions() {
     }
     for script in [
         format!(
-            "file:///home/user/.codex/PLUGINS/CACHE/OPENAI-CURATED-REMOTE/SITES/2.0.0-rc1/{REFERENCE_HELPER}"
+            "file:///home/user/.BaiCode/PLUGINS/CACHE/OPENAI-CURATED-REMOTE/SITES/2.0.0-rc1/{REFERENCE_HELPER}"
         ),
         format!(
-            "file:///home/user/.codex/plugins/cache/openai-curated-remote/SITES/2.0.0-RC1/{REFERENCE_HELPER}"
+            "file:///home/user/.BaiCode/plugins/cache/openai-curated-remote/SITES/2.0.0-RC1/{REFERENCE_HELPER}"
         ),
         format!(
-            "file:///C:/Users/user/.codex/PLUGINS/CACHE/OPENAI-CURATED-REMOTE/SITES/2.0.0-rc2/{REFERENCE_HELPER}"
+            "file:///C:/Users/user/.BaiCode/PLUGINS/CACHE/OPENAI-CURATED-REMOTE/SITES/2.0.0-rc2/{REFERENCE_HELPER}"
         ),
         format!(
-            "file:///C:/Users/user/.codex/PLUGINS/CACHE/OPENAI-CURATED-REMOTE/OTHER/2.0.0-rc1/{REFERENCE_HELPER}"
+            "file:///C:/Users/user/.BaiCode/PLUGINS/CACHE/OPENAI-CURATED-REMOTE/OTHER/2.0.0-rc1/{REFERENCE_HELPER}"
         ),
     ] {
         let script = PathUri::parse(&script).expect("script");
@@ -896,7 +896,7 @@ fn executor_cache_identity_obeys_windows_and_posix_case_conventions() {
     }
     for version in ["2.0.0-RC1", "2.0.0-rc1"] {
         let script = PathUri::parse(&format!(
-            "file:///home/user/.codex/plugins/cache/openai-curated-remote/sites/{version}/{REFERENCE_HELPER}"
+            "file:///home/user/.BaiCode/plugins/cache/openai-curated-remote/sites/{version}/{REFERENCE_HELPER}"
         ))
         .expect("POSIX script");
         let target =

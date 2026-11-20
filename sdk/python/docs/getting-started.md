@@ -1,59 +1,17 @@
 # Getting Started
 
-This guide gets a published OpenAI Codex Python SDK installation running
-with a multi-turn thread.
-
-## 1. Install
-
-Install the SDK:
+Install the locally built SDK and runtime wheels in a Python 3.10 or newer environment.
 
 ```bash
-pip install openai-codex
+pip install --no-index --find-links /path/to/wheels baicode-sdk
 ```
 
-Requirements:
+Set the model provider in `~/.BaiCode/config.toml` using the [BaiInf example](../../../README.md#使用-baiinf). The local engine works without a login.
 
-- Python `>=3.10`
-- An existing Codex account session, or one of the login flows below
-
-The SDK installs its matching `openai-codex-cli-bin` runtime dependency
-automatically. Stable SDK releases track the corresponding stable Codex CLI release.
-
-## 2. Authenticate When Needed
-
-Existing Codex authentication is reused automatically. For ChatGPT browser
-login:
+## Run A Turn
 
 ```python
-from openai_codex import Codex
-
-with Codex() as codex:
-    login = codex.login_chatgpt()
-    print(login.auth_url)
-    print(login.wait().success)
-```
-
-For device-code login:
-
-```python
-with Codex() as codex:
-    login = codex.login_chatgpt_device_code()
-    print(login.verification_url, login.user_code)
-    print(login.wait().success)
-```
-
-For API-key login:
-
-```python
-with Codex() as codex:
-    codex.login_api_key("sk-...")
-    print(codex.account().account)
-```
-
-## 3. Run A Turn
-
-```python
-from openai_codex import Codex, Sandbox
+from baicode_sdk import Codex, Sandbox
 
 with Codex() as codex:
     thread = codex.thread_start(sandbox=Sandbox.workspace_write)
@@ -75,12 +33,12 @@ For **untrusted content** from another agent, tool, or application, pass an
 authority and does not establish user authorization or approval. Plain strings
 and `TextInput` represent user input.
 
-## 4. Choose Sandbox Access
+## Choose Sandbox Access
 
 Use one enum for the initial thread and later turn overrides:
 
 ```python
-from openai_codex import Codex, Sandbox
+from baicode_sdk import Codex, Sandbox
 
 with Codex() as codex:
     thread = codex.thread_start(sandbox=Sandbox.workspace_write)
@@ -98,10 +56,10 @@ Available presets:
 When `sandbox=` is omitted, Codex uses its configured default. A turn override
 also applies to subsequent turns on that thread.
 
-## 5. Continue A Thread
+## Continue A Thread
 
 ```python
-from openai_codex import Codex
+from baicode_sdk import Codex
 
 with Codex() as codex:
     thread = codex.thread_start()
@@ -118,12 +76,12 @@ with Codex() as codex:
     print(thread.run("Continue where we left off.").final_response)
 ```
 
-## 6. Use The Async Client
+## Use The Async Client
 
 ```python
 import asyncio
 
-from openai_codex import AsyncCodex, Sandbox
+from baicode_sdk import AsyncCodex, Sandbox
 
 
 async def main() -> None:
@@ -136,21 +94,21 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## 7. Get Help
+## Get Help
 
 Python's built-in documentation tools cover the curated SDK surface:
 
 ```python
-import openai_codex
-from openai_codex import Codex, CodexConfig
+import baicode_sdk
+from baicode_sdk import Codex, CodexConfig
 
-help(openai_codex)
+help(baicode_sdk)
 help(Codex)
 help(CodexConfig)
 ```
 
 ```bash
-python -m pydoc openai_codex
+python -m pydoc baicode_sdk
 ```
 
 ## Developing From This Repository
@@ -166,6 +124,6 @@ source .venv/bin/activate
 
 ## Next Stops
 
-- [API reference](https://github.com/openai/codex/blob/main/sdk/python/docs/api-reference.md)
-- [FAQ](https://github.com/openai/codex/blob/main/sdk/python/docs/faq.md)
-- [Runnable examples](https://github.com/openai/codex/blob/main/sdk/python/examples/README.md)
+- [API reference](https://github.com/XFreeMing/BaiCode/blob/main/sdk/python/docs/api-reference.md)
+- [FAQ](https://github.com/XFreeMing/BaiCode/blob/main/sdk/python/docs/faq.md)
+- [Runnable examples](https://github.com/XFreeMing/BaiCode/blob/main/sdk/python/examples/README.md)

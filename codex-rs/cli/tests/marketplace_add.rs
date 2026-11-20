@@ -15,10 +15,10 @@ fn codex_command(codex_home: &Path) -> Result<assert_cmd::Command> {
 }
 
 fn write_marketplace_source(source: &Path, marker: &str) -> Result<()> {
-    std::fs::create_dir_all(source.join(".agents/plugins"))?;
-    std::fs::create_dir_all(source.join("plugins/sample/.codex-plugin"))?;
+    std::fs::create_dir_all(source.join(".BaiCode/plugins"))?;
+    std::fs::create_dir_all(source.join("plugins/sample/.baicode-plugin"))?;
     std::fs::write(
-        source.join(".agents/plugins/marketplace.json"),
+        source.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "debug",
   "plugins": [
@@ -33,7 +33,7 @@ fn write_marketplace_source(source: &Path, marker: &str) -> Result<()> {
 }"#,
     )?;
     std::fs::write(
-        source.join("plugins/sample/.codex-plugin/plugin.json"),
+        source.join("plugins/sample/.baicode-plugin/plugin.json"),
         r#"{"name":"sample"}"#,
     )?;
     std::fs::write(source.join("plugins/sample/marker.txt"), marker)?;
@@ -210,7 +210,7 @@ async fn marketplace_add_rejects_local_manifest_file_source() -> Result<()> {
     let codex_home = TempDir::new()?;
     let source = TempDir::new()?;
     write_marketplace_source(source.path(), "local ref")?;
-    let manifest_path = source.path().join(".agents/plugins/marketplace.json");
+    let manifest_path = source.path().join(".BaiCode/plugins/marketplace.json");
 
     codex_command(codex_home.path())?
         .args([

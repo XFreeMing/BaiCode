@@ -56,12 +56,11 @@ impl MigrationScope {
 
     fn repository(root: PathBuf) -> io::Result<Option<Self>> {
         for relative_path in [
-            ".codex",
-            ".codex/config.toml",
-            ".codex/agents",
-            ".codex/hooks",
-            ".agents",
-            ".agents/skills",
+            ".BaiCode",
+            ".BaiCode/config.toml",
+            ".BaiCode/agents",
+            ".BaiCode/hooks",
+            ".BaiCode/skills",
         ] {
             if is_redirected_destination(&root.join(relative_path))? {
                 return Ok(None);

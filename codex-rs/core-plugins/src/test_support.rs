@@ -410,7 +410,7 @@ pub(crate) fn write_file(path: &Path, contents: &str) {
 pub(crate) fn write_curated_plugin(root: &Path, plugin_name: &str) {
     let plugin_root = root.join("plugins").join(plugin_name);
     write_file(
-        &plugin_root.join(".codex-plugin/plugin.json"),
+        &plugin_root.join(".baicode-plugin/plugin.json"),
         &format!(
             r#"{{
   "name": "{plugin_name}",
@@ -498,7 +498,7 @@ fn write_curated_marketplace(
         })
         .unwrap_or_default();
     write_file(
-        &root.join(".agents/plugins").join(manifest_name),
+        &root.join(".BaiCode/plugins").join(manifest_name),
         &format!(
             r#"{{
   "name": "{marketplace_name}",{interface}

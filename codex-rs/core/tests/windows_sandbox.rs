@@ -659,8 +659,8 @@ async fn windows_elevated_does_not_create_missing_workspace_metadata() -> anyhow
             "-Command",
             r#"
 $ErrorActionPreference = 'Stop'
-$sid = (Get-LocalUser -Name 'CodexSandboxOffline').SID.Value
-$rules = foreach ($name in @('codex_sandbox_offline_block_inbound', 'codex_sandbox_offline_block_outbound')) {
+$sid = (Get-LocalUser -Name 'BaiCodeSandboxOffline').SID.Value
+$rules = foreach ($name in @('baicode_sandbox_offline_block_inbound', 'baicode_sandbox_offline_block_outbound')) {
     $rule = @(Get-NetFirewallRule -PolicyStore ActiveStore -DisplayName $name)
     if ($rule.Count -ne 1) { throw "Expected exactly one effective rule for $name" }
     $address = $rule | Get-NetFirewallAddressFilter
@@ -697,8 +697,8 @@ $rules = foreach ($name in @('codex_sandbox_offline_block_inbound', 'codex_sandb
         .context("offline sandbox firewall rules should include their user SID")?;
     let local_user = format!("O:LSD:(A;;CC;;;{offline_sid})");
     let expected_rules: Vec<_> = [
-        ("codex_sandbox_offline_block_inbound", "Inbound"),
-        ("codex_sandbox_offline_block_outbound", "Outbound"),
+        ("baicode_sandbox_offline_block_inbound", "Inbound"),
+        ("baicode_sandbox_offline_block_outbound", "Outbound"),
     ]
     .into_iter()
     .map(|(name, direction)| {
@@ -1065,7 +1065,7 @@ async fn windows_elevated_unified_exec_enforces_large_recursive_deny_reads() -> 
                 std::fs::write(nested.join(format!("bulk-{index}.env")), "bulk secret\n")?;
             }
             std::fs::write(
-                cwd.join("AGENTS.md"),
+                cwd.join("BAICODE.md"),
                 "Preserve the large payload integration fixture.\n",
             )?;
             std::fs::write(
@@ -1142,7 +1142,7 @@ async fn windows_elevated_unified_exec_enforces_large_recursive_deny_reads() -> 
         harness.request_bodies().await.iter().any(|body| body
             .to_string()
             .contains("Preserve the large payload integration fixture.")),
-        "sandboxed AGENTS.md discovery must load the fixture instructions"
+        "sandboxed BAICODE.md discovery must load the fixture instructions"
     );
     assert!(
         output.contains("BULK-DENIED")

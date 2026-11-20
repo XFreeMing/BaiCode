@@ -33,20 +33,20 @@ async fn discovery_preserves_inventory_and_v1_metadata() -> anyhow::Result<()> {
     for name in ["disabled", "unconfigured"] {
         write(
             temp.path(),
-            &format!("codex/plugins/cache/test/{name}/local/.codex-plugin/plugin.json"),
+            &format!("codex/plugins/cache/test/{name}/local/.baicode-plugin/plugin.json"),
             MANIFEST,
         )?;
     }
     let inline_root = "codex/plugins/cache/test/unconfigured/local";
     write(
         temp.path(),
-        "codex/plugins/cache/test/disabled/local/.codex-plugin/plugin.json",
+        "codex/plugins/cache/test/disabled/local/.baicode-plugin/plugin.json",
         r#"{"name":" ","interface":{"displayName":" "},"mcpServers":"./missing-mcp.json","apps":"./missing-apps.json"}"#,
     )?;
     let inline_manifest = r#"{"name":"inline","interface":{"displayName":" Inline Plugin "},"mcpServers":{"inline":{"command":"node"}}}"#;
     write(
         temp.path(),
-        &format!("{inline_root}/.codex-plugin/plugin.json"),
+        &format!("{inline_root}/.baicode-plugin/plugin.json"),
         inline_manifest,
     )?;
     // Inline declarations take precedence over a conventional MCP file.
@@ -58,7 +58,7 @@ async fn discovery_preserves_inventory_and_v1_metadata() -> anyhow::Result<()> {
     let root = "codex/plugins/cache/test/demo/local";
     write(
         temp.path(),
-        &format!("{root}/.codex-plugin/plugin.json"),
+        &format!("{root}/.baicode-plugin/plugin.json"),
         r#"{"name":"demo","skills":"./skills"}"#,
     )?;
     let mcp_path = ".mcp.json";
@@ -70,7 +70,7 @@ async fn discovery_preserves_inventory_and_v1_metadata() -> anyhow::Result<()> {
     for relative in [
         "skills/deploy/SKILL.md",
         "examples/deploy/SKILL.md",
-        ".codex-plugin/migrated-command-skills/deploy/SKILL.md",
+        ".baicode-plugin/migrated-command-skills/deploy/SKILL.md",
         "skills/a/b/c/d/e/f/deploy/SKILL.md",
     ] {
         write(temp.path(), &format!("{root}/{relative}"), SKILL)?;
@@ -83,7 +83,7 @@ async fn discovery_preserves_inventory_and_v1_metadata() -> anyhow::Result<()> {
     for nested in [format!("{root}/nested"), "codex/skills/nested".to_string()] {
         write(
             temp.path(),
-            &format!("{nested}/.codex-plugin/plugin.json"),
+            &format!("{nested}/.baicode-plugin/plugin.json"),
             r#"{"name":"team"}"#,
         )?;
         write(
@@ -146,7 +146,7 @@ async fn discovery_preserves_inventory_and_v1_metadata() -> anyhow::Result<()> {
         .ok_or_else(|| anyhow::anyhow!("missing demo plugin"))?;
     assert_eq!(
         plugin.files.manifest.path,
-        plugin_root.join(".codex-plugin/plugin.json")?,
+        plugin_root.join(".baicode-plugin/plugin.json")?,
     );
     assert_eq!(
         plugin.files.mcp_config.as_ref().map(|file| &file.path),
@@ -328,7 +328,7 @@ policy:
         let plugin_root = "codex/plugins/cache/test/demo/local";
         write(
             temp.path(),
-            &format!("{plugin_root}/.codex-plugin/plugin.json"),
+            &format!("{plugin_root}/.baicode-plugin/plugin.json"),
             MANIFEST,
         )?;
         for root in [
@@ -374,7 +374,7 @@ async fn standalone_skills_retain_their_search_roots() -> anyhow::Result<()> {
     let request = request(temp.path())?;
     let roots = [
         ("codex-home-skills", "codex/skills"),
-        ("user-agent-skills", "home/.agents/skills"),
+        ("user-agent-skills", "home/.BaiCode/skills"),
         ("system-skills", "etc/codex/skills"),
     ];
     let mut expected = Vec::new();

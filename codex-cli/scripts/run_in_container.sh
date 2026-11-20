@@ -73,11 +73,11 @@ for domain in $OPENAI_ALLOWED_DOMAINS; do
     echo "Error: Invalid domain format: $domain"
     exit 1
   fi
-  echo "$domain" | docker exec --user root -i "$CONTAINER_NAME" bash -c "cat >> /etc/codex/allowed_domains.txt"
+  echo "$domain" | docker exec --user root -i "$CONTAINER_NAME" bash -c "cat >> /etc/baicode/allowed_domains.txt"
 done
 
 # Set proper permissions on the domains file
-docker exec --user root "$CONTAINER_NAME" bash -c "chmod 444 /etc/codex/allowed_domains.txt && chown root:root /etc/codex/allowed_domains.txt"
+docker exec --user root "$CONTAINER_NAME" bash -c "chmod 444 /etc/baicode/allowed_domains.txt && chown root:root /etc/baicode/allowed_domains.txt"
 
 # Initialize the firewall inside the container as root user
 docker exec --user root "$CONTAINER_NAME" bash -c "/usr/local/bin/init_firewall.sh"

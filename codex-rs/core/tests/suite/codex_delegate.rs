@@ -290,7 +290,7 @@ async fn codex_delegate_rejects_skill_mcp_dependency_installation_without_prompt
                 .expect("skill MCP dependency installation should be available");
         })
         .with_workspace_setup(|cwd, fs| async move {
-            let skill_dir = cwd.join(".agents/skills/dependency-skill");
+            let skill_dir = cwd.join(".BaiCode/skills/dependency-skill");
             let agents_dir = skill_dir.join("agents");
             fs.create_directory(
                 &PathUri::from_host_native_path(&agents_dir)?,

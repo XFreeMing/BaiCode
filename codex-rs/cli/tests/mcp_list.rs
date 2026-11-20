@@ -76,9 +76,9 @@ enabled = true
     let plugin_root = codex_home
         .path()
         .join("plugins/cache/openai-api-curated/api-docs/local");
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"api-docs","version":"local"}"#,
     )?;
     std::fs::write(

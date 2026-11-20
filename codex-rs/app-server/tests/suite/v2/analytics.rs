@@ -908,10 +908,10 @@ fn write_curated_metrics_plugin(codex_home: &Path) -> Result<PathBuf> {
         &curated_plugin_cache_version(TEST_CURATED_PLUGIN_SHA),
     );
     let script_path = plugin_root.join("scripts/run.sh");
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::create_dir_all(script_path.parent().expect("script path has parent"))?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"sample","version":"0.1.0"}"#,
     )?;
     std::fs::write(
@@ -937,9 +937,9 @@ printf '%s' '{"version":1,"measurements":[{"name":"findings","value":3,"dimensio
     )?;
 
     let curated_repo = codex_home.join(".tmp/plugins");
-    std::fs::create_dir_all(curated_repo.join(".agents/plugins"))?;
+    std::fs::create_dir_all(curated_repo.join(".BaiCode/plugins"))?;
     std::fs::write(
-        curated_repo.join(".agents/plugins/marketplace.json"),
+        curated_repo.join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "openai-curated",
   "plugins": [

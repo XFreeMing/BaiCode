@@ -87,7 +87,7 @@ async fn plugin_read_selects_local_onboarding_skill(
         "demo-plugin",
         "./demo-plugin",
     )?;
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     let mut manifest = json!({ "name": "demo-plugin" });
     if let Some(onboarding_path) = onboarding_path {
         manifest["extensions"] = json!({
@@ -95,7 +95,7 @@ async fn plugin_read_selects_local_onboarding_skill(
         });
     }
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         serde_json::to_vec(&manifest)?,
     )?;
     for name in ["other", "setup"] {
@@ -131,7 +131,7 @@ enabled = {skill_enabled}
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "demo-plugin".to_string(),
@@ -1172,9 +1172,9 @@ async fn plugin_read_returns_canonical_openai_curated_marketplace_name() -> Resu
     let codex_home = TempDir::new()?;
     let repo_root = codex_home.path().join(".tmp/plugins");
     write_plugin_marketplace(&repo_root, "openai-curated", "demo-plugin", "./demo-plugin")?;
-    std::fs::create_dir_all(repo_root.join("demo-plugin/.codex-plugin"))?;
+    std::fs::create_dir_all(repo_root.join("demo-plugin/.baicode-plugin"))?;
     std::fs::write(
-        repo_root.join("demo-plugin/.codex-plugin/plugin.json"),
+        repo_root.join("demo-plugin/.baicode-plugin/plugin.json"),
         r#"{
   "name": "demo-plugin",
   "description": "OpenAI curated plugin"
@@ -1198,7 +1198,7 @@ enabled = true
         .await?;
 
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.join(".BaiCode/plugins/marketplace.json"))?;
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(marketplace_path.clone()),
@@ -1245,11 +1245,11 @@ async fn plugin_read_returns_share_context_for_shared_local_plugin() -> Result<(
         "demo-plugin",
         "./demo-plugin",
     )?;
-    std::fs::create_dir_all(repo_root.path().join("demo-plugin/.codex-plugin"))?;
+    std::fs::create_dir_all(repo_root.path().join("demo-plugin/.baicode-plugin"))?;
     std::fs::write(
         repo_root
             .path()
-            .join("demo-plugin/.codex-plugin/plugin.json"),
+            .join("demo-plugin/.baicode-plugin/plugin.json"),
         r#"{"name":"demo-plugin","version":"1.2.3"}"#,
     )?;
     std::fs::write(
@@ -1308,7 +1308,7 @@ async fn plugin_read_returns_share_context_for_shared_local_plugin() -> Result<(
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "demo-plugin".to_string(),
@@ -1387,11 +1387,11 @@ async fn plugin_read_keeps_remote_version_when_share_principals_are_missing() ->
         "demo-plugin",
         "./demo-plugin",
     )?;
-    std::fs::create_dir_all(repo_root.path().join("demo-plugin/.codex-plugin"))?;
+    std::fs::create_dir_all(repo_root.path().join("demo-plugin/.baicode-plugin"))?;
     std::fs::write(
         repo_root
             .path()
-            .join("demo-plugin/.codex-plugin/plugin.json"),
+            .join("demo-plugin/.baicode-plugin/plugin.json"),
         r#"{"name":"demo-plugin","version":"1.2.3"}"#,
     )?;
     std::fs::write(
@@ -1437,7 +1437,7 @@ async fn plugin_read_keeps_remote_version_when_share_principals_are_missing() ->
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "demo-plugin".to_string(),
@@ -1492,7 +1492,7 @@ async fn plugin_read_falls_back_to_local_share_context_without_remote_auth() -> 
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "demo-plugin".to_string(),
@@ -1549,7 +1549,7 @@ async fn plugin_read_fails_on_malformed_share_mapping() -> Result<()> {
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "demo-plugin".to_string(),
@@ -1608,7 +1608,7 @@ async fn plugin_read_agent_plugin_excludes_nested_skills() -> Result<()> {
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "demo-plugin".to_string(),
@@ -1647,13 +1647,13 @@ async fn plugin_read_returns_plugin_details_with_bundle_contents() -> Result<()>
     let repo_root = TempDir::new()?;
     let plugin_root = repo_root.path().join("plugins/demo-plugin");
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::create_dir_all(plugin_root.join("hooks"))?;
     std::fs::create_dir_all(plugin_root.join("skills/thread-summarizer"))?;
     std::fs::create_dir_all(plugin_root.join("skills/chatgpt-only"))?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -1673,7 +1673,7 @@ async fn plugin_read_returns_plugin_details_with_bundle_contents() -> Result<()>
 }"#,
     )?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r##"{
   "name": "demo-plugin",
   "description": "Longer manifest description",
@@ -1813,7 +1813,7 @@ enabled = false
         .await?;
 
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(marketplace_path.clone()),
@@ -1983,7 +1983,7 @@ async fn plugin_read_batches_large_app_metadata_requests() -> Result<()> {
         &app_ids.iter().map(String::as_str).collect::<Vec<_>>(),
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -2078,7 +2078,7 @@ async fn plugin_read_stops_batching_after_app_metadata_failure() -> Result<()> {
         &app_ids.iter().map(String::as_str).collect::<Vec<_>>(),
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -2189,7 +2189,7 @@ async fn plugin_read_hides_apps_for_api_key_auth() -> Result<()> {
         r#"{"mcpServers":{"alpha":{"command":"alpha-mcp"}}}"#,
     )?;
     let marketplace_path =
-        AbsolutePathBuf::try_from(repo_root.path().join(".agents/plugins/marketplace.json"))?;
+        AbsolutePathBuf::try_from(repo_root.path().join(".BaiCode/plugins/marketplace.json"))?;
 
     let mut mcp = TestAppServer::builder()
         .with_codex_home(codex_home.path())
@@ -2227,10 +2227,10 @@ async fn plugin_read_accepts_legacy_string_default_prompt() -> Result<()> {
     let repo_root = TempDir::new()?;
     let plugin_root = repo_root.path().join("plugins/demo-plugin");
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -2245,7 +2245,7 @@ async fn plugin_read_accepts_legacy_string_default_prompt() -> Result<()> {
 }"#,
     )?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r##"{
   "name": "demo-plugin",
   "interface": {
@@ -2264,7 +2264,7 @@ async fn plugin_read_accepts_legacy_string_default_prompt() -> Result<()> {
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "demo-plugin".to_string(),
@@ -2295,9 +2295,9 @@ async fn plugin_read_describes_uninstalled_git_source_without_cloning() -> Resul
         .unwrap()
         .to_string();
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         format!(
             r#"{{
   "name": "debug",
@@ -2325,7 +2325,7 @@ async fn plugin_read_describes_uninstalled_git_source_without_cloning() -> Resul
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "toolkit".to_string(),
@@ -2360,9 +2360,9 @@ async fn plugin_read_returns_invalid_request_when_plugin_is_missing() -> Result<
     let codex_home = TempDir::new()?;
     let repo_root = TempDir::new()?;
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -2387,7 +2387,7 @@ async fn plugin_read_returns_invalid_request_when_plugin_is_missing() -> Result<
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "missing-plugin".to_string(),
@@ -2415,10 +2415,10 @@ async fn plugin_read_returns_invalid_request_when_plugin_manifest_is_missing() -
     let repo_root = TempDir::new()?;
     let plugin_root = repo_root.path().join("plugins/demo-plugin");
     std::fs::create_dir_all(repo_root.path().join(".git"))?;
-    std::fs::create_dir_all(repo_root.path().join(".agents/plugins"))?;
+    std::fs::create_dir_all(repo_root.path().join(".BaiCode/plugins"))?;
     std::fs::create_dir_all(&plugin_root)?;
     std::fs::write(
-        repo_root.path().join(".agents/plugins/marketplace.json"),
+        repo_root.path().join(".BaiCode/plugins/marketplace.json"),
         r#"{
   "name": "codex-curated",
   "plugins": [
@@ -2443,7 +2443,7 @@ async fn plugin_read_returns_invalid_request_when_plugin_manifest_is_missing() -
     let request_id = mcp
         .send_plugin_read_request(PluginReadParams {
             marketplace_path: Some(AbsolutePathBuf::try_from(
-                repo_root.path().join(".agents/plugins/marketplace.json"),
+                repo_root.path().join(".BaiCode/plugins/marketplace.json"),
             )?),
             remote_marketplace_name: None,
             plugin_name: "demo-plugin".to_string(),
@@ -2471,7 +2471,7 @@ fn write_installed_plugin(
         .join("plugins/cache")
         .join(marketplace_name)
         .join(plugin_name)
-        .join("local/.codex-plugin");
+        .join("local/.baicode-plugin");
     std::fs::create_dir_all(&plugin_root)?;
     std::fs::write(
         plugin_root.join("plugin.json"),
@@ -2602,9 +2602,9 @@ fn write_plugin_marketplace(
     source_path: &str,
 ) -> std::io::Result<()> {
     std::fs::create_dir_all(repo_root.join(".git"))?;
-    std::fs::create_dir_all(repo_root.join(".agents/plugins"))?;
+    std::fs::create_dir_all(repo_root.join(".BaiCode/plugins"))?;
     std::fs::write(
-        repo_root.join(".agents/plugins/marketplace.json"),
+        repo_root.join(".BaiCode/plugins/marketplace.json"),
         format!(
             r#"{{
   "name": "{marketplace_name}",
@@ -2628,9 +2628,9 @@ fn write_plugin_source(
     app_ids: &[&str],
 ) -> Result<()> {
     let plugin_root = repo_root.join(plugin_name);
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         format!(r#"{{"name":"{plugin_name}"}}"#),
     )?;
 

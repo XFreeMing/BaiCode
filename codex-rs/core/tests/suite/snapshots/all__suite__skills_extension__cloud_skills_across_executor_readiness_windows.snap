@@ -36,7 +36,7 @@ Settings:
         ## Execution environments
         Execution environments are separate machines or workspaces with their own files, shell, and installed ca...text>` lists the environments selected for this task. [hash=bc910d398b9b4d83]
 
-        An environment marked `starting` is not yet usable. Its files, commands, AGENTS.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
+        An environment marked `starting` is not yet usable. Its files, commands, BAICODE.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
 
         Wait only when the current task needs that environment. Continue using tools that are already available for unrelated work.
         </environments_instructions>
@@ -63,7 +63,7 @@ Settings: relative to window 1
         ## Execution environments
         Execution environments are separate machines or workspaces with their own files, shell, and installed ca...text>` lists the environments selected for this task. [hash=bc910d398b9b4d83]
 
-        An environment marked `starting` is not yet usable. Its files, commands, AGENTS.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
+        An environment marked `starting` is not yet usable. Its files, commands, BAICODE.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
 
         Wait only when the current task needs that environment. Continue using tools that are already available for unrelated work.
         </environments_instructions>
@@ -109,7 +109,7 @@ Settings: relative to window 2
         ## Execution environments
         Execution environments are separate machines or workspaces with their own files, shell, and installed ca...text>` lists the environments selected for this task. [hash=bc910d398b9b4d83]
 
-        An environment marked `starting` is not yet usable. Its files, commands, AGENTS.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
+        An environment marked `starting` is not yet usable. Its files, commands, BAICODE.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
 
         Wait only when the current task needs that environment. Continue using tools that are already available for unrelated work.
         </environments_instructions>
@@ -147,7 +147,7 @@ Settings: same as window 1
         ## Execution environments
         Execution environments are separate machines or workspaces with their own files, shell, and installed ca...text>` lists the environments selected for this task. [hash=bc910d398b9b4d83]
 
-        An environment marked `starting` is not yet usable. Its files, commands, AGENTS.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
+        An environment marked `starting` is not yet usable. Its files, commands, BAICODE.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
 
         Wait only when the current task needs that environment. Continue using tools that are already available for unrelated work.
         </environments_instructions>
@@ -184,7 +184,7 @@ Settings: same as window 2
         ## Execution environments
         Execution environments are separate machines or workspaces with their own files, shell, and installed ca...text>` lists the environments selected for this task. [hash=bc910d398b9b4d83]
 
-        An environment marked `starting` is not yet usable. Its files, commands, AGENTS.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
+        An environment marked `starting` is not yet usable. Its files, commands, BAICODE.md instructions, skills,...CP tools may become available when startup completes. [hash=42a360e5075e8edb]
 
         Wait only when the current task needs that environment. Continue using tools that are already available for unrelated work.
         </environments_instructions>

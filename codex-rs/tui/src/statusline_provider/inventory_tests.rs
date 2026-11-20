@@ -24,11 +24,11 @@ async fn global_inventory_ignores_the_startup_projects_overrides() -> Result<()>
     std::fs::create_dir_all(&home)?;
     std::fs::create_dir_all(project.join(".git"))?;
     std::fs::write(project.join(".git/HEAD"), "ref: refs/heads/main\n")?;
-    std::fs::create_dir(project.join(".codex"))?;
+    std::fs::create_dir(project.join(".BaiCode"))?;
     let package = home.join("plugins/cache/local/daily/local");
-    std::fs::create_dir_all(package.join(".codex-plugin"))?;
+    std::fs::create_dir_all(package.join(".baicode-plugin"))?;
     std::fs::write(
-        package.join(".codex-plugin/plugin.json"),
+        package.join(".baicode-plugin/plugin.json"),
         r#"{"name":"daily"}"#,
     )?;
     let missing = temp.path().join("missing-mcp-fixture");
@@ -64,7 +64,7 @@ command = {command}
         ),
     )?;
     std::fs::write(
-        project.join(".codex/config.toml"),
+        project.join(".BaiCode/config.toml"),
         format!(
             r#"
 [mcp_servers.calendar]

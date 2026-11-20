@@ -298,9 +298,9 @@ async fn hook_refresh_retries_current_plugin_policy_after_owner_replacement() ->
     let home = session.codex_home().await;
     let file = home.join(CONFIG_TOML_FILE);
     let source = tempfile::tempdir()?;
-    std::fs::create_dir_all(source.path().join(".codex-plugin"))?;
+    std::fs::create_dir_all(source.path().join(".baicode-plugin"))?;
     std::fs::write(
-        source.path().join(".codex-plugin/plugin.json"),
+        source.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"sample","hooks":{"hooks":{"SessionStart":[{"hooks":[{"type":"command","command":"echo sample"}]}]}}}"#,
     )?;
     codex_core_plugins::store::PluginStore::new(home.to_path_buf()).install(

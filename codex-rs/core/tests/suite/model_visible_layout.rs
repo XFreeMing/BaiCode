@@ -117,7 +117,7 @@ fn user_instructions_wrapper_count(request: &ResponsesRequest) -> usize {
     request
         .message_input_texts("user")
         .iter()
-        .filter(|text| text.starts_with("# AGENTS.md instructions"))
+        .filter(|text| text.starts_with("# BAICODE.md instructions"))
         .count()
 }
 
@@ -408,11 +408,11 @@ async fn snapshot_model_visible_layout_cwd_change_refreshes_agents() -> Result<(
     fs::create_dir_all(&cwd_one)?;
     fs::create_dir_all(&cwd_two)?;
     fs::write(
-        cwd_one.join("AGENTS.md"),
+        cwd_one.join("BAICODE.md"),
         "# AGENTS one\n\n<INSTRUCTIONS>\nTurn one agents instructions.\n</INSTRUCTIONS>\n",
     )?;
     fs::write(
-        cwd_two.join("AGENTS.md"),
+        cwd_two.join("BAICODE.md"),
         "# AGENTS two\n\n<INSTRUCTIONS>\nTurn two agents instructions.\n</INSTRUCTIONS>\n",
     )?;
     let cwd_one = cwd_one.abs();
@@ -483,17 +483,17 @@ async fn snapshot_model_visible_layout_cwd_change_refreshes_agents() -> Result<(
     assert_eq!(
         user_instructions_wrapper_count(&requests[0]),
         1,
-        "expected first request to include AGENTS.md from its selected cwd"
+        "expected first request to include BAICODE.md from its selected cwd"
     );
     assert_eq!(
         user_instructions_wrapper_count(&requests[1]),
         2,
-        "expected second request to retain the original AGENTS.md item and append its replacement"
+        "expected second request to retain the original BAICODE.md item and append its replacement"
     );
     insta::assert_snapshot!(
         "model_visible_layout_cwd_change_refreshes_agents",
         format_labeled_requests_snapshot(
-            "Second turn changes cwd to a directory with different AGENTS.md and refreshes the model-visible instructions.",
+            "Second turn changes cwd to a directory with different BAICODE.md and refreshes the model-visible instructions.",
             &[
                 ("First Request (agents_one)", &requests[0]),
                 ("Second Request (agents_two cwd)", &requests[1]),

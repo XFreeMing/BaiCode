@@ -9,8 +9,8 @@ use codex_extension_api::LoadedUserInstructions;
 use codex_extension_api::UserInstructionsProvider;
 use codex_utils_absolute_path::AbsolutePathBuf;
 
-const DEFAULT_AGENTS_MD_FILENAME: &str = "AGENTS.md";
-const LOCAL_AGENTS_MD_FILENAME: &str = "AGENTS.override.md";
+const DEFAULT_AGENTS_MD_FILENAME: &str = "BAICODE.md";
+const LOCAL_AGENTS_MD_FILENAME: &str = "BAICODE.override.md";
 
 /// Loads user instructions from a Codex home directory.
 #[derive(Clone, Debug)]
@@ -48,7 +48,7 @@ impl CodexHomeUserInstructionsProvider {
                 Err(err) if err.kind() == io::ErrorKind::NotFound => continue,
                 Err(err) => {
                     warnings.push(format!(
-                        "Failed to read global AGENTS.md instructions from `{}`: {err}",
+                        "Failed to read global BAICODE.md instructions from `{}`: {err}",
                         path.display()
                     ));
                     continue;
@@ -59,7 +59,7 @@ impl CodexHomeUserInstructionsProvider {
                 Err(err) if err.kind() == io::ErrorKind::NotFound => continue,
                 Err(err) => {
                     warnings.push(format!(
-                        "Failed to read global AGENTS.md instructions from `{}`: {err}",
+                        "Failed to read global BAICODE.md instructions from `{}`: {err}",
                         path.display()
                     ));
                     continue;

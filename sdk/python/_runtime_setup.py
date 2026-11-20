@@ -3,14 +3,10 @@ import importlib.metadata
 import importlib.util
 import json
 import os
-import platform
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 _SDK_PYTHON_ROOT = str(Path(__file__).resolve().parent)
@@ -18,13 +14,11 @@ if _SDK_PYTHON_ROOT not in sys.path:
     sys.path.insert(0, _SDK_PYTHON_ROOT)
 
 from release_version import (  # noqa: E402
-    codex_release_tag as _release_tag,
     normalize_codex_version as _normalized_package_version,
 )
 
-PACKAGE_NAME = "openai-codex-cli-bin"
-SDK_PACKAGE_NAME = "openai-codex"
-REPO_SLUG = "openai/codex"
+PACKAGE_NAME = "baicode-cli-bin"
+SDK_PACKAGE_NAME = "baicode-sdk"
 
 
 class RuntimeSetupError(RuntimeError):
@@ -67,13 +61,19 @@ def ensure_runtime_package_installed(
     ):
         return requested_version
 
-    with tempfile.TemporaryDirectory(prefix="codex-python-runtime-") as temp_root_str:
+    package = os.environ.get("BAICODE_RUNTIME_PACKAGE")
+    if not package or not Path(package).exists():
+        raise RuntimeSetupError(
+            f"Install {PACKAGE_NAME}=={requested_version} or set BAICODE_RUNTIME_PACKAGE "
+            "to a local BaiCode package directory or .tar.gz archive."
+        )
+
+    with tempfile.TemporaryDirectory(prefix="baicode-python-runtime-") as temp_root_str:
         temp_root = Path(temp_root_str)
-        archive_path = _download_release_archive(requested_version, temp_root)
         staged_runtime_dir = _stage_runtime_package(
             sdk_python_dir,
             requested_version,
-            archive_path,
+            Path(package),
             temp_root / "runtime-stage",
         )
         _install_runtime_package(python_executable, staged_runtime_dir, install_target)
@@ -96,37 +96,11 @@ def ensure_runtime_package_installed(
     return requested_version
 
 
-def platform_asset_name() -> str:
-    system = platform.system().lower()
-    machine = platform.machine().lower()
-
-    if system == "darwin":
-        if machine in {"arm64", "aarch64"}:
-            return "codex-package-aarch64-apple-darwin.tar.gz"
-        if machine in {"x86_64", "amd64"}:
-            return "codex-package-x86_64-apple-darwin.tar.gz"
-    elif system == "linux":
-        if machine in {"aarch64", "arm64"}:
-            return "codex-package-aarch64-unknown-linux-musl.tar.gz"
-        if machine in {"x86_64", "amd64"}:
-            return "codex-package-x86_64-unknown-linux-musl.tar.gz"
-    elif system == "windows":
-        if machine in {"aarch64", "arm64"}:
-            return "codex-package-aarch64-pc-windows-msvc.tar.gz"
-        if machine in {"x86_64", "amd64"}:
-            return "codex-package-x86_64-pc-windows-msvc.tar.gz"
-
-    raise RuntimeSetupError(
-        f"Unsupported runtime artifact platform: system={platform.system()!r}, "
-        f"machine={platform.machine()!r}"
-    )
-
-
 def _installed_runtime_version(python_executable: str | Path) -> str | None:
     snippet = (
         "import importlib.metadata, json, sys\n"
         "try:\n"
-        "    from codex_cli_bin import bundled_codex_path\n"
+        "    from baicode_cli_bin import bundled_codex_path\n"
         "    bundled_codex_path()\n"
         f"    print(json.dumps({{'version': importlib.metadata.version({PACKAGE_NAME!r})}}))\n"
         "except Exception:\n"
@@ -141,123 +115,6 @@ def _installed_runtime_version(python_executable: str | Path) -> str | None:
     if result.returncode != 0:
         return None
     return json.loads(result.stdout)["version"]
-
-
-def _release_metadata(version: str) -> dict[str, object]:
-    release_tag = _release_tag(version)
-    url = f"https://api.github.com/repos/{REPO_SLUG}/releases/tags/{release_tag}"
-    token = _github_token()
-    attempts = [True, False] if token is not None else [False]
-    last_error: urllib.error.HTTPError | None = None
-
-    for include_auth in attempts:
-        headers = {
-            "Accept": "application/vnd.github+json",
-            "User-Agent": "codex-python-runtime-setup",
-        }
-        if include_auth and token is not None:
-            headers["Authorization"] = f"Bearer {token}"
-
-        request = urllib.request.Request(url, headers=headers)
-        try:
-            with urllib.request.urlopen(request) as response:
-                return json.load(response)
-        except urllib.error.HTTPError as exc:
-            last_error = exc
-            if include_auth and exc.code == 401:
-                continue
-            break
-
-    assert last_error is not None
-    raise RuntimeSetupError(
-        f"Failed to resolve release metadata for {release_tag} from {REPO_SLUG}: "
-        f"{last_error.code} {last_error.reason}"
-    ) from last_error
-
-
-def _download_release_archive(version: str, temp_root: Path) -> Path:
-    asset_name = platform_asset_name()
-    archive_path = temp_root / asset_name
-    release_tag = _release_tag(version)
-
-    browser_download_url = (
-        f"https://github.com/{REPO_SLUG}/releases/download/{release_tag}/{asset_name}"
-    )
-    request = urllib.request.Request(
-        browser_download_url,
-        headers={"User-Agent": "codex-python-runtime-setup"},
-    )
-    try:
-        with urllib.request.urlopen(request) as response, archive_path.open("wb") as fh:
-            shutil.copyfileobj(response, fh)
-        return archive_path
-    except urllib.error.HTTPError:
-        pass
-
-    metadata = _release_metadata(version)
-    assets = metadata.get("assets")
-    if not isinstance(assets, list):
-        raise RuntimeSetupError(f"Release {release_tag} returned malformed assets metadata.")
-    asset = next(
-        (item for item in assets if isinstance(item, dict) and item.get("name") == asset_name),
-        None,
-    )
-    if asset is None:
-        raise RuntimeSetupError(
-            f"Release {release_tag} does not contain asset {asset_name} for this platform."
-        )
-
-    api_url = asset.get("url")
-    if not isinstance(api_url, str):
-        api_url = None
-
-    if api_url is not None:
-        token = _github_token()
-        if token is not None:
-            request = urllib.request.Request(
-                api_url,
-                headers=_github_api_headers("application/octet-stream"),
-            )
-            try:
-                with (
-                    urllib.request.urlopen(request) as response,
-                    archive_path.open("wb") as fh,
-                ):
-                    shutil.copyfileobj(response, fh)
-                return archive_path
-            except urllib.error.HTTPError:
-                pass
-
-    if shutil.which("gh") is None:
-        raise RuntimeSetupError(
-            f"Unable to download {asset_name} for rust-v{version}. "
-            "Provide GH_TOKEN/GITHUB_TOKEN or install/authenticate GitHub CLI."
-        )
-
-    try:
-        subprocess.run(
-            [
-                "gh",
-                "release",
-                "download",
-                release_tag,
-                "--repo",
-                REPO_SLUG,
-                "--pattern",
-                asset_name,
-                "--dir",
-                str(temp_root),
-            ],
-            check=True,
-            text=True,
-            capture_output=True,
-        )
-    except subprocess.CalledProcessError as exc:
-        raise RuntimeSetupError(
-            f"gh release download failed for {release_tag} asset {asset_name}.\n"
-            f"STDOUT:\n{exc.stdout}\nSTDERR:\n{exc.stderr}"
-        ) from exc
-    return archive_path
 
 
 def _stage_runtime_package(
@@ -284,6 +141,8 @@ def _install_runtime_package(
         "-m",
         "pip",
         "install",
+        "--no-index",
+        "--no-build-isolation",
         "--force-reinstall",
         "--no-deps",
     ]
@@ -314,25 +173,6 @@ def _load_update_script_module(sdk_python_dir: Path):
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
-
-
-def _github_api_headers(accept: str) -> dict[str, str]:
-    headers = {
-        "Accept": accept,
-        "User-Agent": "codex-python-runtime-setup",
-    }
-    token = _github_token()
-    if token is not None:
-        headers["Authorization"] = f"Bearer {token}"
-    return headers
-
-
-def _github_token() -> str | None:
-    for env_name in ("GH_TOKEN", "GITHUB_TOKEN"):
-        token = os.environ.get(env_name)
-        if token:
-            return token
-    return None
 
 
 def _source_tree_runtime_dependency_version() -> str | None:
@@ -368,5 +208,4 @@ __all__ = [
     "RuntimeSetupError",
     "ensure_runtime_package_installed",
     "pinned_runtime_version",
-    "platform_asset_name",
 ]

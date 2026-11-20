@@ -982,7 +982,7 @@ async fn assert_plan_implementation_with_unavailable_attachment(
     } else {
         let denied_path = serde_json::to_string(attachments.as_path())?;
         config
-            // The embedded test executor has no sandbox helper for AGENTS.md discovery.
+            // The embedded test executor has no sandbox helper for BAICODE.md discovery.
             .with_root_config("default_permissions = 'no-attachments'\nproject_doc_max_bytes = 0")
             .with_extra_config(&format!(
                 "[permissions.no-attachments.filesystem]\n\":root\" = 'read'\n{denied_path} = 'deny'"
@@ -1120,9 +1120,9 @@ async fn replacement_failure_keeps_current_task_and_restores_input() -> Result<(
             let destination = server.backend_id();
             let mut backends = BackendSessions::from_initial(source, vec![server]);
             let destination_cwd = tempdir()?;
-            std::fs::create_dir(destination_cwd.path().join(".codex"))?;
+            std::fs::create_dir(destination_cwd.path().join(".BaiCode"))?;
             std::fs::write(
-                destination_cwd.path().join(".codex/hooks.json"),
+                destination_cwd.path().join(".BaiCode/hooks.json"),
                 r#"{"hooks":{"SessionStart":[{"hooks":[{"type":"command","command":"x"}]}]}}"#,
             )?;
             // Model a destination whose trust was saved before thread/start failed.

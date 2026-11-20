@@ -93,9 +93,9 @@ fn write_cached_remote_plugin_with_skill(
     codex_home: &std::path::Path,
 ) -> Result<std::path::PathBuf> {
     let plugin_root = codex_home.join("plugins/cache/openai-curated-remote/linear/local");
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"linear"}"#,
     )?;
 
@@ -116,9 +116,9 @@ fn write_cached_local_curated_plugin_with_skill(
     let plugin_root = codex_home.join(format!(
         "plugins/cache/{marketplace_name}/google-calendar/local"
     ));
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"google-calendar"}"#,
     )?;
 
@@ -228,9 +228,9 @@ async fn skills_list_uses_each_cwds_bundled_skills_configuration() -> Result<()>
 
     for (cwd, enabled) in [(disabled_cwd.path(), false), (enabled_cwd.path(), true)] {
         std::fs::create_dir_all(cwd.join(".git"))?;
-        std::fs::create_dir_all(cwd.join(".codex"))?;
+        std::fs::create_dir_all(cwd.join(".BaiCode"))?;
         std::fs::write(
-            cwd.join(".codex/config.toml"),
+            cwd.join(".BaiCode/config.toml"),
             format!("[skills.bundled]\nenabled = {enabled}\n"),
         )?;
         set_project_trust_level(codex_home.path(), cwd, TrustLevel::Trusted)?;
@@ -732,7 +732,7 @@ async fn skills_list_skips_cwd_roots_when_environment_disabled() -> Result<()> {
     let codex_home = TempDir::new()?;
     let cwd = TempDir::new()?;
     write_skill(&codex_home, "home-skill")?;
-    let repo_skill_dir = cwd.path().join(".codex/skills/repo-skill");
+    let repo_skill_dir = cwd.path().join(".BaiCode/skills/repo-skill");
     std::fs::create_dir_all(&repo_skill_dir)?;
     std::fs::write(
         repo_skill_dir.join("SKILL.md"),
@@ -832,9 +832,9 @@ enabled = false
         (third_cwd.path(), true, false),
     ] {
         std::fs::create_dir_all(cwd.join(".git"))?;
-        std::fs::create_dir_all(cwd.join(".codex"))?;
+        std::fs::create_dir_all(cwd.join(".BaiCode"))?;
         std::fs::write(
-            cwd.join(".codex/config.toml"),
+            cwd.join(".BaiCode/config.toml"),
             format!(
                 "[features]\nplugins = {plugins_enabled}\n[plugins.\"google-calendar@openai-api-curated\"]\nenabled = {plugin_enabled}\n"
             ),
@@ -855,7 +855,7 @@ enabled = false
     ] {
         let cwd = AbsolutePathBuf::try_from(cwd)?;
         let git_dir = PathUri::from_abs_path(&cwd.join(".git"));
-        let skill_dir = PathUri::from_abs_path(&cwd.join(".agents/skills").join(name));
+        let skill_dir = PathUri::from_abs_path(&cwd.join(".BaiCode/skills").join(name));
         for directory in [&git_dir, &skill_dir] {
             file_system
                 .create_directory(
@@ -940,10 +940,10 @@ async fn skills_list_refreshes_externally_updated_plugin_versions() -> Result<()
     let codex_home = TempDir::new()?;
     let cwd = TempDir::new()?;
     let source = TempDir::new()?;
-    std::fs::create_dir_all(source.path().join(".codex-plugin"))?;
+    std::fs::create_dir_all(source.path().join(".baicode-plugin"))?;
     std::fs::create_dir_all(source.path().join("skills"))?;
     std::fs::write(
-        source.path().join(".codex-plugin/plugin.json"),
+        source.path().join(".baicode-plugin/plugin.json"),
         r#"{"name":"sample"}"#,
     )?;
     std::fs::write(
@@ -1070,7 +1070,7 @@ enabled = true
                 .path()
                 .join("plugins/cache/openai-api-curated/google-calendar/local");
             std::fs::write(
-                plugin_root.join(".codex-plugin/plugin.json"),
+                plugin_root.join(".baicode-plugin/plugin.json"),
                 r#"{"name":"google-calendar","skills":"./replacement-skills"}"#,
             )?;
             let skill_dir = plugin_root.join("replacement-skills/refreshed-skill");
@@ -1131,7 +1131,7 @@ async fn skills_list_uses_cached_result_after_session_default_writes_until_force
             .all(|skill| skill.name != "late-extra-skill")
     );
 
-    let skill_dir = cwd.path().join(".codex/skills/late-extra-skill");
+    let skill_dir = cwd.path().join(".BaiCode/skills/late-extra-skill");
     std::fs::create_dir_all(&skill_dir)?;
     std::fs::write(
         skill_dir.join("SKILL.md"),

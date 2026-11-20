@@ -298,9 +298,9 @@ source = {configured_root:?}
     .expect("system config stack");
     let policy = MarketplacePolicy::from_requirements(stack.requirements());
     let configured_path =
-        AbsolutePathBuf::try_from(configured_root.join(".agents/plugins/marketplace.json"))
+        AbsolutePathBuf::try_from(configured_root.join(".BaiCode/plugins/marketplace.json"))
             .expect("configured marketplace path");
-    let other_path = AbsolutePathBuf::try_from(other_root.join(".agents/plugins/marketplace.json"))
+    let other_path = AbsolutePathBuf::try_from(other_root.join(".BaiCode/plugins/marketplace.json"))
         .expect("other marketplace path");
 
     fs::create_dir_all(configured_path.as_path().parent().unwrap()).unwrap();
@@ -354,7 +354,7 @@ source = "https://github.com/example/blocked.git"
         )),
     );
     let marketplace_path = AbsolutePathBuf::try_from(
-        marketplace_install_root(codex_home.path()).join("debug/.agents/plugins/marketplace.json"),
+        marketplace_install_root(codex_home.path()).join("debug/.BaiCode/plugins/marketplace.json"),
     )
     .expect("absolute marketplace path");
 
@@ -395,7 +395,7 @@ url = "https://github.com/openai/plugins.git"
 "#,
     );
     let marketplace_path = AbsolutePathBuf::try_from(
-        curated_plugins_repo_path(codex_home.path()).join(".agents/plugins/marketplace.json"),
+        curated_plugins_repo_path(codex_home.path()).join(".BaiCode/plugins/marketplace.json"),
     )
     .expect("absolute marketplace path");
     let policy = MarketplacePolicy::from_requirements(stack.requirements());
@@ -423,7 +423,7 @@ url = "https://github.com/openai/plugins.git"
     let repository_manifest = AbsolutePathBuf::try_from(
         codex_home
             .path()
-            .join("repository/.agents/plugins/marketplace.json"),
+            .join("repository/.BaiCode/plugins/marketplace.json"),
     )
     .expect("absolute repository manifest");
     let unrestricted = ConfigLayerStack::default();
@@ -455,7 +455,7 @@ url = "https://github.com/openai/plugins.git"
 fn symlinked_marketplaces_cannot_borrow_managed_provenance() {
     let codex_home = TempDir::new().expect("create Codex home");
     let official_root = curated_plugins_repo_path(codex_home.path());
-    let manifest = official_root.join(".agents/plugins/marketplace.json");
+    let manifest = official_root.join(".BaiCode/plugins/marketplace.json");
     fs::create_dir_all(manifest.parent().expect("manifest directory"))
         .expect("create manifest directory");
     fs::write(&manifest, "{}").expect("write official manifest");
@@ -470,7 +470,7 @@ fn symlinked_marketplaces_cannot_borrow_managed_provenance() {
     .expect("symlink official root parent");
     let manifest_alias = codex_home
         .path()
-        .join("manifest-alias/.agents/plugins/api_marketplace.json");
+        .join("manifest-alias/.BaiCode/plugins/api_marketplace.json");
     fs::create_dir_all(manifest_alias.parent().expect("manifest alias parent"))
         .expect("create manifest alias directory");
     std::os::unix::fs::symlink(&manifest, &manifest_alias).expect("symlink official manifest");
@@ -478,11 +478,11 @@ fn symlinked_marketplaces_cannot_borrow_managed_provenance() {
 
     for (path, marketplace) in [
         (
-            root_alias.join(".agents/plugins/marketplace.json"),
+            root_alias.join(".BaiCode/plugins/marketplace.json"),
             OPENAI_CURATED_MARKETPLACE_NAME,
         ),
         (
-            parent_alias.join("plugins/.agents/plugins/marketplace.json"),
+            parent_alias.join("plugins/.BaiCode/plugins/marketplace.json"),
             OPENAI_CURATED_MARKETPLACE_NAME,
         ),
         (manifest_alias, OPENAI_API_CURATED_MARKETPLACE_NAME),

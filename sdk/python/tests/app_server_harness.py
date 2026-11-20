@@ -11,7 +11,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
-from openai_codex import CodexConfig
+from baicode_sdk import CodexConfig
 
 Json = dict[str, Any]
 

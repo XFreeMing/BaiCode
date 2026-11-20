@@ -467,7 +467,7 @@ async fn phase2_replays_legacy_baseline_with_unchanged_inputs() -> anyhow::Resul
     seed_required_memory_artifacts(&root).await?;
     reset_git_repository(&root).await?;
     assert!(!diff_since_latest_init(&root).await?.has_changes());
-    tokio::fs::remove_file(root.join(".git/codex-baseline-version")).await?;
+    tokio::fs::remove_file(root.join(".git/baicode-baseline-version")).await?;
 
     let phase2 = mount_sse_once(
         &server,

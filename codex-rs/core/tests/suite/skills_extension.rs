@@ -406,7 +406,7 @@ fn configure_catalog_test(config: &mut Config) {
         .features
         .enable(Feature::ExecutorCapabilityDiscovery)
         .expect("executor capability discovery should be configurable in tests");
-    // A user layer also discovers the real `$HOME/.agents/skills`. Use a temporary system layer so
+    // A user layer also discovers the real `$HOME/.BaiCode/skills`. Use a temporary system layer so
     // exact catalog and omission assertions only see the skills written under this test's home.
     let system_config_path = config.codex_home.join("config.toml");
     config.config_layer_stack = ConfigLayerStack::new(
@@ -635,9 +635,9 @@ async fn capability_sections_render_in_order_with_host_repo_and_plugin_skills(
     )?;
     let host_skill_path = dunce::canonicalize(host_skill_path)?;
     let plugin_root = codex_home.path().join("plugins/cache/test/sample/local");
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"sample","description":"inspect sample data"}"#,
     )?;
     let plugin_skill_dir = plugin_root.join("skills/sample-search");
@@ -687,7 +687,7 @@ async fn capability_sections_render_in_order_with_host_repo_and_plugin_skills(
                     Default::default(), /*sandbox*/ None,
                 )
                 .await?;
-                let skill_dir = PathUri::from_abs_path(&root.join(".agents/skills").join(name));
+                let skill_dir = PathUri::from_abs_path(&root.join(".BaiCode/skills").join(name));
                 fs.create_directory(
                     &skill_dir,
                     CreateDirectoryOptions { recursive: true, follow_symlinks: true },
@@ -720,8 +720,8 @@ async fn capability_sections_render_in_order_with_host_repo_and_plugin_skills(
                 RepositoryReadAccess::Repository => vec![repository],
                 RepositoryReadAccess::OuterMarkerOnly | RepositoryReadAccess::NoMarkers => vec![
                     config.cwd.clone(),
-                    repository.join(".agents/skills"),
-                    outer.join(".agents/skills"),
+                    repository.join(".BaiCode/skills"),
+                    outer.join(".BaiCode/skills"),
                 ],
             };
             if matches!(repository_read_access, RepositoryReadAccess::OuterMarkerOnly) {
@@ -749,7 +749,7 @@ async fn capability_sections_render_in_order_with_host_repo_and_plugin_skills(
                     .cwd
                     .parent()
                     .expect("inner repository")
-                    .join(".agents/skills/repo-search/SKILL.md"),
+                    .join(".BaiCode/skills/repo-search/SKILL.md"),
             ),
             /*sandbox*/ None,
         )
@@ -895,7 +895,7 @@ async fn repository_skill_cache_cannot_read_inaccessible_files(
                 ("repo-revoked", GATED_BODY),
             ] {
                 let directory =
-                    PathUri::from_host_native_path(cwd.join(".agents/skills").join(name))?;
+                    PathUri::from_host_native_path(cwd.join(".BaiCode/skills").join(name))?;
                 file_system
                     .create_directory(
                         &directory,
@@ -934,7 +934,7 @@ async fn repository_skill_cache_cannot_read_inaccessible_files(
     let gated_path = test
         .fs()
         .canonicalize(
-            &PathUri::from_abs_path(&test.config.cwd.join(".agents/skills/repo-gated/SKILL.md")),
+            &PathUri::from_abs_path(&test.config.cwd.join(".BaiCode/skills/repo-gated/SKILL.md")),
             /*sandbox*/ None,
         )
         .await?;
@@ -971,7 +971,7 @@ async fn repository_skill_cache_cannot_read_inaccessible_files(
     );
     let revoked_path = file_system
         .canonicalize(
-            &executor_cwd.join(".agents/skills/repo-revoked/SKILL.md")?,
+            &executor_cwd.join(".BaiCode/skills/repo-revoked/SKILL.md")?,
             /*sandbox*/ None,
         )
         .await?;
@@ -1203,7 +1203,7 @@ pub(super) async fn repository_skill_grant_history(
     )
     .await?;
     harness.write_file(
-        ".agents/skills/approved-skill/SKILL.md",
+        ".BaiCode/skills/approved-skill/SKILL.md",
         "---\nname: approved-skill\ndescription: Approved repository instructions.\n---\n\nApproved skill body.",
     ).await?;
     let test = harness.test();
@@ -1222,7 +1222,7 @@ pub(super) async fn repository_skill_grant_history(
                 .executor_environment()
                 .selection()
                 .cwd
-                .join(".agents/skills")?,
+                .join(".BaiCode/skills")?,
             /*sandbox*/ None,
         )
         .await?;
@@ -1412,10 +1412,10 @@ async fn explicit_skill_prompt_precedes_plugin_instructions() -> Result<()> {
     let codex_home = Arc::new(TempDir::new()?);
     let plugin_root = codex_home.path().join("plugins/cache/test/sample/local");
     let skill_dir = plugin_root.join("skills/sample-search");
-    std::fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    std::fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     std::fs::create_dir_all(&skill_dir)?;
     std::fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"sample","description":"inspect sample data"}"#,
     )?;
     std::fs::write(
@@ -1617,7 +1617,7 @@ async fn opted_in_executor_provider_skips_host_discovery_but_injects_discovered_
         .with_workspace_setup(|cwd, fs| async move {
             for (skill_dir, name, description, body) in [
                 (
-                    cwd.join(".agents/skills").join(AMBIENT_SKILL_NAME),
+                    cwd.join(".BaiCode/skills").join(AMBIENT_SKILL_NAME),
                     AMBIENT_SKILL_NAME,
                     "Ambient repository skill.",
                     AMBIENT_SKILL_BODY,
@@ -1842,7 +1842,7 @@ async fn executor_only_provider_preserves_structured_repo_skill_without_discover
     let mut builder = test_codex()
         .with_extensions(Arc::new(extensions.build()))
         .with_workspace_setup(|cwd, fs| async move {
-            let skill_dir = cwd.join(".agents/skills").join(AMBIENT_SKILL_NAME);
+            let skill_dir = cwd.join(".BaiCode/skills").join(AMBIENT_SKILL_NAME);
             fs.create_directory(
                 &PathUri::from_host_native_path(&skill_dir)?,
                 CreateDirectoryOptions {
@@ -1876,7 +1876,7 @@ async fn executor_only_provider_preserves_structured_repo_skill_without_discover
     let ambient_skill_path = test
         .executor_environment()
         .cwd()
-        .join(".agents/skills")
+        .join(".BaiCode/skills")
         .join(AMBIENT_SKILL_NAME)
         .join("SKILL.md")
         .to_path_buf();

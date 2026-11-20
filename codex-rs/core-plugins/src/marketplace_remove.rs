@@ -161,9 +161,9 @@ mod tests {
         )
         .unwrap();
         let installed_root = marketplace_install_root(codex_home.path()).join("debug");
-        fs::create_dir_all(installed_root.join(".agents/plugins")).unwrap();
+        fs::create_dir_all(installed_root.join(".BaiCode/plugins")).unwrap();
         fs::write(
-            installed_root.join(".agents/plugins/marketplace.json"),
+            installed_root.join(".BaiCode/plugins/marketplace.json"),
             "{}",
         )
         .unwrap();

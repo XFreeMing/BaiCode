@@ -38,9 +38,9 @@ async fn curated_git_requirements_control_plugin_skills() -> Result<()> {
         let root = home
             .path()
             .join(format!("plugins/cache/{name}/sample/local"));
-        fs::create_dir_all(root.join(".codex-plugin"))?;
+        fs::create_dir_all(root.join(".baicode-plugin"))?;
         fs::write(
-            root.join(".codex-plugin/plugin.json"),
+            root.join(".baicode-plugin/plugin.json"),
             r#"{"name":"sample","description":"inspect sample data"}"#,
         )?;
         let skill_dir = root.join("skills/sample-search");

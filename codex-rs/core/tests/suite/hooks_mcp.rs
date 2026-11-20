@@ -562,7 +562,7 @@ async fn mcp_tool_hook_starts_cached_model_hidden_tools(
             fs::write(home.join("hooks.json"), hooks.to_string())
                 .expect("write model-hidden MCP tool hook config");
             let manifest_dir = home.join(format!(
-                "plugins/cache/openai-bundled/{plugin}/local/.codex-plugin"
+                "plugins/cache/openai-bundled/{plugin}/local/.baicode-plugin"
             ));
             fs::create_dir_all(&manifest_dir).expect("create bundled plugin fixture");
             let manifest = json!({

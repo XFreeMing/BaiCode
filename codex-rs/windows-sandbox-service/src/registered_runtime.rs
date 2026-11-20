@@ -374,7 +374,7 @@ pub(crate) fn validate_target(
     }
     ensure!(
         sandbox_member,
-        "runtime account is not in CodexSandboxUsers"
+        "runtime account is not in BaiCodeSandboxUsers"
     );
     Ok(user_sid)
 }

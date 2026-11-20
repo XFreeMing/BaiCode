@@ -135,7 +135,7 @@ fn private_tmp_fixture() {
     // Rebinding the synthetic-mount registry must preserve masks for aliases
     // beneath it, even when the surrounding /tmp is writable.
     let registry_alias = PathBuf::from(format!(
-        "/tmp/codex-bwrap-synthetic-mount-targets-{}/view",
+        "/tmp/baicode-bwrap-synthetic-mount-targets-{}/view",
         unsafe { libc::geteuid() }
     ));
     std::fs::create_dir_all(&registry_alias).unwrap();

@@ -693,9 +693,7 @@ fn run_update_action(
     action: UpdateAction,
     cli_executable: Option<&std::path::Path>,
 ) -> anyhow::Result<()> {
-    let UpdateAction::Daemon(source) = action else {
-        anyhow::bail!("Only updates from a local CLI package are available");
-    };
+    let UpdateAction::Daemon(source) = action;
     anyhow::ensure!(
         source == codex_tui::DaemonUpdateSource::ThisCli,
         "Only updates from a local CLI package are available"
@@ -854,6 +852,28 @@ fn stage_str(stage: Stage) -> &'static str {
 }
 
 fn main() -> anyhow::Result<()> {
+    // A parent Codex process may supply private credentials and session identifiers.
+    // SAFETY: this is the first operation in main, before starting any worker threads.
+    for (name, _) in std::env::vars_os() {
+        if name
+            .as_encoded_bytes()
+            .get(..6)
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case(b"codex_"))
+        {
+            unsafe { std::env::remove_var(name) };
+        }
+    }
+    if let Some(path) = std::env::var_os("PATH") {
+        let directories = std::env::split_paths(&path).filter(|directory| {
+            !directory.components().any(|component| {
+                let name = component.as_os_str().as_encoded_bytes();
+                name.eq_ignore_ascii_case(b".codex") || name.eq_ignore_ascii_case(b"codex-runtimes")
+            })
+        });
+        let path = std::env::join_paths(directories)?;
+        // SAFETY: arg0 dispatch and runtime initialization have not started.
+        unsafe { std::env::set_var("PATH", path) };
+    }
     codex_build_info::initialize!();
     let remote_control_disabled = codex_app_server::take_remote_control_disabled_env();
     arg0_dispatch_or_else(move |arg0_paths: Arg0DispatchPaths| async move {

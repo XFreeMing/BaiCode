@@ -118,7 +118,7 @@ async fn recoverable_override_read_error_warns_and_falls_back_to_default() {
     fs::write(home.path().join(DEFAULT_AGENTS_MD_FILENAME), "default").expect("write default");
     let read_error = fs::read(&override_path).expect_err("symlink loop should not be readable");
     let warning = format!(
-        "Failed to read global AGENTS.md instructions from `{}`: {read_error}",
+        "Failed to read global BAICODE.md instructions from `{}`: {read_error}",
         override_path.display()
     );
 

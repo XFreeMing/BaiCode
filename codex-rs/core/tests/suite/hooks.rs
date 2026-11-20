@@ -4632,7 +4632,7 @@ async fn local_bundled_cleanup_hook_runs_without_saved_trust(
     let plugin_root = home
         .path()
         .join(format!("plugins/cache/openai-bundled/{plugin_name}/local"));
-    fs::create_dir_all(plugin_root.join(".codex-plugin"))?;
+    fs::create_dir_all(plugin_root.join(".baicode-plugin"))?;
     let hooks = serde_json::json!({ "hooks": { "Stop": [{ "hooks": [{
         "type": "mcp_tool",
         "server": mcp_server_name,
@@ -4655,7 +4655,7 @@ async fn local_bundled_cleanup_hook_runs_without_saved_trust(
         }
     };
     fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         serde_json::to_vec(&serde_json::json!({
             "name": plugin_name,
             "hooks": manifest_hooks,
@@ -4839,11 +4839,11 @@ async fn plugin_pre_tool_use_blocks_exec_command_before_execution() -> Result<()
 
     let plugin_root = home.path().join("plugins/cache/test/sample/local");
     let hooks_dir = plugin_root.join("hooks");
-    fs::create_dir_all(plugin_root.join(".codex-plugin"))
+    fs::create_dir_all(plugin_root.join(".baicode-plugin"))
         .context("create plugin manifest directory")?;
     fs::create_dir_all(&hooks_dir).context("create plugin hooks directory")?;
     fs::write(
-        plugin_root.join(".codex-plugin/plugin.json"),
+        plugin_root.join(".baicode-plugin/plugin.json"),
         r#"{"name":"sample"}"#,
     )
     .context("write plugin manifest")?;

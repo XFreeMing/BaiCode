@@ -66,7 +66,7 @@ from .retry import retry_on_overload
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 ApprovalHandler = Callable[[str, JsonObject | None], JsonObject]
-RUNTIME_PKG_NAME = "openai-codex-cli-bin"
+RUNTIME_PKG_NAME = "baicode-cli-bin"
 _GOAL_START_TIMEOUT_S = 30.0
 
 
@@ -112,7 +112,7 @@ def _params_dict(
 
 def _installed_codex_path() -> Path:
     try:
-        from codex_cli_bin import bundled_codex_path
+        from baicode_cli_bin import bundled_codex_path
     except ImportError as exc:
         raise FileNotFoundError(
             "Unable to locate the pinned Codex runtime. Install the published SDK build "
@@ -125,7 +125,7 @@ def _installed_codex_path() -> Path:
 
 def _installed_codex_path_dirs() -> tuple[Path, ...]:
     try:
-        from codex_cli_bin import bundled_path_dir
+        from baicode_cli_bin import bundled_path_dir
     except (ImportError, AttributeError):
         return ()
 
