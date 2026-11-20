@@ -23,23 +23,32 @@ use tracing::warn;
 /// plenty for an interactive CLI.
 pub const CHANNEL_CAPACITY: usize = 128;
 
-mod remote_control;
 mod stdio;
 mod unix_socket;
 #[cfg(test)]
 mod unix_socket_tests;
 mod websocket;
 
-pub use remote_control::REMOTE_CONTROL_DISABLED_ENV_VAR;
-pub use remote_control::RemoteControlDisabledByRequirements;
-pub use remote_control::RemoteControlEnableError;
-pub use remote_control::RemoteControlHandle;
-pub use remote_control::RemoteControlPolicy;
-pub use remote_control::RemoteControlStartConfig;
-pub use remote_control::RemoteControlStartupMode;
-pub use remote_control::RemoteControlUnavailable;
-pub use remote_control::start_remote_control;
-pub use remote_control::take_remote_control_disabled_env;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RemoteControlStartupMode {
+    ResolvePersisted,
+    DisabledEphemeral,
+    EnabledEphemeral,
+}
+
+/// Internal marker used by the daemon to disable remote control without requiring a new CLI flag.
+pub const REMOTE_CONTROL_DISABLED_ENV_VAR: &str =
+    "CODEX_INTERNAL_APP_SERVER_REMOTE_CONTROL_DISABLED";
+
+/// Reads and removes the daemon's internal disabled-start marker before worker threads start.
+pub fn take_remote_control_disabled_env() -> bool {
+    let disabled =
+        std::env::var_os(REMOTE_CONTROL_DISABLED_ENV_VAR).is_some_and(|value| value == "1");
+    // SAFETY: app-server calls this synchronously at process startup, before spawning threads.
+    unsafe { std::env::remove_var(REMOTE_CONTROL_DISABLED_ENV_VAR) };
+    disabled
+}
+
 pub use stdio::start_stdio_connection;
 pub use unix_socket::AppServerStartupLock;
 pub use unix_socket::DaemonShutdownAccess;
@@ -111,7 +120,7 @@ impl std::fmt::Display for AppServerTransportParseError {
             ),
             AppServerTransportParseError::InvalidWebSocketListenUrl(listen_url) => write!(
                 f,
-                "invalid websocket --listen URL `{listen_url}`; expected `ws://IP:PORT`"
+                "invalid websocket --listen URL `{listen_url}`; expected a loopback `ws://IP:PORT`"
             ),
         }
     }
@@ -160,6 +169,11 @@ impl AppServerTransport {
             let bind_address = socket_addr.parse::<SocketAddr>().map_err(|_| {
                 AppServerTransportParseError::InvalidWebSocketListenUrl(listen_url.to_string())
             })?;
+            if !bind_address.ip().is_loopback() {
+                return Err(AppServerTransportParseError::InvalidWebSocketListenUrl(
+                    listen_url.to_string(),
+                ));
+            }
             return Ok(Self::WebSocket { bind_address });
         }
 

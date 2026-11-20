@@ -62,11 +62,6 @@
 //codex-rs/cli:cli-worktree-test-windows-cross	12
 //codex-rs/cli:codex-bin-unit-tests	60
 //codex-rs/cli:logs_client-bin-unit-tests	1
-//codex-rs/cloud-config:cloud-config-unit-tests	47
-//codex-rs/cloud-tasks-client:cloud-tasks-client-unit-tests	35
-//codex-rs/cloud-tasks-mock-client:cloud-tasks-mock-client-unit-tests	59
-//codex-rs/cloud-tasks:cloud-tasks-env_filter-test-windows-cross	1
-//codex-rs/cloud-tasks:cloud-tasks-unit-tests	1
 //codex-rs/code-mode-host:code-mode-host-grpc-test-windows-cross	28
 //codex-rs/code-mode-host:code-mode-host-grpc_notifications-test-windows-cross	25
 //codex-rs/code-mode-host:code-mode-host-grpc_tcp-test-windows-cross	1
@@ -145,7 +140,6 @@
 //codex-rs/ext/history-notes:history-notes-history_notes_extension-test-windows-cross	1
 //codex-rs/ext/history-notes:history-notes-image_model_input-test-windows-cross	2
 //codex-rs/ext/history-notes:history-notes-unit-tests	1
-//codex-rs/ext/image-generation:image-generation-unit-tests	47
 //codex-rs/ext/mcp:mcp-hosted_apps_mcp-test-windows-cross	26
 //codex-rs/ext/mcp:mcp-plugin_mcp-test-windows-cross	5
 //codex-rs/ext/mcp:mcp-unit-tests	48
@@ -155,7 +149,6 @@
 //codex-rs/ext/skills:skills-executor_file_system_authority-test-windows-cross	36
 //codex-rs/ext/skills:skills-skills_extension-test-windows-cross	7
 //codex-rs/ext/skills:skills-unit-tests	8
-//codex-rs/ext/web-search:web-search-unit-tests	1
 //codex-rs/external-agent-migration:external-agent-migration-unit-tests	4
 //codex-rs/features:features-unit-tests	47
 //codex-rs/feedback:feedback-unit-tests	77

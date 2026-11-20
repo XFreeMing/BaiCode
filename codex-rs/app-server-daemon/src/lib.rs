@@ -24,7 +24,6 @@ mod remote_control_client;
 mod settings;
 pub mod telemetry;
 mod thread_recovery;
-mod update_loop;
 
 use std::collections::BTreeMap;
 use std::io::Write;
@@ -296,13 +295,10 @@ pub async fn set_remote_control(mode: RemoteControlMode) -> Result<RemoteControl
 }
 
 pub async fn run_pid_update_loop(
-    http_client_factory: codex_http_client::HttpClientFactory,
-    restore_release: Option<String>,
+    _http_client_factory: codex_http_client::HttpClientFactory,
+    _restore_release: Option<String>,
 ) -> Result<()> {
-    ensure_supported_platform()?;
-    #[cfg(windows)]
-    backend::windows::ensure_not_elevated()?;
-    update_loop::run(http_client_factory, restore_release).await
+    anyhow::bail!("Automatic updates are unavailable in the local build")
 }
 
 pub use backend::stderr_log::stderr_writer;
@@ -320,12 +316,9 @@ pub fn maintain_stderr_log() -> Result<()> {
 }
 
 pub async fn update(
-    http_client_factory: codex_http_client::HttpClientFactory,
+    _http_client_factory: codex_http_client::HttpClientFactory,
 ) -> Result<UpdateOutput> {
-    ensure_supported_platform()?;
-    #[cfg(windows)]
-    backend::windows::ensure_not_elevated()?;
-    update_loop::request_manual_update(&Daemon::from_environment()?, http_client_factory).await
+    anyhow::bail!("Use app-server daemon update --from-cli to install from a local CLI package")
 }
 
 #[cfg(any(unix, windows))]
@@ -1016,41 +1009,8 @@ impl Daemon {
 
     async fn ensure_managed_updater(&self, settings: &DaemonSettings) -> Result<bool> {
         let updater = backend::pid_update_loop_backend(self.backend_paths(settings));
-        if !settings.auto_update_enabled {
-            updater.stop().await?;
-            return Ok(false);
-        }
-        if !self.is_stable_standalone_release()? {
-            // An installer publishes current and the latest marker separately.
-            // Keep its updater alive while that publication may be in progress.
-            if !self.has_latest_selection_marker() {
-                updater.stop().await?;
-            }
-            return Ok(false);
-        }
-        let Ok(codex_bin) =
-            managed_install::resolved_managed_codex_bin(&self.managed_codex_bin).await
-        else {
-            if !self.has_latest_selection_marker() {
-                updater.stop().await?;
-            }
-            return Ok(false);
-        };
-        if !managed_install::supports_daemon_update_loop(&codex_bin).await
-            || !self.is_stable_standalone_release()?
-            || !managed_install::resolved_managed_codex_bin(&self.managed_codex_bin)
-                .await
-                .is_ok_and(|selected| selected == codex_bin)
-        {
-            if !self.has_latest_selection_marker() {
-                updater.stop().await?;
-            }
-            return Ok(false);
-        }
-        backend::pid_update_loop_backend(self.backend_paths_with_bin(settings, &codex_bin))
-            .start()
-            .await?;
-        Ok(true)
+        updater.stop().await?;
+        Ok(false)
     }
 
     fn is_stable_standalone_release(&self) -> Result<bool> {

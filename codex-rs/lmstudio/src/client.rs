@@ -3,7 +3,6 @@ use codex_http_client::ClientRouteClass;
 use codex_http_client::RouteAwareClientPool;
 use codex_model_provider_info::LMSTUDIO_OSS_PROVIDER_ID;
 use std::io;
-use std::path::Path;
 use std::time::Duration;
 
 #[derive(Clone)]
@@ -129,70 +128,6 @@ impl LMStudioClient {
     }
 
     // Find lms, checking fallback paths if not in PATH
-    fn find_lms() -> std::io::Result<String> {
-        Self::find_lms_with_home_dir(/*home_dir*/ None)
-    }
-
-    fn find_lms_with_home_dir(home_dir: Option<&str>) -> std::io::Result<String> {
-        // First try 'lms' in PATH
-        if which::which("lms").is_ok() {
-            return Ok("lms".to_string());
-        }
-
-        // Platform-specific fallback paths
-        let home = match home_dir {
-            Some(dir) => dir.to_string(),
-            None => {
-                #[cfg(unix)]
-                {
-                    std::env::var("HOME").unwrap_or_default()
-                }
-                #[cfg(windows)]
-                {
-                    std::env::var("USERPROFILE").unwrap_or_default()
-                }
-            }
-        };
-
-        #[cfg(unix)]
-        let fallback_path = format!("{home}/.lmstudio/bin/lms");
-
-        #[cfg(windows)]
-        let fallback_path = format!("{home}/.lmstudio/bin/lms.exe");
-
-        if Path::new(&fallback_path).exists() {
-            Ok(fallback_path)
-        } else {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                "LM Studio not found. Please install LM Studio from https://lmstudio.ai/",
-            ))
-        }
-    }
-
-    pub async fn download_model(&self, model: &str) -> std::io::Result<()> {
-        let lms = Self::find_lms()?;
-        eprintln!("Downloading model: {model}");
-
-        let status = std::process::Command::new(&lms)
-            .args(["get", "--yes", model])
-            .stdout(std::process::Stdio::inherit())
-            .stderr(std::process::Stdio::null())
-            .status()
-            .map_err(|e| {
-                std::io::Error::other(format!("Failed to execute '{lms} get --yes {model}': {e}"))
-            })?;
-
-        if !status.success() {
-            return Err(std::io::Error::other(format!(
-                "Model download failed with exit code: {}",
-                status.code().unwrap_or(-1)
-            )));
-        }
-
-        tracing::info!("Successfully downloaded model '{model}'");
-        Ok(())
-    }
 }
 
 #[cfg(test)]
@@ -385,40 +320,5 @@ mod tests {
                 .to_string()
                 .contains("Server returned error: 404")
         );
-    }
-
-    #[test]
-    fn test_find_lms() {
-        let result = LMStudioClient::find_lms();
-
-        match result {
-            Ok(_) => {
-                // lms was found in PATH - that's fine
-            }
-            Err(e) => {
-                // Expected error when LM Studio not installed
-                assert!(e.to_string().contains("LM Studio not found"));
-            }
-        }
-    }
-
-    #[test]
-    fn test_find_lms_with_mock_home() {
-        // Test fallback path construction without touching env vars
-        #[cfg(unix)]
-        {
-            let result = LMStudioClient::find_lms_with_home_dir(Some("/test/home"));
-            if let Err(e) = result {
-                assert!(e.to_string().contains("LM Studio not found"));
-            }
-        }
-
-        #[cfg(windows)]
-        {
-            let result = LMStudioClient::find_lms_with_home_dir(Some("C:\\test\\home"));
-            if let Err(e) = result {
-                assert!(e.to_string().contains("LM Studio not found"));
-            }
-        }
     }
 }

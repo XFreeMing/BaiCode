@@ -445,13 +445,6 @@ pub(crate) struct AutomaticThreadName {
 impl AutomaticThreadName {
     pub(crate) async fn save(mut self, title: String, cancellation: &CancellationToken) {
         let read = async {
-            if let AppServerRequestHandle::Cloud(handle) = &self.session.request_handle
-                && let Some(result) = handle
-                    .read_native_thread_name(&self.thread_id.to_string())
-                    .await
-            {
-                return Ok(result?);
-            }
             let thread = self
                 .session
                 .thread_read(self.thread_id, /*include_turns*/ false)
@@ -470,18 +463,7 @@ impl AutomaticThreadName {
         if cancellation.is_cancelled() {
             return;
         }
-        let result = if let AppServerRequestHandle::Cloud(handle) = &self.session.request_handle
-            && let Some(result) = handle
-                .save_native_thread_name(ThreadSetNameParams {
-                    thread_id: self.thread_id.to_string(),
-                    name: title.clone(),
-                })
-                .await
-        {
-            result
-        } else {
-            self.session.thread_set_name(self.thread_id, title).await
-        };
+        let result = self.session.thread_set_name(self.thread_id, title).await;
         if let Err(error) = result {
             tracing::debug!(%error, "failed to apply generated thread title");
         }

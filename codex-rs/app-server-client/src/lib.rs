@@ -21,10 +21,6 @@
 //! unread notifications cannot prevent request responses from being delivered.
 
 mod cloud;
-pub mod cloud_backend;
-pub use codex_cloud_client::EnvironmentSelection;
-pub use codex_cloud_client::ProjectEnvironment;
-pub use codex_cloud_client::SavedEnvironment;
 mod path;
 use codex_app_server_remote_client as remote;
 mod remote_addr;
@@ -35,7 +31,9 @@ pub use cloud::CloudOperation;
 pub use cloud::CloudRecoveryRelease;
 pub use cloud::CloudRequestHandle;
 pub use cloud::CloudUserMessageReceipt;
-pub use cloud_backend::CloudRecoverySignInChanged;
+pub use cloud::EnvironmentSelection;
+pub use cloud::ProjectEnvironment;
+pub use cloud::SavedEnvironment;
 mod server_request;
 pub use server_request::AppServerReplyHandle;
 
@@ -648,7 +646,7 @@ impl AppServerRequestHandle {
         &self,
         request_id: RequestId,
         params: codex_app_server_protocol::ThreadStartParams,
-        environment: codex_cloud_client::EnvironmentSelection,
+        environment: EnvironmentSelection,
     ) -> Result<codex_app_server_protocol::ThreadStartResponse, TypedRequestError> {
         let response = match self {
             Self::Cloud(handle) => {

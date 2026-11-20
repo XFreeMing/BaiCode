@@ -1013,8 +1013,6 @@ See the Codex keymap documentation for supported actions and examples."
             )
         });
         let runtime_keymap = startup_try!(runtime_keymap);
-        #[cfg(not(debug_assertions))]
-        let upgrade_version = crate::updates::get_upgrade_version(&config);
 
         let agents_overview =
             agents_overview::AgentsOverviewState::new(local_settings.tui.agents_overview_grouping);
@@ -1343,32 +1341,8 @@ See the Codex keymap documentation for supported actions and examples."
         let mut settled_size_tags = crate::terminal_size_telemetry::tags(last_screen_size);
         let mut pending_resize: Option<(ratatui::layout::Size, Instant)> = None;
         let mut reconnect = None;
-        let mut cloud_environment_picker: Option<
-            futures::future::LocalBoxFuture<'static, crate::bottom_pane::SelectionViewParams>,
-        > = None;
         let mut waiting_for_initial_session_configured = wait_for_initial_session_configured;
         let mut waiting_for_initial_session_header = true;
-
-        #[cfg(not(debug_assertions))]
-        let pre_loop_exit_reason = if let Some(latest_version) = upgrade_version {
-            let control = Box::pin(app.handle_event(
-                tui,
-                &mut app_server,
-                AppEvent::InsertHistoryCell(Box::new(UpdateAvailableHistoryCell::new(
-                    latest_version,
-                    crate::update_action::get_update_action(),
-                ))),
-            ))
-            .await;
-            match startup_try!(control) {
-                AppRunControl::Continue => None,
-                AppRunControl::Exit(exit_reason) => Some(exit_reason),
-            }
-        } else {
-            None
-        };
-        #[cfg(debug_assertions)]
-        let pre_loop_exit_reason: Option<ExitReason> = None;
 
         let mut backends =
             super::backend_sessions::BackendSessions::from_initial(app_server, other_backends);
@@ -1386,9 +1360,7 @@ See the Codex keymap documentation for supported actions and examples."
         backends.settings = backend_settings;
 
         let mut parked_side_completions = HashMap::<_, Vec<AppEvent>>::new();
-        let exit_reason_result = if let Some(exit_reason) = pre_loop_exit_reason {
-            Ok(exit_reason)
-        } else {
+        let exit_reason_result = {
             loop {
                 let displayed_session = backends.displayed;
                 let displayed_owner = backends.displayed_owner();
@@ -1579,13 +1551,6 @@ See the Codex keymap documentation for supported actions and examples."
                         }
                         AppRunControl::Continue
                     }
-                    Some(view) = futures::future::OptionFuture::from(cloud_environment_picker.as_mut()) => {
-                        cloud_environment_picker = None;
-                        app.chat_widget.replace_selection_view_if_present(
-                            super::cloud_environments::LOADING_VIEW_ID, view,
-                        );
-                        AppRunControl::Continue
-                    }
                     Some(event) = app.saved_openings.next_event(&mut app_event_rx) => {
                         if let AppEvent::ArchiveFinished { backend_id, thread_id, result: Ok(()) } = &event
                             && *backend_id != displayed_owner
@@ -1603,19 +1568,7 @@ See the Codex keymap documentation for supported actions and examples."
                             continue;
                         }
                         let switch_backend = match &event {
-                            AppEvent::ChooseCloudEnvironment => {
-                                if let Some(source) = cloud_draft
-                                    && app.chat_widget.no_modal_or_popup_active()
-                                    && let AppServerRequestHandle::Cloud(handle) = backends.session_at(displayed_session).request_handle()
-                                {
-                                    app.chat_widget.show_selection_view(super::cloud_environments::loading_view());
-                                    cloud_environment_picker = Some(Box::pin(async move {
-                                        let environments = handle.list_saved_environments().await.map_err(|error| error.to_string());
-                                        super::cloud_environments::cloud_environment_picker(environments, source)
-                                    }));
-                                }
-                                continue;
-                            }
+                            AppEvent::ChooseCloudEnvironment => continue,
                             AppEvent::StartCloudConversation { source, saved_environment }
                                 if cloud_draft == Some(*source) =>
                             {

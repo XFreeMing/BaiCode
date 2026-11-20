@@ -13,7 +13,7 @@ pub fn get_default_model_for_oss_provider(provider_id: &str) -> Option<&'static 
     }
 }
 
-/// Ensures the specified OSS provider is ready (models downloaded, service reachable).
+/// Ensures the specified OSS provider is ready (model installed, service reachable).
 pub async fn ensure_oss_provider_ready(
     provider_id: &str,
     config: &Config,

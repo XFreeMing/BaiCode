@@ -284,6 +284,9 @@ impl HttpClientFactory {
     /// to a direct route. Ordered PAC candidates are collapsed to one route on Windows and macOS;
     /// later proxy or `DIRECT` candidates are not retried after a connection failure.
     pub fn resolve_proxy_route(&self, request_url: &str) -> OutboundProxyRoute {
+        if self.network_policy.is_loopback_only() {
+            return OutboundProxyRoute::Direct;
+        }
         resolve_proxy_route(
             &ProcessEnv,
             request_url,
@@ -297,6 +300,9 @@ impl HttpClientFactory {
         &self,
         request_url: String,
     ) -> io::Result<OutboundProxyRoute> {
+        if self.network_policy.is_loopback_only() {
+            return Ok(OutboundProxyRoute::Direct);
+        }
         if matches!(
             self.outbound_proxy_policy,
             OutboundProxyPolicy::ReqwestDefault

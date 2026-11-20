@@ -6,29 +6,16 @@ use codex_core::config::Config;
 /// Default OSS model to use when `--oss` is passed without an explicit `-m`.
 pub const DEFAULT_OSS_MODEL: &str = "openai/gpt-oss-20b";
 
-/// Prepare the local OSS environment when `--oss` is selected.
-///
-/// - Ensures a local LM Studio server is reachable.
-/// - Checks if the model exists locally and downloads it if missing.
+/// Checks that the requested model is already available in LM Studio.
 pub async fn ensure_oss_ready(config: &Config) -> std::io::Result<()> {
-    let model = match config.model.as_ref() {
-        Some(model) => model,
-        None => DEFAULT_OSS_MODEL,
-    };
-
-    // Verify local LM Studio is reachable.
+    let model = config.model.as_deref().unwrap_or(DEFAULT_OSS_MODEL);
     let lmstudio_client = LMStudioClient::try_from_provider(config).await?;
-
-    match lmstudio_client.fetch_models().await {
-        Ok(models) => {
-            if !models.iter().any(|m| m == model) {
-                lmstudio_client.download_model(model).await?;
-            }
-        }
-        Err(err) => {
-            // Not fatal; higher layers may still proceed and surface errors later.
-            tracing::warn!("Failed to query local models from LM Studio: {}.", err);
-        }
+    let models = lmstudio_client.fetch_models().await?;
+    if !models.iter().any(|candidate| candidate == model) {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Model {model} is not installed locally in LM Studio"),
+        ));
     }
 
     // Load the model in the background

@@ -935,7 +935,6 @@ async fn reducer_ingests_artifact_operation_fact() {
         )
         .await;
 
-    assert!(events[0].can_send_with_api_key_auth());
     assert_eq!(
         serde_json::to_value(events).expect("serialize events"),
         json!([{

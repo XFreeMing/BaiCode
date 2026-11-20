@@ -4,11 +4,9 @@
 use crate::AppServerEvent;
 use crate::RequestResult;
 use crate::TypedRequestError;
-use crate::cloud_backend::CloudTitleClient;
 use codex_app_server_protocol::ClientNotification;
 use codex_app_server_protocol::ClientRequest;
 use codex_app_server_protocol::JSONRPCErrorError;
-use codex_app_server_protocol::ModelListParams;
 use codex_app_server_protocol::RequestId;
 use codex_app_server_protocol::Result as JsonRpcResult;
 use codex_app_server_protocol::ThreadResumeResponse;
@@ -25,6 +23,37 @@ use tokio::sync::mpsc;
 use tokio::sync::oneshot;
 use tokio::time::Instant;
 use tokio::time::timeout_at;
+
+/// A local project's GitHub origins to provision in the default cloud environment.
+/// Callers must supply credential-free origin URLs; this client does not inspect local Git state.
+#[derive(Clone)]
+pub struct ProjectEnvironment {
+    pub name: String,
+    pub origin_urls: Vec<String>,
+    /// Working directory inside the managed environment, when a project selects one.
+    pub cwd: Option<String>,
+}
+
+/// An explicit saved environment or the default environment with a project checkout.
+#[derive(Clone, Debug)]
+pub enum EnvironmentSelection {
+    Saved(String),
+    Project(ProjectEnvironment),
+}
+
+impl std::fmt::Debug for ProjectEnvironment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ProjectEnvironment([redacted])")
+    }
+}
+
+/// A saved environment available to the current Cloud account.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SavedEnvironment {
+    pub id: String,
+    pub name: String,
+    pub workspace_shared: bool,
+}
 
 /// Rejection from the original network policy during Cloud recovery.
 pub const CLOUD_RECOVERY_NETWORK_BLOCKED: &str =
@@ -46,7 +75,7 @@ pub enum CloudOperation {
     StartThreadWithEnvironment {
         request_id: RequestId,
         params: Box<codex_app_server_protocol::ThreadStartParams>,
-        environment: codex_cloud_client::EnvironmentSelection,
+        environment: EnvironmentSelection,
     },
     SubmitUserMessage(Box<TurnStartParams>),
     /// Apply the result of a name write that already succeeded outside the command queue.
@@ -122,8 +151,6 @@ pub(super) enum IdleReconnect {
 pub struct CloudRequestHandle {
     pub(super) reconnect: tokio::sync::watch::Sender<IdleReconnect>,
     commands: mpsc::Sender<CloudCommand>,
-    native: Option<Arc<codex_cloud_client::Client>>,
-    title_client: Option<Arc<CloudTitleClient>>,
 }
 
 /// Tracks only losses queued for delivery. The worker remains the sole owner
@@ -189,18 +216,6 @@ impl CloudClient {
         mpsc::Receiver<CloudCommand>,
         mpsc::UnboundedSender<AppServerEvent>,
     ) {
-        Self::channel_with_native(capacity, /*native*/ None, /*title_client*/ None)
-    }
-
-    pub(super) fn channel_with_native(
-        capacity: usize,
-        native: Option<codex_cloud_client::Client>,
-        title_client: Option<CloudTitleClient>,
-    ) -> (
-        Self,
-        mpsc::Receiver<CloudCommand>,
-        mpsc::UnboundedSender<AppServerEvent>,
-    ) {
         let (commands, receiver) = mpsc::channel(capacity.max(1));
         let (events, event_receiver) = mpsc::unbounded_channel();
         (
@@ -209,8 +224,6 @@ impl CloudClient {
                 handle: CloudRequestHandle {
                     commands,
                     reconnect: Default::default(),
-                    native: native.map(Arc::new),
-                    title_client: title_client.map(Arc::new),
                 },
                 events: event_receiver,
             },
@@ -281,47 +294,6 @@ impl CloudClient {
 }
 
 impl CloudRequestHandle {
-    /// Generate metadata with Cloud's own account, outside its conversation command queue.
-    pub async fn generate_thread_title(
-        &self,
-        model: &str,
-        effort: Option<codex_protocol::openai_models::ReasoningEffort>,
-        prompt: String,
-        schema: serde_json::Value,
-    ) -> color_eyre::Result<String> {
-        let client = self
-            .title_client
-            .as_ref()
-            .ok_or_else(|| io::Error::other("Cloud title generation is unavailable"))?;
-        client.generate(model, effort, prompt, schema).await
-    }
-
-    /// Read the saved title even when another Cloud conversation owns the attachment.
-    pub async fn read_native_thread_name(
-        &self,
-        thread_id: &str,
-    ) -> Option<Result<Option<String>, codex_cloud_client::Error>> {
-        Some(self.native.as_ref()?.read_thread_name(thread_id).await)
-    }
-
-    /// Save an automatic name without occupying the conversation command queue.
-    pub async fn save_native_thread_name(
-        &self,
-        params: ThreadSetNameParams,
-    ) -> Option<color_eyre::Result<()>> {
-        let client = self.native.as_ref()?;
-        Some(
-            async {
-                client
-                    .set_thread_name(&params.thread_id, &params.name)
-                    .await?;
-                self.unit(CloudOperation::ThreadNameSaved(params)).await?;
-                Ok(())
-            }
-            .await,
-        )
-    }
-
     /// Accept a quiet Attach only for the conversation displayed by the caller.
     pub fn reconnect_idle_thread(&self, thread_id: &str) -> bool {
         self.reconnect.send_if_modified(|state| {
@@ -359,67 +331,11 @@ impl CloudRequestHandle {
         Ok((settings, CloudRecoveryRelease { release, deadline }))
     }
 
-    /// Whether a completed model read still belongs to the bound Cloud account.
-    pub fn model_catalog_is_current(&self) -> bool {
-        self.native
-            .as_ref()
-            .is_none_or(|catalog| catalog.model_catalog_is_current())
-    }
-
-    async fn model_list(
-        catalog: &codex_cloud_client::Client,
-        params: &ModelListParams,
-    ) -> RequestResult {
-        if params.model_provider.is_some() {
-            return Err(JSONRPCErrorError {
-                code: -32602,
-                message: "Cloud model discovery uses the server's model provider.".into(),
-                data: None,
-            });
-        }
-        let result = async {
-            let body = catalog
-                .list_models(
-                    params.cursor.as_deref(),
-                    params.limit,
-                    params.include_hidden,
-                )
-                .await
-                .map_err(|error| error.to_string())?;
-            if !catalog.model_catalog_is_current() {
-                return Err("Cloud model catalog account changed.".into());
-            }
-            serde_json::from_slice(&body)
-                .map_err(|_| "Invalid Cloud model catalog response.".into())
-        }
-        .await;
-        result.map_err(|message| JSONRPCErrorError {
-            code: -32000,
-            message,
-            data: None,
-        })
-    }
-
-    /// Discover saved environments using this Cloud connection's authenticated account.
-    pub async fn list_saved_environments(
-        &self,
-    ) -> Result<Vec<codex_cloud_client::SavedEnvironment>, codex_cloud_client::Error> {
-        let catalog = self
-            .native
-            .as_ref()
-            .ok_or(codex_cloud_client::Error::InvalidCredentials)?;
-        let environments = catalog.list_saved_environments().await?;
-        if !catalog.model_catalog_is_current() {
-            return Err(codex_cloud_client::Error::InvalidCredentials);
-        }
-        Ok(environments)
-    }
-
     pub(crate) async fn start_thread_with_environment(
         &self,
         request_id: RequestId,
         params: codex_app_server_protocol::ThreadStartParams,
-        environment: codex_cloud_client::EnvironmentSelection,
+        environment: EnvironmentSelection,
     ) -> io::Result<RequestResult> {
         self.send(CloudOperation::StartThreadWithEnvironment {
             request_id,
@@ -462,8 +378,6 @@ impl CloudRequestHandle {
             Self {
                 commands,
                 reconnect: self.reconnect.clone(),
-                native: None,
-                title_client: None,
             },
         ))
     }
@@ -499,11 +413,6 @@ impl CloudRequestHandle {
     }
 
     pub(crate) async fn request(&self, request: ClientRequest) -> io::Result<RequestResult> {
-        // Catalog reads must not occupy the serialized send and attachment lane.
-        if let (Some(catalog), ClientRequest::ModelList { params, .. }) = (&self.native, &request) {
-            // Keep the catalog HTTP state out of the shared request future.
-            return Ok(Box::pin(Self::model_list(catalog, params)).await);
-        }
         self.send(CloudOperation::Request(Box::new(request))).await
     }
 

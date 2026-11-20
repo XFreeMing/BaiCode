@@ -318,12 +318,6 @@ impl AccountRequestProcessor {
                         ),
                     );
                 });
-                thread_manager
-                    .plugins_manager()
-                    .maybe_start_curated_repo_sync_for_config(
-                        &plugins_config,
-                        Some(Arc::clone(&on_effective_plugins_changed)),
-                    );
                 if let Err(err) = runtime_auth {
                     warn!("failed to initialize runtime auth for remote plugin refresh: {err}");
                     return;

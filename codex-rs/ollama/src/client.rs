@@ -1,15 +1,8 @@
-use futures::StreamExt;
-use futures::stream::BoxStream;
 use semver::Version;
 use serde_json::Value as JsonValue;
-use std::collections::VecDeque;
 use std::io;
 use std::time::Duration;
 
-use crate::line_buffer::LineBuffer;
-use crate::parser::pull_events_from_value;
-use crate::pull::PullEvent;
-use crate::pull::PullProgressReporter;
 use crate::url::base_url_to_host_root;
 use crate::url::is_openai_compatible_base_url;
 use codex_core::config::Config;
@@ -180,98 +173,6 @@ impl OllamaClient {
         }
     }
 
-    /// Start a model pull and emit streaming events. The returned stream ends when
-    /// a Success event is observed or the server closes the connection.
-    pub async fn pull_model_stream(
-        &self,
-        model: &str,
-    ) -> io::Result<BoxStream<'static, PullEvent>> {
-        let url = format!("{}/api/pull", self.host_root.trim_end_matches('/'));
-        let resp = self
-            .client
-            .post(url)
-            .json(&serde_json::json!({"model": model, "stream": true}))
-            .send()
-            .await
-            .map_err(io::Error::other)?;
-        if !resp.status().is_success() {
-            return Err(io::Error::other(format!(
-                "failed to start pull: HTTP {}",
-                resp.status()
-            )));
-        }
-
-        let mut stream = resp.bytes_stream();
-        let mut buf = LineBuffer::default();
-        let _pending: VecDeque<PullEvent> = VecDeque::new();
-
-        // Using an async stream adaptor backed by unfold-like manual loop.
-        let s = async_stream::stream! {
-            while let Some(chunk) = stream.next().await {
-                match chunk {
-                    Ok(bytes) => {
-                        buf.extend_from_slice(&bytes);
-                        while let Some(line) = buf.take_line() {
-                            if let Ok(text) = std::str::from_utf8(&line) {
-                                let text = text.trim();
-                                if text.is_empty() { continue; }
-                                if let Ok(value) = serde_json::from_str::<JsonValue>(text) {
-                                    for ev in pull_events_from_value(&value) { yield ev; }
-                                    if let Some(err_msg) = value.get("error").and_then(|e| e.as_str()) {
-                                        yield PullEvent::Error(err_msg.to_string());
-                                        return;
-                                    }
-                                    if let Some(status) = value.get("status").and_then(|s| s.as_str())
-                                        && status == "success" { yield PullEvent::Success; return; }
-                                }
-                            }
-                        }
-                    }
-                    Err(_) => {
-                        // Connection error: end the stream.
-                        return;
-                    }
-                }
-            }
-        };
-
-        Ok(Box::pin(s))
-    }
-
-    /// High-level helper to pull a model and drive a progress reporter.
-    pub async fn pull_with_reporter(
-        &self,
-        model: &str,
-        reporter: &mut dyn PullProgressReporter,
-    ) -> io::Result<()> {
-        reporter.on_event(&PullEvent::Status(format!("Pulling model {model}...")))?;
-        let mut stream = self.pull_model_stream(model).await?;
-        while let Some(event) = stream.next().await {
-            reporter.on_event(&event)?;
-            match event {
-                PullEvent::Success => {
-                    return Ok(());
-                }
-                PullEvent::Error(err) => {
-                    // Empirically, ollama returns a 200 OK response even when
-                    // the output stream includes an error message. Verify with:
-                    //
-                    // `curl -i http://localhost:11434/api/pull -d '{ "model": "foobarbaz" }'`
-                    //
-                    // As such, we have to check the event stream, not the
-                    // HTTP response status, to determine whether to return Err.
-                    return Err(io::Error::other(format!("Pull failed: {err}")));
-                }
-                PullEvent::ChunkProgress { .. } | PullEvent::Status(_) => {
-                    continue;
-                }
-            }
-        }
-        Err(io::Error::other(
-            "Pull stream ended unexpectedly without success.",
-        ))
-    }
-
     /// Low-level constructor given a raw host root, e.g. "http://localhost:11434".
     #[cfg(test)]
     fn from_host_root(host_root: impl Into<String>) -> Self {
@@ -291,7 +192,7 @@ impl OllamaClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use assert_matches::assert_matches;
+
     use pretty_assertions::assert_eq;
 
     // Happy-path tests using a mock HTTP server; skip if sandbox network is disabled.
@@ -360,50 +261,6 @@ mod tests {
 
         let version = client.fetch_version().await.expect("version fetch");
         assert_eq!(version, Some(Version::new(0, 14, 1)));
-    }
-
-    #[tokio::test]
-    async fn test_pull_model_stream_parses_large_json_lines() {
-        if std::env::var(codex_core::spawn::CODEX_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
-            tracing::info!(
-                "{} set; skipping test_pull_model_stream_parses_large_json_lines",
-                codex_core::spawn::CODEX_SANDBOX_NETWORK_DISABLED_ENV_VAR
-            );
-            return;
-        }
-
-        let server = wiremock::MockServer::start().await;
-        let body = format!(
-            "{}\n{}\n",
-            serde_json::json!({
-                "status": "pulling layers",
-                "padding": "x".repeat(128 * 1024),
-            }),
-            serde_json::json!({"status": "complete"}),
-        );
-        wiremock::Mock::given(wiremock::matchers::method("POST"))
-            .and(wiremock::matchers::path("/api/pull"))
-            .respond_with(
-                wiremock::ResponseTemplate::new(200).set_body_raw(body, "application/x-ndjson"),
-            )
-            .mount(&server)
-            .await;
-
-        let client = OllamaClient::from_host_root(server.uri());
-        let events = client
-            .pull_model_stream("test-model")
-            .await
-            .expect("start pull stream")
-            .collect::<Vec<_>>()
-            .await;
-
-        assert_matches!(
-            events.as_slice(),
-            [
-                PullEvent::Status(pulling),
-                PullEvent::Status(complete),
-            ] if pulling == "pulling layers" && complete == "complete"
-        );
     }
 
     #[tokio::test]

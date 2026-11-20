@@ -110,6 +110,7 @@ fn run_git(args: &[&str], cwd: Option<&Path>) -> Result<(), MarketplaceAddError>
         .args(["-c", codex_git_utils::SAFE_BARE_REPOSITORY_CONFIG])
         .args(args);
     command.env("GIT_TERMINAL_PROMPT", "0");
+    command.env("GIT_ALLOW_PROTOCOL", "file");
     if let Some(cwd) = cwd {
         command.current_dir(cwd);
     }

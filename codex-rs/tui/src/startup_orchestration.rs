@@ -175,17 +175,6 @@ pub(super) async fn run_main_inner(
             CloudConfigBundleLoader::default(),
         )
         .await;
-        let validation_cloud_config_bundle = if workload_identity_selected {
-            cloud_config_bundle_for_app_server_target(
-                &validation_target,
-                &validation_bootstrap,
-                &codex_home,
-                &embedded_network_policy,
-            )
-            .await?
-        } else {
-            CloudConfigBundleLoader::default()
-        };
         load_config_or_exit(
             cli_kv_overrides.clone(),
             ConfigOverrides {
@@ -207,7 +196,7 @@ pub(super) async fn run_main_inner(
                 ..Default::default()
             },
             validation_loader_overrides,
-            validation_cloud_config_bundle,
+            CloudConfigBundleLoader::default(),
             strict_config,
         )
         .await;
@@ -313,20 +302,6 @@ pub(super) async fn run_main_inner(
             err
         }
     })?;
-    if std::io::stdin().is_terminal() && std::io::stdout().is_terminal() {
-        codex_cloud_config::ensure_config_server_login(
-            embedded_network_policy.bind_bootstrap_auth(bootstrap_auth_config(
-                &codex_home,
-                &presentation.bootstrap_config,
-            )?),
-            presentation
-                .bootstrap_config
-                .config_layer_stack
-                .requirements_toml(),
-            codex_cloud_config::ConfigServerLoginMethod::Browser,
-        )
-        .await?;
-    }
     // Keep normal terminal signals available until local configuration is ready. Once raw
     // mode begins, StartupDraft immediately takes ownership of input.
     let (initialized_terminal, terminal_restore_guard) = tokio::task::spawn_blocking(|| {
@@ -375,7 +350,6 @@ pub(super) async fn run_main_inner(
         workload_identity_selected,
         std::env::var_os(codex_exec_server::CODEX_EXEC_SERVER_URL_ENV_VAR).as_deref(),
     )?;
-    let cloud_preview_available = app_server_target.uses_embedded_network_policy();
     let remote_cwd_override = cli
         .cwd
         .clone()
@@ -396,14 +370,7 @@ pub(super) async fn run_main_inner(
     } else {
         Ok(())
     };
-    let cloud_config_bundle = startup_draft
-        .run_until(cloud_config_bundle_for_app_server_target(
-            &app_server_target,
-            &bootstrap_config,
-            &codex_home,
-            &embedded_network_policy,
-        ))
-        .await??;
+    let mut cloud_config_bundle = CloudConfigBundleLoader::default();
     let bootstrap_config_toml = &bootstrap_config.config_toml;
 
     let cwd_override = if app_server_target.uses_remote_workspace() {
@@ -527,19 +494,6 @@ pub(super) async fn run_main_inner(
         config.cwd.as_path(),
     );
 
-    let mut cloud_config_bundle = if workload_identity_selected {
-        cloud_config_bundle
-    } else {
-        startup_draft
-            .run_until(managed_config_bundle_loader_for_storage(
-                embedded_network_policy.bind_bootstrap_auth(
-                    app_server_target.auth_config_for_cloud_loader(config.auth_config()),
-                ),
-                config.config_layer_stack.requirements_toml(),
-                /*enable_codex_api_key_env*/ false,
-            ))
-            .await??
-    };
     let managed_worktree = if cli.shared.worktree {
         let (destination, bundle, worktree) = startup_draft
             .run_until(worktree_startup::prepare(
@@ -1025,7 +979,6 @@ pub(super) async fn run_main_inner(
         state_db,
         environment_manager,
         embedded_network_policy,
-        cloud_preview_available,
         managed_worktree.clone(),
         daemon_startup_warning,
         managed_daemon,

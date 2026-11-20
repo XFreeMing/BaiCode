@@ -88,7 +88,6 @@ mod security;
 mod system;
 mod thread_inventory;
 mod title;
-mod updates;
 #[cfg(target_os = "windows")]
 mod windows_dev_drive;
 
@@ -109,7 +108,6 @@ use sandbox::sandbox_check;
 use system::system_check;
 use thread_inventory::thread_inventory_check;
 use title::terminal_title_check;
-use updates::updates_check;
 
 const OPENAI_BETA_HEADER: &str = "OpenAI-Beta";
 const RESPONSES_WEBSOCKETS_V2_BETA_HEADER_VALUE: &str = "responses_websockets=2026-02-06";
@@ -422,7 +420,6 @@ async fn build_report(
             let (
                 config_check,
                 auth_check,
-                updates_check,
                 network_check,
                 websocket_check,
                 mcp_check,
@@ -458,7 +455,6 @@ async fn build_report(
                         ),
                     })
                 },
-                run_async_check("updates", progress.clone(), updates_check(config)),
                 async {
                     run_sync_check("network", progress.clone(), || network::check(Some(config)))
                 },
@@ -512,7 +508,6 @@ async fn build_report(
             checks.extend([
                 config_check,
                 auth_check,
-                updates_check,
                 network_check,
                 websocket_check,
                 mcp_check,
@@ -528,15 +523,7 @@ async fn build_report(
             ]);
         }
         Err(err) => {
-            let reachability_plan = default_reachability_plan();
-            let (
-                config_check,
-                network_check,
-                terminal_check,
-                git_check,
-                state_check,
-                reachability_check,
-            ) = tokio::join!(
+            let (config_check, network_check, terminal_check, git_check, state_check) = tokio::join!(
                 async { run_sync_check("config", progress.clone(), || config_load_failure(err)) },
                 async {
                     run_sync_check("network", progress.clone(), || {
@@ -550,11 +537,6 @@ async fn build_report(
                 },
                 async { run_sync_check("git", progress.clone(), || git_check(&cwd)) },
                 async { run_sync_check("state", progress.clone(), fallback_state_check) },
-                run_async_check(
-                    "provider reachability",
-                    progress.clone(),
-                    provider_reachability_check(reachability_plan),
-                ),
             );
             checks.extend([
                 config_check,
@@ -562,18 +544,12 @@ async fn build_report(
                 terminal_check,
                 git_check,
                 state_check,
-                reachability_check,
             ]);
         }
     }
 
     progress.begin("desktop");
     if let Some(desktop) = desktop::collect().await {
-        #[cfg(any(target_os = "macos", target_os = "windows"))]
-        if let Some(application) = desktop.application.as_ref() {
-            updates::append_desktop_update(&mut checks, config_result.as_ref().ok(), application)
-                .await;
-        }
         progress.finish("desktop", overall_status(&desktop.checks));
         checks.extend(desktop.checks);
     }
@@ -2687,18 +2663,6 @@ fn provider_reachability_plan(config: &Config) -> ReachabilityPlan {
     plan
 }
 
-fn default_reachability_plan() -> ReachabilityPlan {
-    provider_reachability_plan_from_parts(
-        ProviderAuthReachabilityMode::Chatgpt,
-        "openai",
-        "OpenAI",
-        /*provider_base_url*/ None,
-        /*provider_query_params*/ None,
-        /*is_amazon_bedrock*/ false,
-        "https://chatgpt.com/backend-api/",
-    )
-}
-
 fn provider_auth_reachability_mode_from_auth(
     requires_openai_auth: bool,
     provider_env_key: Option<&str>,
@@ -4027,19 +3991,6 @@ mod tests {
                 url: "https://api.openai.com/v1/responses".to_string(),
                 required: true,
                 route_probe_url: Some("https://api.openai.com/v1/models".to_string()),
-            }]
-        );
-    }
-
-    #[test]
-    fn provider_reachability_chatgpt_uses_inference_endpoint() {
-        assert_eq!(
-            default_reachability_plan().endpoints,
-            vec![ReachabilityEndpoint {
-                label: "ChatGPT".to_string(),
-                url: "https://chatgpt.com/backend-api/codex/responses".to_string(),
-                required: true,
-                route_probe_url: None,
             }]
         );
     }

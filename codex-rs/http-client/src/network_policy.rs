@@ -57,19 +57,22 @@ pub struct NetworkPolicy {
     state: Option<Arc<Mutex<State>>>,
     endpoints: Option<Arc<BTreeSet<Url>>>,
     account: Option<u64>,
+    loopback_only: bool,
 }
 
 impl fmt::Debug for NetworkPolicy {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("NetworkPolicy")
             .field("managed", &self.state.is_some())
+            .field("loopback_only", &self.loopback_only)
             .finish_non_exhaustive()
     }
 }
 
 impl PartialEq for NetworkPolicy {
     fn eq(&self, other: &Self) -> bool {
-        self.endpoints == other.endpoints
+        self.loopback_only == other.loopback_only
+            && self.endpoints == other.endpoints
             && self.account == other.account
             && match (&self.state, &other.state) {
                 (Some(left), Some(right)) => Arc::ptr_eq(left, right),
@@ -144,6 +147,7 @@ impl NetworkPolicyController {
             state: Some(self.state.clone()),
             endpoints: None,
             account: None,
+            loopback_only: false,
         }
     }
 
@@ -194,7 +198,18 @@ impl NetworkPolicy {
             state: None,
             endpoints: None,
             account: None,
+            loopback_only: false,
         }
+    }
+
+    /// Restrict this transport to HTTP and WebSocket services on this machine.
+    pub fn with_loopback_only(mut self) -> Self {
+        self.loopback_only = true;
+        self
+    }
+
+    pub fn is_loopback_only(&self) -> bool {
+        self.loopback_only
     }
 
     /// Narrows a bootstrap client's existing local policy to exact endpoint URLs.
@@ -232,6 +247,7 @@ impl NetworkPolicy {
             return None;
         }
         self.account = self.account.or(credentials.account);
+        self.loopback_only |= credentials.loopback_only;
         if let Some(endpoints) = &credentials.endpoints {
             self = self.restrict_to_endpoints(endpoints.as_ref().clone());
         }
@@ -240,7 +256,7 @@ impl NetworkPolicy {
 
     /// Whether this transport participates in the application policy lifecycle.
     pub fn is_managed(&self) -> bool {
-        self.state.is_some()
+        self.loopback_only || self.state.is_some()
     }
 
     /// Watches effective changes; unmanaged callers have no application policy owner.
@@ -279,6 +295,9 @@ impl NetworkPolicy {
 
     /// Checks a destination before proxy resolution, DNS, or transport work starts.
     pub fn acquire(&self, url: &Url) -> Result<NetworkPermit, NetworkPolicyDenied> {
+        if self.loopback_only && !crate::is_loopback_network_url(url) {
+            return Err(NetworkPolicyDenied::Destination);
+        }
         if self
             .endpoints
             .as_ref()
@@ -292,7 +311,7 @@ impl NetworkPolicy {
     /// Disables SDKs without destination enforcement whenever restrictions apply.
     /// The returned permit also cancels work if an unrestricted policy changes.
     pub fn acquire_for_unsupported_sdk(&self) -> Result<NetworkPermit, NetworkPolicyDenied> {
-        if self.endpoints.is_some() {
+        if self.loopback_only || self.endpoints.is_some() {
             return Err(NetworkPolicyDenied::UnsupportedTransport);
         }
         self.acquire_destination(PermitDestination::UnrestrictedSdk)

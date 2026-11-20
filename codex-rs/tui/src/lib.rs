@@ -8,7 +8,6 @@ use crate::legacy_core::config::Config;
 use crate::legacy_core::config::ConfigBuilder;
 use crate::legacy_core::config::ConfigOverrides;
 use crate::legacy_core::config::ConfigTomlLoadResult;
-use crate::legacy_core::config::bootstrap_auth_config;
 use crate::legacy_core::config::edit::ConfigEdit;
 use crate::legacy_core::config::edit::ConfigEditsBuilder;
 use crate::legacy_core::config::load_config_toml_with_layer_stack;
@@ -38,7 +37,6 @@ use codex_app_server_client::InProcessClientStartArgs;
 use codex_app_server_client::RemoteAppServerClient;
 use codex_app_server_client::RemoteAppServerConnectArgs;
 pub use codex_app_server_client::RemoteAppServerEndpoint;
-use codex_app_server_client::cloud_backend;
 pub use codex_app_server_client::resolve_remote_addr;
 pub use codex_app_server_client::resolve_remote_endpoint;
 use codex_app_server_protocol::Account as AppServerAccount;
@@ -50,7 +48,6 @@ use codex_app_server_protocol::ThreadListCwdFilter;
 use codex_app_server_protocol::ThreadListParams;
 use codex_app_server_protocol::ThreadSortKey as AppServerThreadSortKey;
 use codex_app_server_protocol::ThreadSourceKind;
-use codex_cloud_config::managed_config_bundle_loader_for_storage;
 use codex_config::CloudConfigBundleLoader;
 use codex_config::ConfigLoadError;
 use codex_config::LoaderOverrides;
@@ -59,7 +56,6 @@ use codex_config::types::ResumeCwdMode;
 use codex_exec_server::EnvironmentManager;
 use codex_exec_server::ExecServerRuntimeOptions;
 use codex_features::Feature;
-use codex_login::AuthConfig;
 use codex_login::default_client::originator;
 use codex_login::default_client::set_default_client_residency_requirement;
 use codex_login::enforce_login_restrictions;
@@ -269,13 +265,7 @@ pub(crate) mod update_action;
 mod worktree_startup;
 pub use update_action::DaemonUpdateSource;
 pub use update_action::UpdateAction;
-#[cfg(not(debug_assertions))]
-pub use update_action::get_update_action;
-mod update_prompt;
 mod update_versions;
-mod updates;
-#[cfg(any(not(debug_assertions), test))]
-mod updates_cache;
 mod user_prompt;
 mod version;
 mod vim_search;
@@ -401,17 +391,6 @@ impl AppServerTarget {
             | Self::Remote { .. }
             | Self::Cloud => factory,
         }
-    }
-
-    fn auth_config_for_cloud_loader(&self, mut auth_config: AuthConfig) -> AuthConfig {
-        if matches!(self, Self::Remote { .. }) {
-            // Remove local auth restrictions before loading credentials for a remote
-            // workspace; the remote app server enforces its own authentication policy.
-            auth_config.forced_login_method = None;
-            auth_config.forced_chatgpt_workspace_id = None;
-            auth_config.managed_auth_policy = Default::default();
-        }
-        auth_config
     }
 
     fn thread_params_mode(&self) -> ThreadParamsMode {
@@ -1055,23 +1034,6 @@ fn app_server_target_for_launch(
     })
 }
 
-async fn cloud_config_bundle_for_app_server_target(
-    app_server_target: &AppServerTarget,
-    bootstrap_config: &ConfigTomlLoadResult,
-    codex_home: &Path,
-    embedded_network_policy: &codex_app_server_client::EmbeddedNetworkPolicy,
-) -> std::io::Result<CloudConfigBundleLoader> {
-    managed_config_bundle_loader_for_storage(
-        embedded_network_policy
-            .bind_bootstrap_auth(app_server_target.auth_config_for_cloud_loader(
-                bootstrap_auth_config(codex_home, bootstrap_config)?,
-            )),
-        bootstrap_config.config_layer_stack.requirements_toml(),
-        /*enable_codex_api_key_env*/ false,
-    )
-    .await
-}
-
 fn loader_overrides_are_default(loader_overrides: &LoaderOverrides) -> bool {
     let loader_overrides_are_default = loader_overrides.user_config_path.is_none()
         && loader_overrides.user_config_profile.is_none()
@@ -1167,13 +1129,12 @@ async fn run_ratatui_app(
     manually_selected_oss_provider: Option<String>,
     overrides: ConfigOverrides,
     cli_kv_overrides: Vec<(String, toml::Value)>,
-    mut cloud_config_bundle: CloudConfigBundleLoader,
+    cloud_config_bundle: CloudConfigBundleLoader,
     feedback: codex_feedback::CodexFeedback,
     log_db: Option<log_db::LogDbLayer>,
     mut state_db: Option<StateDbHandle>,
     environment_manager: Arc<EnvironmentManager>,
     embedded_network_policy: codex_app_server_client::EmbeddedNetworkPolicy,
-    cloud_preview_available: bool,
     managed_worktree: Option<ManagedTuiWorktree>,
     daemon_startup_warning: Option<String>,
     managed_daemon: bool,
@@ -1193,10 +1154,7 @@ async fn run_ratatui_app(
     );
     let backend_id = crate::backend_id::BackendId::new();
     let uses_remote_workspace = app_server_target.uses_remote_workspace();
-    let workload_identity_selected = is_workload_identity_selected();
     color_eyre::install()?;
-
-    tooltips::announcement::prewarm(initial_config.http_client_factory());
 
     // Forward panic reports through tracing so they appear in the UI status
     // line, but do not swallow the default/color-eyre panic handler.
@@ -1209,32 +1167,6 @@ async fn run_ratatui_app(
         prev_hook(info);
     }));
     let (mut tui, mut terminal_restore_guard, mut startup_draft) = startup_draft.into_parts();
-
-    #[cfg(not(debug_assertions))]
-    {
-        use crate::update_prompt::UpdatePromptOutcome;
-
-        let skip_update_prompt = cli.prompt.as_ref().is_some_and(|prompt| !prompt.is_empty());
-        if !skip_update_prompt {
-            startup_draft.flush_pending_events(&mut tui).await?;
-            match update_prompt::run_update_prompt_if_needed(&mut tui, &initial_config).await? {
-                UpdatePromptOutcome::Continue => {}
-                UpdatePromptOutcome::RunUpdate(action) => {
-                    terminal_restore_guard.restore()?;
-                    launch_telemetry.record("update_requested");
-                    return Ok(AppExitInfo {
-                        token_usage: crate::token_usage::TokenUsage::default(),
-                        thread_id: None,
-                        resume_hint: None,
-                        archive_warnings: Vec::new(),
-                        disconnect_info: None,
-                        update_action: Some(action),
-                        exit_reason: ExitReason::UserRequested,
-                    });
-                }
-            }
-        }
-    }
 
     // Initialize high-fidelity session event logging if enabled.
     session_log::maybe_init(&initial_config);
@@ -1479,18 +1411,6 @@ async fn run_ratatui_app(
         }
         let reloaded_config = startup_draft
             .run_until(&mut tui, async {
-                // If this onboarding run included the login step, always refresh the cloud config
-                // bundle and rebuild config. This avoids missing newly available cloud-managed
-                // policy due to login status detection edge cases.
-                if show_login_screen && !uses_remote_workspace && !workload_identity_selected {
-                    cloud_config_bundle = managed_config_bundle_loader_for_storage(
-                        embedded_network_policy.bind_bootstrap_auth(initial_config.auth_config()),
-                        initial_config.config_layer_stack.requirements_toml(),
-                        /*enable_codex_api_key_env*/ false,
-                    )
-                    .await?;
-                }
-
                 // Reload config when persisted trust or auth changes alter the current process.
                 Ok::<_, std::io::Error>(
                     if !uses_remote_workspace
@@ -2261,36 +2181,7 @@ async fn run_ratatui_app(
         Ok(StartupHooksReviewOutcome::OpenHooksBrowser(data)) => Some(data),
     };
 
-    let mut initial_backends = app::backend_sessions::InitialBackendSessions::singleton(app_server);
-    if cfg!(any(target_os = "macos", target_os = "linux"))
-        && config.features.enabled(Feature::TuiMultiBackend)
-        && cloud_preview_available
-        && !workload_identity_selected
-        && config
-            .config_layer_stack
-            .requirements_toml()
-            .config_server
-            .is_none()
-    {
-        // A daemon-backed resume can rebuild Config without the local transport handle.
-        let mut cloud_config = config.clone();
-        embedded_network_policy.bind_config(&mut cloud_config);
-        match Box::pin(cloud_backend::connect(&cloud_config)).await {
-            Ok(client) => initial_backends.register(
-                AppServerSession::new(
-                    backend_id::BackendId::new(),
-                    client,
-                    ThreadParamsMode::Cloud,
-                ),
-                AppServerTarget::Cloud,
-                cloud_config,
-                local_settings.clone(),
-            ),
-            Err(error) => tui.insert_history_lines(vec![ratatui::text::Line::from(format!(
-                "Could not add the Cloud connection. {error}"
-            ))]),
-        }
-    }
+    let initial_backends = app::backend_sessions::InitialBackendSessions::singleton(app_server);
 
     // Keep the large event-loop future out of the enclosing startup futures so session
     // transitions have enough stack headroom to rebuild configuration and the chat widget.

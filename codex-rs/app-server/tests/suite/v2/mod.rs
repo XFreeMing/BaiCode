@@ -130,7 +130,6 @@ mod rate_limits;
 mod rate_limits_identity;
 mod realtime_conversation;
 mod recommended_plugins;
-mod remote_control;
 #[cfg(debug_assertions)]
 mod remote_thread_store;
 mod request_permissions;
@@ -190,7 +189,6 @@ mod turn_settings_update;
 mod turn_start;
 mod turn_steer;
 mod view_image;
-mod web_search;
 mod windows_sandbox_setup;
 mod workspace_routing;
 

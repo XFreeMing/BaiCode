@@ -86,18 +86,23 @@ pub(crate) async fn connect_websocket_request(
     diagnostic_url: String,
     connector: WebSocketConnector,
     connect_timeout: Duration,
-    use_loopback_direct: bool,
+    _use_loopback_direct: bool,
 ) -> Result<WebSocketConnection, ExecServerError> {
+    if !request
+        .uri()
+        .to_string()
+        .parse::<url::Url>()
+        .is_ok_and(|url| codex_http_client::is_loopback_network_url(&url))
+    {
+        return Err(ExecServerError::Protocol(
+            "Exec-server connections must use a loopback address".to_string(),
+        ));
+    }
     let websocket_config = tokio_tungstenite::tungstenite::protocol::WebSocketConfig::default();
-    timeout(connect_timeout, async {
-        if use_loopback_direct {
-            connector
-                .connect_loopback_direct(request, websocket_config)
-                .await
-        } else {
-            connector.connect(request, websocket_config).await
-        }
-    })
+    timeout(
+        connect_timeout,
+        connector.connect_loopback_direct(request, websocket_config),
+    )
     .await
     .map_err(|_| ExecServerError::WebSocketConnectTimeout {
         url: diagnostic_url.clone(),

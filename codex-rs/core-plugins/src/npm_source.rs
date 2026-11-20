@@ -90,6 +90,7 @@ fn pack_npm_package(
     command
         .current_dir(destination)
         .arg("pack")
+        .arg("--offline")
         .arg("--ignore-scripts")
         .arg("--pack-destination")
         .arg(destination);

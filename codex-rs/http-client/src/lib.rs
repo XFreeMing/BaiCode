@@ -98,21 +98,25 @@ pub use crate::windows_proxy_auth::connect_windows_proxy;
 #[cfg(windows)]
 pub use crate::windows_tls::build_windows_platform_tls_config;
 
+pub fn is_loopback_network_url(url: &Url) -> bool {
+    matches!(url.scheme(), "http" | "https" | "ws" | "wss")
+        && match url.host() {
+            Some(Host::Domain(host)) => host.eq_ignore_ascii_case("localhost"),
+            Some(Host::Ipv4(host)) => host.is_loopback(),
+            Some(Host::Ipv6(host)) => host.is_loopback(),
+            None => false,
+        }
+}
+
 /// Validates HTTPS or loopback HTTP endpoints, rejecting userinfo and fragments.
 /// Errors identify the caller-supplied field without including the URL.
 pub fn validate_endpoint_url(value: &str, field: &str) -> Result<Url, String> {
     let url = Url::parse(value).map_err(|_| format!("invalid {field} URL"))?;
-    let loopback = match url.host() {
-        Some(Host::Domain(host)) => host.eq_ignore_ascii_case("localhost"),
-        Some(Host::Ipv4(host)) => host.is_loopback(),
-        Some(Host::Ipv6(host)) => host.is_loopback(),
-        None => false,
-    };
     if url.host().is_none()
         || !url.username().is_empty()
         || url.password().is_some()
         || url.fragment().is_some()
-        || !(url.scheme() == "https" || (url.scheme() == "http" && loopback))
+        || !(url.scheme() == "https" || (url.scheme() == "http" && is_loopback_network_url(&url)))
     {
         return Err(format!(
             "{field} must use HTTPS (or loopback HTTP), without userinfo or a fragment"

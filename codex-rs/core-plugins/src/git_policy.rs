@@ -40,6 +40,7 @@ impl PluginGitMode {
     pub(crate) fn command(self, git_binary: &Path) -> Command {
         let mut command = codex_utils_process::background_command(git_binary);
         command.args(["-c", codex_git_utils::SAFE_BARE_REPOSITORY_CONFIG]);
+        command.env("GIT_ALLOW_PROTOCOL", "file");
         if matches!(self, Self::Automatic) {
             command.env("GIT_OPTIONAL_LOCKS", "0");
             for name in REPOSITORY_LOCAL_GIT_ENVIRONMENT_VARIABLES {

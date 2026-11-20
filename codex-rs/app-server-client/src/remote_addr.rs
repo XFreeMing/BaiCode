@@ -52,12 +52,11 @@ pub fn resolve_remote_addr(addr: &str) -> color_eyre::Result<RemoteAppServerEndp
         Ok(parsed) => parsed,
         Err(_) => {
             color_eyre::eyre::bail!(
-                "invalid remote address `{addr}`; expected `ws://host:port`, `wss://host:port`, `unix://`, or `unix://PATH`"
+                "invalid remote address `{addr}`; expected `ws://127.0.0.1:port`, `wss://127.0.0.1:port`, `unix://`, or `unix://PATH`"
             );
         }
     };
-    if matches!(parsed.scheme(), "ws" | "wss")
-        && parsed.host_str().is_some()
+    if websocket_url_supports_auth_token(&parsed)
         && remote_addr_has_explicit_port(addr, &parsed)
         && parsed.path() == "/"
         && parsed.query().is_none()
@@ -70,7 +69,7 @@ pub fn resolve_remote_addr(addr: &str) -> color_eyre::Result<RemoteAppServerEndp
     }
 
     color_eyre::eyre::bail!(
-        "invalid remote address `{addr}`; expected `ws://host:port`, `wss://host:port`, `unix://`, or `unix://PATH`"
+        "invalid remote address `{addr}`; expected `ws://127.0.0.1:port`, `wss://127.0.0.1:port`, `unix://`, or `unix://PATH`"
     );
 }
 

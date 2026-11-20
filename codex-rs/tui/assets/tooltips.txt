@@ -2,7 +2,7 @@
 # Tips may use {key:context.action} to insert the configured primary key or chord.
 # A tip is skipped if any referenced action is unbound or unavailable.
 Start a fresh idea with **/new**; the previous session stays in history.
-Use **/feedback** to send logs to the maintainers when something looks off.
+Use **/feedback** to save a diagnostic report locally.
 Switch models or reasoning effort quickly with **/model**.
 Use **/permissions** to control when Codex asks for confirmation.
 Run **/review** to get a code review of your current changes.
@@ -35,7 +35,6 @@ When goals are enabled, use **/goal** to set or inspect the objective for a long
 Use **/agents** to open the agent command center.
 Use **/subagents** to switch between this session’s subagents.
 Use **/export** to save your conversation as Markdown.
-When signed in with ChatGPT, use **/usage** to check your account usage and access available usage limit resets.
 Use **/title** to choose what appears in your terminal’s title.
 Use **/theme** to choose a syntax highlighting theme.
 When plugins are enabled, use **/plugins** to browse plugins.

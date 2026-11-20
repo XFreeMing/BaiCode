@@ -116,30 +116,20 @@ impl App {
         };
         let effort = (model == THREAD_TITLE_MODEL).then_some(ReasoningEffort::Low);
         let event_sender = self.app_event_tx.clone();
-        if let AppServerRequestHandle::Cloud(handle) = request_handle {
+        if matches!(request_handle, AppServerRequestHandle::Cloud(_)) {
             let writer = app_server.automatic_thread_name_writer(thread_id, expected_name);
-            let mut shutdown = self.cloud_title_shutdown.subscribe();
+            let shutdown = self.cloud_title_shutdown.subscribe();
             tokio::spawn(async move {
-                let result = tokio::select! {
-                    biased;
-                    _ = cancellation.cancelled() => return,
-                    _ = shutdown.changed() => Err(color_eyre::eyre::eyre!("shutting down")),
-                    result = handle.generate_thread_title(&model, effort, prompt, thread_title_output_schema()) => result,
-                };
-                if let Some(title) = result
-                    .as_deref()
-                    .ok()
-                    .and_then(parse_thread_title)
-                    .or(fallback_title)
-                {
+                if let Some(title) = fallback_title {
                     writer.save(title, &cancellation).await;
                 }
+                drop(shutdown);
                 event_sender.send(AppEvent::GeneratedThreadTitle {
                     cancellation,
                     thread_id,
                     temporary_thread_id: None,
                     destination,
-                    result: result.map_err(|error| error.to_string()),
+                    result: Err("Cloud title generation is unavailable".to_string()),
                 });
             });
             return;

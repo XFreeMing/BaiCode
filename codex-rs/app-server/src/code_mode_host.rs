@@ -63,8 +63,10 @@ impl TypedValueParser for RedactedHostUrlParser {
 
 fn parse_host_url(value: &str) -> Result<Url, String> {
     let url = Url::parse(value).map_err(|error| format!("invalid code-mode host URL: {error}"))?;
-    if !matches!(url.scheme(), "http" | "https") || url.host_str().is_none() {
-        return Err("code-mode host URL must use http:// or https:// with a host".to_string());
+    if !matches!(url.scheme(), "http" | "https")
+        || !codex_http_client::is_loopback_network_url(&url)
+    {
+        return Err("code-mode host URL must use a loopback HTTP address".to_string());
     }
     if url.fragment().is_some() {
         return Err("code-mode host URL must not contain a fragment".to_string());

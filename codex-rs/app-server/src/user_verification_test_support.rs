@@ -181,7 +181,6 @@ impl Harness {
                 }
                 ConnectionOrigin::WebSocket => AppServerRpcTransport::Websocket,
             },
-            remote_control_handle: None,
             plugin_startup_tasks: None,
         }));
         Ok(Self {

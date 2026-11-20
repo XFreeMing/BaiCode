@@ -133,6 +133,9 @@ impl WebSocketConnector {
         request: Request,
         config: WebSocketConfig,
     ) -> Result<(WebSocketConnection, Response), WebSocketError> {
+        if self.http_client_factory.network_policy().is_loopback_only() {
+            return self.connect_loopback_direct(request, config).await;
+        }
         let route = self
             .http_client_factory
             .resolve_proxy_route_async(request.uri().to_string());

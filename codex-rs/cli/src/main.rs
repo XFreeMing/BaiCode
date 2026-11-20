@@ -8,23 +8,11 @@ use codex_app_server_daemon::LifecycleCommand as AppServerLifecycleCommand;
 use codex_app_server_daemon::RemoteControlMode as AppServerRemoteControlMode;
 use codex_arg0::Arg0DispatchPaths;
 use codex_arg0::arg0_dispatch_or_else;
-use codex_chatgpt::apply_command::ApplyCommand;
-use codex_chatgpt::apply_command::run_apply_command;
 use codex_cli::cloud_config;
-use codex_cli::read_access_token_from_stdin;
-use codex_cli::read_api_key_from_stdin;
-use codex_cli::run_login_status;
-use codex_cli::run_login_with_access_token;
-use codex_cli::run_login_with_api_key;
-use codex_cli::run_login_with_browser;
-use codex_cli::run_login_with_device_code;
-use codex_cli::run_logout;
-use codex_cloud_tasks::Cli as CloudTasksCli;
 use codex_exec::Cli as ExecCli;
 use codex_exec::Command as ExecCommand;
 use codex_exec::ReviewArgs;
 use codex_execpolicy::ExecPolicyCheckCommand;
-use codex_responses_api_proxy::Args as ResponsesApiProxyArgs;
 use codex_rollout_trace::REDUCED_STATE_FILE_NAME;
 use codex_rollout_trace::replay_bundle;
 use codex_state::StateRuntime;
@@ -52,14 +40,10 @@ use supports_color::Stream;
 #[global_allocator]
 static ALLOCATOR: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
-#[cfg(any(target_os = "macos", target_os = "windows"))]
-mod app_cmd;
 mod app_server_proxy;
 mod config_override_args;
 mod daemon_install;
 mod daemon_telemetry;
-#[cfg(any(target_os = "macos", target_os = "windows"))]
-mod desktop_app;
 mod doctor;
 #[cfg(test)]
 #[path = "exec_args_tests.rs"]
@@ -74,19 +58,15 @@ mod migrate_nfs_db;
 mod migrate_rollouts;
 mod plugin_cmd;
 mod queue_cmd;
-mod remote_control_cmd;
 #[cfg(target_os = "windows")]
 mod sandbox_setup;
 mod sandbox_uninstall;
 mod state_db_recovery;
-#[cfg(not(windows))]
-mod wsl_paths;
 
 use crate::mcp_cmd::McpCli;
 use crate::plugin_cmd::PluginCli;
 use crate::plugin_cmd::PluginSubcommand;
 use crate::queue_cmd::QueueCommand;
-use crate::remote_control_cmd::RemoteControlCommand;
 use codex_exec_server_cli::ExecServerCommand;
 use doctor::DoctorCommand;
 use state_db_recovery as local_state_db;
@@ -107,7 +87,6 @@ use codex_login::AuthManager;
 use codex_memories_write::clear_memory_roots_contents;
 use codex_models_manager::bundled_models_response;
 use codex_models_manager::manager::RefreshStrategy;
-use codex_protocol::auth::AuthMode;
 use codex_protocol::protocol::AskForApproval;
 use codex_protocol::user_input::UserInput;
 use codex_terminal_detection::TerminalName;
@@ -149,26 +128,12 @@ enum Subcommand {
     /// Open the agent command center to browse and switch sessions.
     Agents(AgentsCommand),
 
-    /// Internal: forward SSH stdio or a local TCP socket through an HTTP/3 CONNECT proxy.
-    #[clap(hide = true)]
-    TcpTunnel(codex_tcp_tunnel::Args),
-
     /// Run Codex non-interactively.
     #[clap(visible_alias = "e")]
     Exec(ExecCli),
 
     /// Run a code review non-interactively.
     Review(ReviewCommand),
-
-    /// Manage login.
-    Login(LoginCommand),
-
-    /// Supply the existing Codex login to Git's credential-helper protocol.
-    #[clap(hide = true)]
-    GitCredential(codex_cli::GitCredentialArgs),
-
-    /// Remove stored authentication credentials.
-    Logout(LogoutCommand),
 
     /// Manage external MCP servers for Codex.
     Mcp(McpCli),
@@ -179,18 +144,8 @@ enum Subcommand {
     /// [experimental] Run the app server or related tooling.
     AppServer(AppServerCommand),
 
-    /// [experimental] Manage the app-server daemon with remote control enabled.
-    RemoteControl(RemoteControlCommand),
-
-    /// Launch the Desktop app (opens the app installer if missing).
-    #[cfg(any(target_os = "macos", target_os = "windows"))]
-    App(app_cmd::AppCommand),
-
     /// Generate shell completion scripts.
     Completion(CompletionCommand),
-
-    /// Update Codex to the latest version.
-    Update,
 
     /// Diagnose local Codex installation, config, auth, and runtime health.
     Doctor(DoctorCommand),
@@ -204,10 +159,6 @@ enum Subcommand {
     /// Execpolicy tooling.
     #[clap(hide = true)]
     Execpolicy(ExecpolicyCommand),
-
-    /// Apply the latest diff produced by Codex agent as a `git apply` to your local working tree.
-    #[clap(visible_alias = "a")]
-    Apply(ApplyCommand),
 
     /// Resume a previous interactive session (picker by default; use --last to continue the most recent).
     Resume(ResumeCommand),
@@ -232,14 +183,6 @@ enum Subcommand {
 
     /// Fork a previous interactive session (picker by default; use --last to fork the most recent).
     Fork(ForkCommand),
-
-    /// [EXPERIMENTAL] Browse tasks from Codex Cloud and apply changes locally.
-    #[clap(name = "cloud", alias = "cloud-tasks")]
-    Cloud(CloudTasksCli),
-
-    /// Internal: run the responses API proxy.
-    #[clap(hide = true)]
-    ResponsesApiProxy(ResponsesApiProxyArgs),
 
     /// [EXPERIMENTAL] Run the standalone exec-server service.
     ExecServer(ExecServerCommand),
@@ -523,61 +466,6 @@ enum ExecpolicySubcommand {
 }
 
 #[derive(Debug, Parser)]
-struct LoginCommand {
-    #[clap(skip)]
-    config_overrides: CliConfigOverrides,
-
-    #[arg(
-        long = "with-api-key",
-        help = "Read the API key from stdin (e.g. `printenv OPENAI_API_KEY | codex login --with-api-key`)"
-    )]
-    with_api_key: bool,
-
-    #[arg(
-        long = "with-access-token",
-        help = "Read the access token from stdin (e.g. `printenv CODEX_ACCESS_TOKEN | codex login --with-access-token`)"
-    )]
-    with_access_token: bool,
-
-    #[arg(
-        long = "api-key",
-        num_args = 0..=1,
-        default_missing_value = "",
-        value_name = "API_KEY",
-        help = "(deprecated) Previously accepted the API key directly; now exits with guidance to use --with-api-key",
-        hide = true
-    )]
-    api_key: Option<String>,
-
-    #[arg(long = "device-auth")]
-    use_device_code: bool,
-
-    /// EXPERIMENTAL: Use custom OAuth issuer base URL (advanced)
-    /// Override the OAuth issuer base URL (advanced)
-    #[arg(long = "experimental_issuer", value_name = "URL", hide = true)]
-    issuer_base_url: Option<String>,
-
-    /// EXPERIMENTAL: Use custom OAuth client ID (advanced)
-    #[arg(long = "experimental_client-id", value_name = "CLIENT_ID", hide = true)]
-    client_id: Option<String>,
-
-    #[command(subcommand)]
-    action: Option<LoginSubcommand>,
-}
-
-#[derive(Debug, clap::Subcommand)]
-enum LoginSubcommand {
-    /// Show login status.
-    Status,
-}
-
-#[derive(Debug, Parser)]
-struct LogoutCommand {
-    #[clap(skip)]
-    config_overrides: CliConfigOverrides,
-}
-
-#[derive(Debug, Parser)]
 struct AppServerCommand {
     #[command(flatten)]
     startup_config: codex_app_server::StartupConfigArgs,
@@ -804,105 +692,26 @@ fn run_update_action(
     action: UpdateAction,
     cli_executable: Option<&std::path::Path>,
 ) -> anyhow::Result<()> {
-    if let UpdateAction::Daemon(source) = action {
-        let executable = cli_executable
-            .ok_or_else(|| anyhow::anyhow!("Cannot locate the launching Codex CLI"))?;
-        println!("Updating the local background server...");
-        let status = std::process::Command::new(executable)
-            .args(source.command_args())
-            .env(codex_app_server_daemon::telemetry::HANDOFF_ENV, "1")
-            .status()?;
-        anyhow::ensure!(
-            status.success(),
-            "Daemon update failed with status {status}"
-        );
-        println!("Relaunch Codex to reconnect.");
-        return Ok(());
-    }
-    println!();
-    let cmd_str = action.command_str();
-    println!("Updating Codex via `{cmd_str}`...");
-    let status = {
-        #[cfg(windows)]
-        {
-            let (cmd, args) = action.command_args();
-            let cmd = if action == UpdateAction::StandaloneWindows {
-                // These args contain PowerShell metacharacters, so do not let
-                // PATHEXT select a batch shim for this action.
-                "powershell.exe"
-            } else {
-                cmd
-            };
-            let path_env =
-                std::env::var_os("PATH").ok_or_else(|| anyhow::anyhow!("PATH is not set"))?;
-            let command_path = resolve_windows_update_command_from_path(cmd, &path_env)?;
-            // Do not let a project-local command or package-manager config
-            // influence the updater after the user accepts the update prompt.
-            let update_cwd = tempfile::tempdir()?;
-            // Resolve through PATH without consulting the project cwd. When
-            // this returns a .cmd/.bat shim, std::process::Command routes the
-            // absolute path through the system command processor.
-            std::process::Command::new(command_path)
-                .args(args)
-                .current_dir(update_cwd.path())
-                .status()?
-        }
-        #[cfg(not(windows))]
-        {
-            let (cmd, args) = action.command_args();
-            let command_path = crate::wsl_paths::normalize_for_wsl(cmd);
-            let normalized_args: Vec<String> = args
-                .iter()
-                .map(crate::wsl_paths::normalize_for_wsl)
-                .collect();
-            std::process::Command::new(&command_path)
-                .args(&normalized_args)
-                // Package managers search parent directories for project config and hooks.
-                .current_dir("/")
-                .status()?
-        }
+    let UpdateAction::Daemon(source) = action else {
+        anyhow::bail!("Only updates from a local CLI package are available");
     };
-    if !status.success() {
-        anyhow::bail!("`{cmd_str}` failed with status {status}");
-    }
-    println!("\n🎉 Update ran successfully! Please restart Codex.");
+    anyhow::ensure!(
+        source == codex_tui::DaemonUpdateSource::ThisCli,
+        "Only updates from a local CLI package are available"
+    );
+    let executable =
+        cli_executable.ok_or_else(|| anyhow::anyhow!("Cannot locate the launching Codex CLI"))?;
+    println!("Updating the local background server...");
+    let status = std::process::Command::new(executable)
+        .args(source.command_args())
+        .env(codex_app_server_daemon::telemetry::HANDOFF_ENV, "1")
+        .status()?;
+    anyhow::ensure!(
+        status.success(),
+        "Daemon update failed with status {status}"
+    );
+    println!("Relaunch Codex to reconnect.");
     Ok(())
-}
-
-#[cfg(windows)]
-fn resolve_windows_update_command_from_path(
-    command: &str,
-    path_env: &std::ffi::OsStr,
-) -> anyhow::Result<PathBuf> {
-    let path_env =
-        std::env::join_paths(std::env::split_paths(path_env).filter(|path| path.is_absolute()))?;
-    if path_env.is_empty() {
-        anyhow::bail!(
-            "Could not find an absolute update command `{command}` on PATH. Please update manually: https://developers.openai.com/codex/cli/"
-        );
-    }
-    which::which_in_global(command, Some(&path_env))?
-        .next()
-        .ok_or_else(|| anyhow::anyhow!("could not find update command `{command}` on PATH"))
-}
-
-fn run_update_command() -> anyhow::Result<()> {
-    #[cfg(debug_assertions)]
-    {
-        anyhow::bail!(
-            "`codex update` is not available in debug builds. Install a release build of Codex to use this command."
-        );
-    }
-
-    #[cfg(not(debug_assertions))]
-    {
-        let Some(action) = codex_tui::get_update_action() else {
-            anyhow::bail!(
-                "Could not detect the Codex installation method. Please update manually: https://developers.openai.com/codex/cli/"
-            );
-        };
-        run_update_action(action, /*cli_executable*/ None)
-    }
 }
 
 fn run_execpolicycheck(cmd: ExecPolicyCheckCommand) -> anyhow::Result<()> {
@@ -1170,39 +979,6 @@ async fn dispatch_cli(
                 root_remote_auth_token_env,
                 arg0_paths,
             )));
-        }
-        Some(Subcommand::TcpTunnel(args)) if args.token_file.is_some() => {
-            codex_tcp_tunnel::run_ssh_proxy_from_file(args, tokio::io::stdout()).await?;
-        }
-        Some(Subcommand::TcpTunnel(args)) => {
-            let config =
-                cloud_config::load_config(&root_config_overrides, LoaderOverrides::default())
-                    .await?;
-            let permit = config.application_network_policy.acquire(&args.proxy_url)?;
-            let manager = AuthManager::shared_from_config_with_auth_modes(
-                &config,
-                /*enable_codex_api_key_env*/ false,
-                vec![AuthMode::Chatgpt, AuthMode::ChatgptAuthTokens],
-            )
-            .await?;
-            anyhow::ensure!(
-                manager.auth_mode() == Some(AuthMode::Chatgpt),
-                "ChatGPT OAuth login required for SSH"
-            );
-            let access_token = async {
-                let oauth = manager
-                    .auth()
-                    .await
-                    .ok_or_else(|| anyhow::anyhow!("ChatGPT OAuth login required for SSH"))?;
-                Ok(oauth.get_token_data()?.access_token)
-            };
-            permit
-                .run(codex_tcp_tunnel::run_ssh_proxy(
-                    args,
-                    access_token,
-                    tokio::io::stdout(),
-                ))
-                .await??;
         }
         Some(Subcommand::Exec(mut exec_cli)) => {
             if let Some(root_endpoint) = &root_remote
@@ -1561,30 +1337,6 @@ async fn dispatch_cli(
                 }
             }
         }
-        Some(Subcommand::RemoteControl(mut remote_control_cli)) => {
-            remote_control_cli.no_daemon |= interactive.no_daemon;
-            let subcommand_name = remote_control_cli.subcommand_name();
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                subcommand_name,
-            )?;
-            remote_control_cmd::run(
-                remote_control_cli,
-                arg0_paths.clone(),
-                root_config_overrides,
-            )
-            .await?;
-        }
-        #[cfg(any(target_os = "macos", target_os = "windows"))]
-        Some(Subcommand::App(app_cli)) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "app",
-            )?;
-            app_cmd::run_app(app_cli).await?;
-        }
         Some(Subcommand::Resume(ResumeCommand {
             session_id,
             last,
@@ -1706,75 +1458,6 @@ async fn dispatch_cli(
                 arg0_paths,
             )));
         }
-        Some(Subcommand::GitCredential(mut args)) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "git-credential",
-            )?;
-            prepend_config_flags(&mut args.config_overrides, root_config_overrides.clone());
-            // Git falls back to prompting after helper errors; quitting must be explicit.
-            if let Err(error) = codex_cli::run_git_credential(args).await {
-                eprintln!("{error}");
-                println!("quit=true\n");
-            }
-        }
-        Some(Subcommand::Login(mut login_cli)) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "login",
-            )?;
-            prepend_config_flags(
-                &mut login_cli.config_overrides,
-                root_config_overrides.clone(),
-            );
-            match login_cli.action {
-                Some(LoginSubcommand::Status) => {
-                    run_login_status(login_cli.config_overrides).await;
-                }
-                None => {
-                    if login_cli.with_api_key && login_cli.with_access_token {
-                        eprintln!(
-                            "Choose one login credential source: --with-api-key or --with-access-token."
-                        );
-                        std::process::exit(1);
-                    } else if login_cli.use_device_code {
-                        run_login_with_device_code(
-                            login_cli.config_overrides,
-                            login_cli.issuer_base_url,
-                            login_cli.client_id,
-                        )
-                        .await;
-                    } else if login_cli.api_key.is_some() {
-                        eprintln!(
-                            "The --api-key flag is no longer supported. Pipe the key instead, e.g. `printenv OPENAI_API_KEY | codex login --with-api-key`."
-                        );
-                        std::process::exit(1);
-                    } else if login_cli.with_api_key {
-                        let api_key = read_api_key_from_stdin();
-                        run_login_with_api_key(login_cli.config_overrides, api_key).await;
-                    } else if login_cli.with_access_token {
-                        let access_token = read_access_token_from_stdin();
-                        run_login_with_access_token(login_cli.config_overrides, access_token).await;
-                    } else {
-                        run_login_with_browser(login_cli.config_overrides).await;
-                    }
-                }
-            }
-        }
-        Some(Subcommand::Logout(mut logout_cli)) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "logout",
-            )?;
-            prepend_config_flags(
-                &mut logout_cli.config_overrides,
-                root_config_overrides.clone(),
-            );
-            run_logout(logout_cli.config_overrides).await;
-        }
         Some(Subcommand::Completion(completion_cli)) => {
             reject_remote_mode_for_subcommand(
                 root_remote.as_deref(),
@@ -1782,14 +1465,6 @@ async fn dispatch_cli(
                 "completion",
             )?;
             print_completion(completion_cli);
-        }
-        Some(Subcommand::Update) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "update",
-            )?;
-            run_update_command()?;
         }
         Some(Subcommand::Doctor(doctor_cli)) => {
             reject_remote_mode_for_subcommand(
@@ -1804,19 +1479,6 @@ async fn dispatch_cli(
                 &arg0_paths,
             )
             .await?;
-        }
-        Some(Subcommand::Cloud(mut cloud_cli)) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "cloud",
-            )?;
-            prepend_config_flags(
-                &mut cloud_cli.config_overrides,
-                root_config_overrides.clone(),
-            );
-            codex_cloud_tasks::run_main(cloud_cli, arg0_paths.codex_linux_sandbox_exe.clone())
-                .await?;
         }
         Some(Subcommand::Sandbox(SandboxCommand {
             host: mut sandbox_cli,
@@ -1939,27 +1601,6 @@ async fn dispatch_cli(
                 run_execpolicycheck(cmd)?
             }
         },
-        Some(Subcommand::Apply(mut apply_cli)) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "apply",
-            )?;
-            prepend_config_flags(
-                &mut apply_cli.config_overrides,
-                root_config_overrides.clone(),
-            );
-            run_apply_command(apply_cli, /*cwd*/ None).await?;
-        }
-        Some(Subcommand::ResponsesApiProxy(args)) => {
-            reject_remote_mode_for_subcommand(
-                root_remote.as_deref(),
-                root_remote_auth_token_env.as_deref(),
-                "responses-api-proxy",
-            )?;
-            tokio::task::spawn_blocking(move || codex_responses_api_proxy::run_main(args))
-                .await??;
-        }
         Some(Subcommand::ExecServer(mut cmd)) => {
             reject_remote_mode_for_subcommand(
                 root_remote.as_deref(),
@@ -2439,26 +2080,15 @@ fn unsupported_subcommand_name_for_strict_config(
         Some(Subcommand::AppServer(app_server)) => {
             Some(app_server_subcommand_name(app_server.subcommand.as_ref()))
         }
-        Some(Subcommand::RemoteControl(remote_control)) => Some(remote_control.subcommand_name()),
         Some(Subcommand::Mcp(_)) => Some("mcp"),
         Some(Subcommand::Plugin(_)) => Some("plugin"),
         Some(Subcommand::MigrateRollouts(_)) => Some("migrate-rollouts"),
         Some(Subcommand::MigrateNfsDb(_)) => Some("migrate-nfs-db"),
-        #[cfg(any(target_os = "macos", target_os = "windows"))]
-        Some(Subcommand::App(_)) => Some("app"),
-        Some(Subcommand::Login(_)) => Some("login"),
-        Some(Subcommand::GitCredential(_)) => Some("git-credential"),
-        Some(Subcommand::Logout(_)) => Some("logout"),
         Some(Subcommand::Completion(_)) => Some("completion"),
-        Some(Subcommand::Update) => Some("update"),
-        Some(Subcommand::Cloud(_)) => Some("cloud"),
         Some(Subcommand::Sandbox(_)) => Some("sandbox"),
         Some(Subcommand::Debug(_)) => Some("debug"),
         Some(Subcommand::Execpolicy(_)) => Some("execpolicy"),
-        Some(Subcommand::Apply(_)) => Some("apply"),
-        Some(Subcommand::ResponsesApiProxy(_)) => Some("responses-api-proxy"),
         Some(Subcommand::Features(_)) => Some("features"),
-        Some(Subcommand::TcpTunnel(_)) => Some("tcp-tunnel"),
     }
 }
 
@@ -2831,52 +2461,6 @@ mod tests {
         let size = std::mem::size_of_val(&future);
 
         assert!(size < 64 * 1024, "interactive TUI future is {size} bytes");
-    }
-
-    #[cfg(windows)]
-    #[test]
-    fn windows_update_command_resolution_ignores_relative_path_entries() {
-        let cwd = std::env::current_dir().expect("current directory");
-        let decoy_dir = tempfile::tempdir_in(&cwd).expect("relative decoy directory");
-        let trusted_dir = tempfile::tempdir().expect("trusted PATH directory");
-        let relative_decoy_dir = decoy_dir
-            .path()
-            .strip_prefix(&cwd)
-            .expect("decoy directory should be relative to cwd");
-
-        for command in ["npm.cmd", "pnpm.cmd", "bun.exe"] {
-            std::fs::write(decoy_dir.path().join(command), "decoy")
-                .expect("write cwd-relative decoy");
-            std::fs::write(trusted_dir.path().join(command), "trusted")
-                .expect("write trusted PATH command");
-            let path_env = std::env::join_paths([relative_decoy_dir, trusted_dir.path()])
-                .expect("join synthetic PATH");
-
-            let resolved = resolve_windows_update_command_from_path(command, &path_env)
-                .expect("resolve update command");
-
-            assert_eq!(resolved, trusted_dir.path().join(command));
-        }
-
-        let cwd_decoy = tempfile::Builder::new()
-            .suffix(".cmd")
-            .tempfile_in(&cwd)
-            .expect("cwd-local decoy");
-        let command = cwd_decoy
-            .path()
-            .file_name()
-            .and_then(|name| name.to_str())
-            .expect("decoy filename");
-        let relative_only_path_env = std::env::join_paths(["."]).expect("join relative-only PATH");
-        let err = resolve_windows_update_command_from_path(command, &relative_only_path_env)
-            .expect_err("relative-only PATH should not resolve a cwd command");
-
-        assert_eq!(
-            err.to_string(),
-            format!(
-                "Could not find an absolute update command `{command}` on PATH. Please update manually: https://developers.openai.com/codex/cli/"
-            )
-        );
     }
 
     #[tokio::test]
@@ -3513,22 +3097,6 @@ enabled = true
     }
 
     #[test]
-    fn tcp_tunnel_is_hidden_and_accepts_an_ssh_proxy_route() {
-        let root_help = help_from_args(&["codex", "--help"]);
-        assert!(!root_help.contains("tcp-tunnel"), "{root_help}");
-        let cli = MultitoolCli::try_parse_from([
-            "codex",
-            "tcp-tunnel",
-            "--environment-id",
-            "ccarenv_test",
-            "--token-file",
-            "/private/token",
-        ])
-        .expect("SSH proxy route should parse");
-        assert!(matches!(cli.subcommand, Some(Subcommand::TcpTunnel(_))));
-    }
-
-    #[test]
     fn plugin_marketplace_help_uses_plugin_namespace() {
         let help = help_from_args(&["codex", "plugin", "marketplace", "--help"]);
         assert!(
@@ -3602,12 +3170,6 @@ enabled = true
         .expect("parse");
 
         assert!(matches!(cli.subcommand, Some(Subcommand::Plugin(_))));
-    }
-
-    #[test]
-    fn update_parses_as_update_subcommand() {
-        let cli = MultitoolCli::try_parse_from(["codex", "update"]).expect("parse");
-        assert!(matches!(cli.subcommand, Some(Subcommand::Update)));
     }
 
     #[test]
@@ -4432,34 +3994,6 @@ enabled = true
             err.to_string(),
             "`--strict-config` is not supported for `codex app-server proxy`"
         );
-    }
-
-    #[test]
-    fn reject_remote_flag_for_remote_control() {
-        let cli = MultitoolCli::try_parse_from(["codex", "--remote", "unix://", "remote-control"])
-            .expect("parse");
-        let Some(Subcommand::RemoteControl(remote_control)) = &cli.subcommand else {
-            panic!("expected remote-control subcommand");
-        };
-        assert_eq!(remote_control.subcommand_name(), "remote-control");
-
-        let err = reject_remote_mode_for_subcommand(
-            cli.remote.remote.as_deref(),
-            cli.remote.remote_auth_token_env.as_deref(),
-            "remote-control",
-        )
-        .expect_err("remote-control should reject root --remote");
-
-        assert!(err.to_string().contains("remote-control"));
-    }
-
-    #[test]
-    fn remote_control_pair_parses() {
-        let cli = MultitoolCli::try_parse_from(["codex", "remote-control", "pair"]).expect("parse");
-        let Some(Subcommand::RemoteControl(remote_control)) = &cli.subcommand else {
-            panic!("expected remote-control subcommand");
-        };
-        assert_eq!(remote_control.subcommand_name(), "remote-control pair");
     }
 
     #[test]

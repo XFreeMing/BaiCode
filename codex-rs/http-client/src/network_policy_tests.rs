@@ -8,6 +8,33 @@ use reqwest::Url;
 use super::*;
 
 #[test]
+fn local_policy_allows_loopback_and_rejects_remote_destinations() {
+    let policy = NetworkPolicy::default().with_loopback_only();
+    for address in [
+        "http://127.0.0.1:11434/v1/responses",
+        "http://localhost:1234/v1/models",
+        "ws://[::1]:8080/",
+    ] {
+        assert!(policy.acquire(&Url::parse(address).unwrap()).is_ok());
+    }
+    for address in [
+        "https://example.invalid/v1/responses",
+        "http://192.168.1.10:11434/v1/responses",
+        "http://localhost.example.invalid/",
+        "https://127.0.0.1@example.invalid/",
+    ] {
+        assert!(matches!(
+            policy.acquire(&Url::parse(address).unwrap()),
+            Err(NetworkPolicyDenied::Destination)
+        ));
+    }
+    assert!(matches!(
+        policy.acquire_for_unsupported_sdk(),
+        Err(NetworkPolicyDenied::UnsupportedTransport)
+    ));
+}
+
+#[test]
 fn credential_binding_keeps_both_endpoint_restrictions_and_account_revocation() {
     let controller = NetworkPolicyController::default();
     let policy = controller.policy();

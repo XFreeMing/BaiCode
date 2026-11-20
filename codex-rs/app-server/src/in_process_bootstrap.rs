@@ -45,7 +45,7 @@ impl EmbeddedNetworkPolicy {
         &self,
         factory: codex_http_client::HttpClientFactory,
     ) -> codex_http_client::HttpClientFactory {
-        factory.with_network_policy(self.effective.policy())
+        factory.with_network_policy(self.effective.policy().with_loopback_only())
     }
 
     /// Publishes successfully loaded requirements before caller-owned clients are created.
@@ -65,7 +65,7 @@ impl EmbeddedNetworkPolicy {
 
     /// Keeps a rebuilt caller config on the live policy owned by the running app-server.
     pub fn bind_config(&self, config: &mut Config) {
-        config.application_network_policy = self.effective.policy();
+        config.application_network_policy = self.effective.policy().with_loopback_only();
     }
 
     /// Limits cloud discovery and each authentication request to their exact local-policy endpoints.

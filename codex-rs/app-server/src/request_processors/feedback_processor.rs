@@ -29,7 +29,7 @@ pub(crate) struct FeedbackRequestProcessor {
     feedback: CodexFeedback,
     log_db: Option<LogDbLayer>,
     state_db: Option<StateDbHandle>,
-    uploads: Arc<Semaphore>,
+    saves: Arc<Semaphore>,
 }
 
 impl FeedbackRequestProcessor {
@@ -48,22 +48,17 @@ impl FeedbackRequestProcessor {
             feedback,
             log_db,
             state_db,
-            uploads: Arc::new(Semaphore::new(/*permits*/ 3)),
+            saves: Arc::new(Semaphore::new(/*permits*/ 3)),
         }
     }
 
     pub(crate) async fn feedback_upload(
         &self,
-        params: FeedbackUploadParams,
+        _params: FeedbackUploadParams,
     ) -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
-        if !self.config.feedback_enabled {
-            return Err(invalid_request(
-                "sending feedback is disabled by configuration",
-            ));
-        }
-        self.feedback_response(params, /*save_path*/ None)
-            .await
-            .map(|response| Some(response.into()))
+        Err(invalid_request(
+            "Use feedback/save to save reports locally.",
+        ))
     }
 
     pub(crate) async fn feedback_save(
@@ -79,7 +74,7 @@ impl FeedbackRequestProcessor {
             .map_err(|error| invalid_request(format!("invalid feedback savePath: {error}")))?;
         let saved_path = LegacyAppPathString::from_abs_path(&save_path);
         let response = self
-            .feedback_response(params.feedback, Some(save_path))
+            .save_feedback_response(params.feedback, save_path)
             .await?;
         Ok(Some(
             FeedbackSaveResponse {
@@ -91,19 +86,19 @@ impl FeedbackRequestProcessor {
         ))
     }
 
-    async fn feedback_response(
+    async fn save_feedback_response(
         &self,
         params: FeedbackUploadParams,
-        save_path: Option<AbsolutePathBuf>,
+        save_path: AbsolutePathBuf,
     ) -> Result<FeedbackUploadResponse, JSONRPCErrorError> {
         let permit = self
-            .uploads
+            .saves
             .clone()
             .try_acquire_owned()
             .map_err(|_| JSONRPCErrorError {
                 code: OVERLOADED_ERROR_CODE,
                 message:
-                    "Three feedback uploads are already in progress; try again after one finishes"
+                    "Three feedback saves are already in progress; try again after one finishes"
                         .to_string(),
                 data: None,
             })?;
@@ -126,11 +121,10 @@ impl FeedbackRequestProcessor {
             None => None,
         };
 
-        let http_client_factory = self.config.http_client_factory();
         let auth = self.auth_manager.auth_cached();
         let turn_metadata = if let Some(conversation_id) = conversation_id
             && let Some(rollout_path) = self
-                .resolve_rollout_path(conversation_id, self.state_db.as_ref(), save_path.as_ref())
+                .resolve_rollout_path(conversation_id, self.state_db.as_ref())
                 .await?
         {
             feedback_turn_metadata_from_rollout(
@@ -230,11 +224,7 @@ impl FeedbackRequestProcessor {
                 .flat_map(|index| &mut index.threads)
             {
                 if let Some(rollout_path) = self
-                    .resolve_rollout_path(
-                        thread.thread_id,
-                        state_db_ctx.as_ref(),
-                        save_path.as_ref(),
-                    )
+                    .resolve_rollout_path(thread.thread_id, state_db_ctx.as_ref())
                     .await?
                     && seen_attachment_paths.insert(rollout_path.clone())
                 {
@@ -260,9 +250,7 @@ impl FeedbackRequestProcessor {
                 }
             }
             if let Some(mut index) = feedback_index {
-                if save_path.is_some() {
-                    index.rollout_archive_filename = None;
-                }
+                index.rollout_archive_filename = None;
                 match index.attachment() {
                     Ok(attachment) => extra_attachments.insert(0, attachment),
                     Err(err) => warn!("failed to serialize feedback thread index: {err}"),
@@ -322,16 +310,10 @@ impl FeedbackRequestProcessor {
         }
 
         let session_source = self.thread_manager.session_source();
-        let runtime_handle = tokio::runtime::Handle::current();
         let codex_home = self.config.codex_home.clone();
 
-        let operation = if save_path.is_some() {
-            "save"
-        } else {
-            "upload"
-        };
-        let upload_result = tokio::task::spawn_blocking(move || {
-            // Cancelling the RPC waiter must not release a still-running upload's slot.
+        let save_result = tokio::task::spawn_blocking(move || {
+            // Cancelling the RPC waiter must not release a still-running save's slot.
             let _permit = permit;
             if include_logs {
                 extra_attachments
@@ -348,26 +330,20 @@ impl FeedbackRequestProcessor {
                 session_source: Some(session_source),
                 logs_override: sqlite_feedback_logs,
             };
-            match save_path {
-                Some(path) => snapshot.save_feedback(options, path.as_path()),
-                None => {
-                    runtime_handle.block_on(snapshot.upload_feedback(options, &http_client_factory))
-                }
-            }
+            snapshot.save_feedback(options, save_path.as_path())
         })
         .await;
 
-        let upload_result = match upload_result {
+        let save_result = match save_result {
             Ok(result) => result,
             Err(join_err) => {
                 return Err(internal_error(format!(
-                    "failed to {operation} feedback: {join_err}"
+                    "failed to save feedback: {join_err}"
                 )));
             }
         };
 
-        upload_result
-            .map_err(|err| internal_error(format!("failed to {operation} feedback: {err:#}")))?;
+        save_result.map_err(|err| internal_error(format!("failed to save feedback: {err:#}")))?;
         Ok(FeedbackUploadResponse {
             thread_id,
             prompt_hash,
@@ -378,19 +354,11 @@ impl FeedbackRequestProcessor {
         &self,
         conversation_id: ThreadId,
         state_db_ctx: Option<&StateDbHandle>,
-        save_path: Option<&AbsolutePathBuf>,
     ) -> Result<Option<PathBuf>, JSONRPCErrorError> {
         if let Ok(conversation) = self.thread_manager.get_thread(conversation_id).await {
-            if save_path.is_some() {
-                // Explicit extraLogFiles are collected separately and remain strict, even
-                // when they name this same not-yet-materialized automatic rollout.
-                return conversation.feedback_rollout_path().await.map_err(|error| {
-                    internal_error(format!("failed to select feedback rollout: {error}"))
-                });
-            }
-            if let Some(rollout_path) = conversation.rollout_path() {
-                return Ok(Some(rollout_path));
-            }
+            return conversation.feedback_rollout_path().await.map_err(|error| {
+                internal_error(format!("failed to select feedback rollout: {error}"))
+            });
         }
 
         let Some(state_db_ctx) = state_db_ctx else {

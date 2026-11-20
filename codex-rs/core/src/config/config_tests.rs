@@ -7062,44 +7062,6 @@ async fn feedback_enabled_defaults_to_true() -> std::io::Result<()> {
 }
 
 #[test]
-fn web_search_mode_defaults_to_none_if_unset() {
-    let cfg = ConfigToml::default();
-    let features = Features::with_defaults();
-
-    assert_eq!(resolve_web_search_mode(&cfg, &features), None);
-}
-
-#[test]
-fn web_search_mode_prefers_config_over_legacy_flags() {
-    let cfg = ConfigToml {
-        web_search: Some(WebSearchMode::Live),
-        ..Default::default()
-    };
-    let mut features = Features::with_defaults();
-    features.enable(Feature::WebSearchCached);
-
-    assert_eq!(
-        resolve_web_search_mode(&cfg, &features),
-        Some(WebSearchMode::Live)
-    );
-}
-
-#[test]
-fn web_search_mode_disabled_overrides_legacy_request() {
-    let cfg = ConfigToml {
-        web_search: Some(WebSearchMode::Disabled),
-        ..Default::default()
-    };
-    let mut features = Features::with_defaults();
-    features.enable(Feature::WebSearchRequest);
-
-    assert_eq!(
-        resolve_web_search_mode(&cfg, &features),
-        Some(WebSearchMode::Disabled)
-    );
-}
-
-#[test]
 fn web_search_mode_for_turn_preserves_indexed_for_disabled_permissions() {
     let web_search_mode = Constrained::allow_any(WebSearchMode::Indexed);
     let mode = resolve_web_search_mode_for_turn(

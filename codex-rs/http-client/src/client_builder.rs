@@ -232,9 +232,17 @@ impl HttpClientBuilder {
         route_class: ClientRouteClass,
         route: &OutboundProxyRoute,
     ) -> Result<TransportClient, BuildRouteAwareHttpClientError> {
-        self.chatgpt_cookie_store = http_client_factory.chatgpt_cookie_store();
+        if !http_client_factory.network_policy().is_loopback_only() {
+            self.chatgpt_cookie_store = http_client_factory.chatgpt_cookie_store();
+        }
         let explicit_roots = self.tls.root_certificate.is_some();
-        let (builder, request_logging, default_headers) = self.into_reqwest_parts();
+        let (mut builder, request_logging, default_headers) = self.into_reqwest_parts();
+        if http_client_factory.network_policy().is_loopback_only() {
+            builder = builder.resolve(
+                "localhost",
+                std::net::SocketAddr::from((std::net::Ipv4Addr::LOCALHOST, 0)),
+            );
+        }
         let inner = if explicit_roots {
             crate::outbound_proxy::configure_builder_for_resolved_route(
                 builder,

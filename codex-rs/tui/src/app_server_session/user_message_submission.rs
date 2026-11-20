@@ -143,9 +143,7 @@ impl AppServerSession {
     }
 
     fn cloud_model_catalog_is_current(&self) -> bool {
-        matches!(&self.request_handle,
-            AppServerRequestHandle::Cloud(handle) if handle.model_catalog_is_current()
-        )
+        matches!(&self.request_handle, AppServerRequestHandle::Cloud(_))
     }
 
     pub(crate) fn stage_cloud_model_selection(

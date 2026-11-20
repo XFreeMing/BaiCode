@@ -120,15 +120,17 @@ impl RemoteAppServerConnectArgs {
     }
 }
 
-/// Whether the endpoint permits bearer authentication without exposing it remotely in plaintext.
+/// Whether the endpoint is a local WebSocket and can receive a bearer token.
 pub fn websocket_url_supports_auth_token(url: &Url) -> bool {
-    match (url.scheme(), url.host()) {
-        ("wss", Some(_)) => true,
-        ("ws", Some(url::Host::Domain(domain))) => domain.eq_ignore_ascii_case("localhost"),
-        ("ws", Some(url::Host::Ipv4(addr))) => addr.is_loopback(),
-        ("ws", Some(url::Host::Ipv6(addr))) => addr.is_loopback(),
-        _ => false,
-    }
+    matches!(url.scheme(), "ws" | "wss")
+        && url.username().is_empty()
+        && url.password().is_none()
+        && match url.host() {
+            Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
+            Some(url::Host::Ipv4(addr)) => addr.is_loopback(),
+            Some(url::Host::Ipv6(addr)) => addr.is_loopback(),
+            None => false,
+        }
 }
 
 enum RemoteClientCommand {
@@ -738,12 +740,10 @@ async fn connect_websocket_endpoint(
             format!("invalid websocket URL `{websocket_url}`: {err}"),
         )
     })?;
-    if auth_token.is_some() && !websocket_url_supports_auth_token(&url) {
+    if !websocket_url_supports_auth_token(&url) {
         return Err(IoError::new(
             ErrorKind::InvalidInput,
-            format!(
-                "remote auth tokens require `wss://` or loopback `ws://` URLs; got `{websocket_url}`"
-            ),
+            "App-server WebSocket connections must use a loopback address",
         ));
     }
 
