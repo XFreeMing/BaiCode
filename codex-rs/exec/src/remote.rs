@@ -68,7 +68,7 @@ pub(super) async fn run(cli: Cli, endpoint: RemoteAppServerEndpoint) -> anyhow::
         RemoteAppServerClient::connect(RemoteAppServerConnectArgs {
             required_human_approval: false,
             endpoint,
-            client_name: "codex_exec".into(),
+            client_name: "baicode_exec".into(),
             client_version: env!("CARGO_PKG_VERSION").into(),
             experimental_api: true,
             mcp_server_openai_form_elicitation: false,

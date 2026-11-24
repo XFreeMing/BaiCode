@@ -30,6 +30,11 @@ pub struct Prompt {
     /// Tool definitions to inject into this request, empty when supplied by history.
     pub(crate) tools: Arc<[ToolSpec]>,
 
+    /// Optional explicit tool choice override (e.g., `"auto"`, `"none"`, `"required"`).
+    /// When `None`, defaults to `"auto"`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) tool_choice: Option<String>,
+
     /// Whether parallel tool calls are permitted for this prompt.
     pub(crate) parallel_tool_calls: bool,
 
@@ -51,6 +56,7 @@ impl Default for Prompt {
         Self {
             input: Vec::new(),
             tools: Arc::default(),
+            tool_choice: None,
             parallel_tool_calls: false,
             base_instructions: BaseInstructions::default(),
             output_schema: None,

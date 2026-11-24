@@ -1334,6 +1334,178 @@ pub struct SandboxWorkspaceWrite {
     pub exclude_slash_tmp: bool,
 }
 
+/// Operating mode for the local BaiDec (Jev-style typed decision model) tool router.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Default, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum BaiDecMode {
+    /// Disabled: no requests are sent to BaiDec and no decision trajectories are written.
+    #[default]
+    Off,
+    /// Shadow: queries BaiDec and records fine-tuning/evaluation trajectories, while preserving
+    /// canonical tool exposure and `tool_choice = "auto"`.
+    Shadow,
+    /// Enforce: routes tool selection and `tool_choice` through BaiDec's calibrated multi-head
+    /// decisions, falling back to canonical routing if BaiDec is unreachable or degraded.
+    Enforce,
+}
+
+impl BaiDecMode {
+    pub fn is_active(self) -> bool {
+        !matches!(self, Self::Off)
+    }
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Off => "off",
+            Self::Shadow => "shadow",
+            Self::Enforce => "enforce",
+        }
+    }
+}
+
+/// TOML configuration under `[baidec]` for Jev-style decision-model tool recognition and routing.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default, JsonSchema)]
+#[schemars(deny_unknown_fields)]
+pub struct BaiDecConfigToml {
+    /// Master switch. When `true` and `mode` is omitted, defaults to `enforce`.
+    pub enabled: Option<bool>,
+    /// Explicit operating mode (`off`, `shadow`, or `enforce`).
+    pub mode: Option<BaiDecMode>,
+    /// Full BaiDec decision endpoint URL (defaults to `http://127.0.0.1:18190/v1/decisions`).
+    pub url: Option<String>,
+    /// Per-request timeout in milliseconds (defaults to `5000`).
+    pub timeout_ms: Option<u64>,
+    /// Character budget for the serialized `state` object sent to BaiDec (defaults to `12000`).
+    pub max_state_chars: Option<usize>,
+    /// Minimum calibrated probability to enforce `final_answer` (`tool_choice = "none"`).
+    pub min_action_confidence: Option<f64>,
+    /// Minimum calibrated probability on the primary tool to enforce `tool_choice = "required"`.
+    pub min_tool_confidence: Option<f64>,
+    /// Minimum calibrated probability to include secondary candidate tools alongside the primary tool.
+    pub secondary_tool_threshold: Option<f64>,
+    /// Maximum number of routed tools passed to the generative model in `enforce` mode.
+    pub max_routed_tools: Option<usize>,
+    /// Record step decisions and hindsight execution outcomes for BaiDec fine-tuning & calibration.
+    pub record_trajectories: Option<bool>,
+    /// Optional custom output directory for recorded decision trajectory JSONL files.
+    pub trajectory_dir: Option<AbsolutePathBuf>,
+}
+
+/// Resolved runtime configuration for BaiDec tool routing and trajectory logging.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct BaiDecConfig {
+    pub mode: BaiDecMode,
+    pub url: String,
+    pub timeout_ms: u64,
+    pub max_state_chars: usize,
+    pub min_action_confidence: f64,
+    pub min_tool_confidence: f64,
+    pub secondary_tool_threshold: f64,
+    pub max_routed_tools: usize,
+    pub record_trajectories: bool,
+    pub trajectory_dir: std::path::PathBuf,
+}
+
+impl Default for BaiDecConfig {
+    fn default() -> Self {
+        Self {
+            mode: BaiDecMode::Off,
+            url: "http://127.0.0.1:18190/v1/decisions".to_string(),
+            timeout_ms: 5_000,
+            max_state_chars: 12_000,
+            min_action_confidence: 0.60,
+            min_tool_confidence: 0.30,
+            secondary_tool_threshold: 0.10,
+            max_routed_tools: 3,
+            record_trajectories: true,
+            trajectory_dir: std::path::PathBuf::new(),
+        }
+    }
+}
+
+impl BaiDecConfig {
+    pub fn resolve(toml: Option<&BaiDecConfigToml>, codex_home: &std::path::Path) -> Self {
+        let defaults = Self::default();
+        let configured_mode = match (
+            toml.and_then(|cfg| cfg.enabled),
+            toml.and_then(|cfg| cfg.mode),
+        ) {
+            (Some(false), _) => BaiDecMode::Off,
+            (_, Some(mode)) => mode,
+            (Some(true), None) => BaiDecMode::Enforce,
+            (None, None) => BaiDecMode::Off,
+        };
+        let mode = std::env::var("BAICODE_BAIDEC_MODE")
+            .ok()
+            .and_then(|raw| match raw.trim().to_ascii_lowercase().as_str() {
+                "off" | "false" | "0" => Some(BaiDecMode::Off),
+                "shadow" => Some(BaiDecMode::Shadow),
+                "enforce" | "on" | "true" | "1" => Some(BaiDecMode::Enforce),
+                _ => None,
+            })
+            .unwrap_or(configured_mode);
+        let url = std::env::var("BAICODE_BAIDEC_URL")
+            .ok()
+            .filter(|v| !v.trim().is_empty())
+            .or_else(|| {
+                toml.and_then(|cfg| cfg.url.clone())
+                    .filter(|v| !v.trim().is_empty())
+            })
+            .unwrap_or(defaults.url);
+        let timeout_ms = std::env::var("BAICODE_BAIDEC_TIMEOUT_MS")
+            .ok()
+            .and_then(|v| v.trim().parse::<u64>().ok())
+            .or_else(|| toml.and_then(|cfg| cfg.timeout_ms))
+            .unwrap_or(defaults.timeout_ms)
+            .max(100);
+        let max_state_chars = toml
+            .and_then(|cfg| cfg.max_state_chars)
+            .unwrap_or(defaults.max_state_chars)
+            .clamp(1_024, 28_000);
+        let min_action_confidence = toml
+            .and_then(|cfg| cfg.min_action_confidence)
+            .unwrap_or(defaults.min_action_confidence)
+            .clamp(0.0, 1.0);
+        let min_tool_confidence = toml
+            .and_then(|cfg| cfg.min_tool_confidence)
+            .unwrap_or(defaults.min_tool_confidence)
+            .clamp(0.0, 1.0);
+        let secondary_tool_threshold = toml
+            .and_then(|cfg| cfg.secondary_tool_threshold)
+            .unwrap_or(defaults.secondary_tool_threshold)
+            .clamp(0.0, 1.0);
+        let max_routed_tools = toml
+            .and_then(|cfg| cfg.max_routed_tools)
+            .unwrap_or(defaults.max_routed_tools)
+            .clamp(1, 16);
+        let record_trajectories = toml
+            .and_then(|cfg| cfg.record_trajectories)
+            .unwrap_or(defaults.record_trajectories);
+        let trajectory_dir = std::env::var("BAICODE_BAIDEC_TRAJECTORY_DIR")
+            .ok()
+            .filter(|v| !v.trim().is_empty())
+            .map(std::path::PathBuf::from)
+            .or_else(|| {
+                toml.and_then(|cfg| cfg.trajectory_dir.as_ref())
+                    .map(|p| p.as_path().to_path_buf())
+            })
+            .unwrap_or_else(|| codex_home.join("baidec").join("trajectories"));
+
+        Self {
+            mode,
+            url,
+            timeout_ms,
+            max_state_chars,
+            min_action_confidence,
+            min_tool_confidence,
+            secondary_tool_threshold,
+            max_routed_tools,
+            record_trajectories,
+            trajectory_dir,
+        }
+    }
+}
+
 #[cfg(test)]
 #[path = "types_tests.rs"]
 mod tests;

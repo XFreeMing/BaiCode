@@ -1,7 +1,7 @@
 {
   "name": "@baicode/cli-sdk",
   "version": "0.0.0-dev",
-  "description": "TypeScript SDK for Codex APIs.",
+  "description": "TypeScript SDK for BaiCode CLI.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/XFreeMing/BaiCode.git",

@@ -21,7 +21,7 @@ pub(crate) struct SandboxSetupCommand {
     #[arg(long = "elevated", action = ArgAction::SetTrue)]
     elevated_sandbox_level: bool,
 
-    /// Windows user that will run Codex after managed deployment.
+    /// Windows user that will run BaiCode after managed deployment.
     #[arg(
         long = "user",
         value_name = "USER",
@@ -30,7 +30,7 @@ pub(crate) struct SandboxSetupCommand {
     )]
     user: Option<String>,
 
-    /// Use the current Windows user as the Codex user.
+    /// Use the current Windows user as the BaiCode user.
     #[arg(
         long = "current-user",
         default_value_t = false,
@@ -38,7 +38,7 @@ pub(crate) struct SandboxSetupCommand {
     )]
     current_user: bool,
 
-    /// BAICODE_HOME for the Codex user. Required with --user.
+    /// BAICODE_HOME for the BaiCode user. Required with --user.
     #[arg(long = "codex-home", value_name = "DIR")]
     codex_home: Option<PathBuf>,
 }
@@ -99,7 +99,7 @@ async fn run_elevated(
         .cli_overrides(cli_overrides)
         .build()
         .await
-        .context("failed to load target user's Codex config for sandbox provisioning")?;
+        .context("failed to load target user's BaiCode config for sandbox provisioning")?;
 
     codex_core::windows_sandbox::run_elevated_provisioning_setup(
         identity.codex_home.as_path(),

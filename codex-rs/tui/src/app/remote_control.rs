@@ -248,18 +248,18 @@ async fn verified_daemon_session(
     let status = codex_app_server_daemon::run(codex_app_server_daemon::LifecycleCommand::Version)
         .await
         .map_err(|_| {
-            "Codex could not verify that it manages the local background server.".to_string()
+            "BaiCode could not verify that it manages the local background server.".to_string()
         })?;
     let Some(protected) =
         codex_app_server_client::verified_local_daemon_socket(&status.socket_path)
             .ok()
             .flatten()
     else {
-        return Err("Codex could not verify that it manages the local background server.".into());
+        return Err("BaiCode could not verify that it manages the local background server.".into());
     };
     if status.backend.is_none() || endpoint != status.socket_path && endpoint != protected.as_path()
     {
-        return Err("Codex could not verify that it manages the local background server.".into());
+        return Err("BaiCode could not verify that it manages the local background server.".into());
     }
     let target = crate::AppServerTarget::LocalDaemon {
         endpoint: crate::RemoteAppServerEndpoint::UnixSocket {

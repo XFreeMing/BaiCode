@@ -39,7 +39,7 @@ use crate::outbound_proxy::AuthRouteConfig;
 /// The full user agent string is returned from the mcp initialize response.
 /// Parenthesis will be added by Codex. This should only specify what goes inside of the parenthesis.
 pub static USER_AGENT_SUFFIX: LazyLock<Mutex<Option<String>>> = LazyLock::new(|| Mutex::new(None));
-pub const DEFAULT_ORIGINATOR: &str = "codex_cli_rs";
+pub const DEFAULT_ORIGINATOR: &str = "baicode_cli_rs";
 pub const BAICODE_INTERNAL_ORIGINATOR_OVERRIDE_ENV_VAR: &str = "BAICODE_INTERNAL_ORIGINATOR_OVERRIDE";
 pub use codex_model_provider_info::RESIDENCY_HEADER_NAME;
 pub use codex_model_provider_info::ResidencyRequirement;
@@ -140,6 +140,10 @@ pub fn add_originator_header(headers: &mut HeaderMap, originator_value: &str) {
 
 pub fn is_first_party_originator(originator_value: &str) -> bool {
     originator_value == DEFAULT_ORIGINATOR
+        || originator_value == "baicode-tui"
+        || originator_value == "baicode_exec"
+        || originator_value.starts_with("BaiCode ")
+        || originator_value == "codex_cli_rs"
         || originator_value == "codex-tui"
         || originator_value == "codex_vscode"
         || originator_value.starts_with("Codex ")
@@ -204,7 +208,7 @@ fn sanitize_user_agent(candidate: String, fallback: &str) -> String {
         fallback.to_string()
     } else {
         tracing::warn!(
-            "Falling back to default Codex originator because base user agent string is invalid"
+            "Falling back to default BaiCode originator because base user agent string is invalid"
         );
         originator().value
     }

@@ -2069,6 +2069,7 @@ pub(crate) fn build_prompt(
         } else {
             step_context.tool_router.model_visible_specs()
         },
+        tool_choice: None,
         parallel_tool_calls: true,
         base_instructions: if incremental_tools {
             BaseInstructions {
@@ -2191,6 +2192,24 @@ async fn run_sampling_request(
             &sess.services.thread_extension_data,
             &mut prompt.tools,
         );
+        let active_baidec_step = if !crate::guardian::is_basic_session_source(
+            &turn_context.session_source,
+        ) && prompt.output_schema.is_none()
+        {
+            crate::tools::baidec::maybe_route_prompt_tools(
+                &turn_context.config.baidec,
+                &turn_context.config.http_client_factory(),
+                &sess.thread_id.to_string(),
+                &turn_context.sub_id,
+                &turn_context.cwd,
+                &step_context.settings.model_info.slug,
+                input_item_count,
+                &mut prompt,
+            )
+            .await
+        } else {
+            None
+        };
         let (submitted_audio, pending_audio) = {
             let model = &step_context.settings.model_info.slug;
             let provider = &turn_context.config.model_provider_id;
@@ -2236,6 +2255,23 @@ async fn run_sampling_request(
         .await;
         if SamplingInterrupt::enabled(&turn_context) && tool_cancellation.is_cancelled() {
             return Err(CodexErr::TurnAborted);
+        }
+        if let Some(active_step) = &active_baidec_step {
+            let after_history = sess.clone_history().await;
+            let raw_after: Vec<ResponseItem> = after_history.raw_items().cloned().collect();
+            let (needs_follow_up, err_text) = match &result {
+                Ok(output) => (output.needs_follow_up, None),
+                Err(err) => (false, Some(err.to_string())),
+            };
+            crate::tools::baidec::record_step_outcome(
+                &turn_context.config.baidec,
+                &sess.thread_id.to_string(),
+                &turn_context.sub_id,
+                active_step,
+                &raw_after,
+                needs_follow_up,
+                err_text.as_deref(),
+            );
         }
         let err = match result {
             Ok(output) => {

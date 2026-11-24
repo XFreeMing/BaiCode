@@ -12,7 +12,7 @@ use crate::app_command::UserVerificationFailure;
 pub(super) fn verification_failure(error: &TypedRequestError) -> UserVerificationFailure {
     let TypedRequestError::Server { source, .. } = error else {
         return UserVerificationFailure {
-            message: "Could not complete user verification with the local Codex binary.",
+            message: "Could not complete user verification with the local BaiCode binary.",
             details: UserVerificationErrorDetails::Failed {
                 reason: UserVerificationFailureReason::ServiceError,
             },
@@ -25,10 +25,10 @@ pub(super) fn verification_failure(error: &TypedRequestError) -> UserVerificatio
     let message = match details {
         Some(UserVerificationErrorDetails::InvalidRequest {
             reason: UserVerificationInvalidRequestReason::InvalidParams,
-        }) => "The local Codex binary could not verify this request.",
+        }) => "The local BaiCode binary could not verify this request.",
         Some(UserVerificationErrorDetails::Unavailable {
             reason: UserVerificationUnavailableReason::CredentialMissing,
-        }) => "No user-verification credential is available in the local Codex binary.",
+        }) => "No user-verification credential is available in the local BaiCode binary.",
         Some(UserVerificationErrorDetails::Unavailable {
             reason: UserVerificationUnavailableReason::BiometricsUnavailable,
         }) => "Biometric verification is currently unavailable on this device.",

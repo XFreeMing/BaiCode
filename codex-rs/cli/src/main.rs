@@ -2300,7 +2300,7 @@ where
             Err(backup_err) => {
                 local_state_db::print_diagnostic_guidance(startup_error);
                 return Ok(AppExitInfo::fatal(format!(
-                    "failed to move damaged Codex local database files into a backup folder automatically: {backup_err}"
+                    "failed to move damaged BaiCode local database files into a backup folder automatically: {backup_err}"
                 )));
             }
         }

@@ -537,6 +537,100 @@
       ],
       "type": "object"
     },
+    "BaiDecConfigToml": {
+      "additionalProperties": false,
+      "description": "TOML configuration under `[baidec]` for Jev-style decision-model tool recognition and routing.",
+      "properties": {
+        "enabled": {
+          "description": "Master switch. When `true` and `mode` is omitted, defaults to `enforce`.",
+          "type": "boolean"
+        },
+        "max_routed_tools": {
+          "description": "Maximum number of routed tools passed to the generative model in `enforce` mode.",
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "max_state_chars": {
+          "description": "Character budget for the serialized `state` object sent to BaiDec (defaults to `12000`).",
+          "format": "uint",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "min_action_confidence": {
+          "description": "Minimum calibrated probability to enforce `final_answer` (`tool_choice = \"none\"`).",
+          "format": "double",
+          "type": "number"
+        },
+        "min_tool_confidence": {
+          "description": "Minimum calibrated probability on the primary tool to enforce `tool_choice = \"required\"`.",
+          "format": "double",
+          "type": "number"
+        },
+        "mode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BaiDecMode"
+            }
+          ],
+          "description": "Explicit operating mode (`off`, `shadow`, or `enforce`)."
+        },
+        "record_trajectories": {
+          "description": "Record step decisions and hindsight execution outcomes for BaiDec fine-tuning & calibration.",
+          "type": "boolean"
+        },
+        "secondary_tool_threshold": {
+          "description": "Minimum calibrated probability to include secondary candidate tools alongside the primary tool.",
+          "format": "double",
+          "type": "number"
+        },
+        "timeout_ms": {
+          "description": "Per-request timeout in milliseconds (defaults to `5000`).",
+          "format": "uint64",
+          "minimum": 0.0,
+          "type": "integer"
+        },
+        "trajectory_dir": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/AbsolutePathBuf"
+            }
+          ],
+          "description": "Optional custom output directory for recorded decision trajectory JSONL files."
+        },
+        "url": {
+          "description": "Full BaiDec decision endpoint URL (defaults to `http://127.0.0.1:18190/v1/decisions`).",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "BaiDecMode": {
+      "description": "Operating mode for the local BaiDec (Jev-style typed decision model) tool router.",
+      "oneOf": [
+        {
+          "description": "Disabled: no requests are sent to BaiDec and no decision trajectories are written.",
+          "enum": [
+            "off"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Shadow: queries BaiDec and records fine-tuning/evaluation trajectories, while preserving canonical tool exposure and `tool_choice = \"auto\"`.",
+          "enum": [
+            "shadow"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Enforce: routes tool selection and `tool_choice` through BaiDec's calibrated multi-head decisions, falling back to canonical routing if BaiDec is unreachable or degraded.",
+          "enum": [
+            "enforce"
+          ],
+          "type": "string"
+        }
+      ]
+    },
     "BodySecretReplacement": {
       "additionalProperties": false,
       "properties": {
@@ -8083,6 +8177,14 @@
       "format": "uint64",
       "minimum": 0.0,
       "type": "integer"
+    },
+    "baidec": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaiDecConfigToml"
+        }
+      ],
+      "description": "Local BaiDec (Jev-style typed decision model) tool routing and trajectory collection settings."
     },
     "browser_use": {
       "$ref": "#/definitions/BrowserUseConfigToml"

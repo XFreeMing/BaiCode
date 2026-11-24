@@ -7,6 +7,7 @@ use crate::session::turn_context::TurnContext;
 use crate::tools::code_mode::execute_spec::create_code_mode_tool;
 use crate::tools::effective_tool_mode;
 use crate::tools::handlers::ApplyPatchHandler;
+use crate::tools::handlers::CodeMapHandler;
 use crate::tools::handlers::CodeModeExecuteHandler;
 use crate::tools::handlers::CodeModeWaitHandler;
 use crate::tools::handlers::CurrentTimeHandler;
@@ -1294,6 +1295,8 @@ fn add_core_utility_tools(context: &CoreToolPlanContext<'_>, registry: &mut Tool
         registry.add(PlanHandler);
     }
 
+    registry.add(CodeMapHandler);
+
     if features.enabled(Feature::DeferredExecutor) {
         registry.add(
             context
@@ -1416,9 +1419,12 @@ fn add_core_utility_tools(context: &CoreToolPlanContext<'_>, registry: &mut Tool
         ));
     }
 
-    if context.model_info.apply_patch_tool_type.is_some() {
+    if let Some(patch_tool_type) = context.model_info.apply_patch_tool_type {
         let include_environment_id = matches!(environment_mode, ToolEnvironmentMode::Multiple);
-        registry.add(ApplyPatchHandler::new(include_environment_id));
+        registry.add(ApplyPatchHandler::with_tool_type(
+            include_environment_id,
+            patch_tool_type,
+        ));
     }
 
     if context

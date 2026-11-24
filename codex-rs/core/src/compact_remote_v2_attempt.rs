@@ -191,6 +191,7 @@ pub(super) async fn run_remote_compact_v2_attempt(
             tool_router.model_visible_specs()
         },
         parallel_tool_calls: true,
+        tool_choice: None,
         base_instructions,
         output_schema: None,
         output_schema_strict: true,

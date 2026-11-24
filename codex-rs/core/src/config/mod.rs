@@ -1261,6 +1261,9 @@ pub struct Config {
     /// Configured discoverable tools for tool suggestions.
     pub tool_suggest: ToolSuggestConfig,
 
+    /// Local BaiDec decision-model tool routing and trajectory logging configuration.
+    pub baidec: codex_config::types::BaiDecConfig,
+
     /// OTEL configuration (exporter type, endpoint, headers, etc.).
     pub otel: codex_config::types::OtelConfig,
 }
@@ -3691,6 +3694,7 @@ impl Config {
         }
 
         let tool_suggest = resolve_tool_suggest_config(&cfg, &config_layer_stack);
+        let baidec = codex_config::types::BaiDecConfig::resolve(cfg.baidec.as_ref(), &codex_home);
         let feature_overrides = FeatureOverrides {
             web_search_request: override_tools_web_search_request,
         };
@@ -4231,7 +4235,7 @@ impl Config {
             .clone()
             .filter(|value| !value.is_empty());
 
-        let model_providers =
+        let mut model_providers =
             merge_configured_model_providers(built_in_model_providers(openai_base_url), cfg.model_providers)
                 .map_err(|message| std::io::Error::new(std::io::ErrorKind::InvalidData, message))?;
 
@@ -4239,6 +4243,11 @@ impl Config {
             .or(model_provider)
             .or(cfg.model_provider)
             .unwrap_or_else(|| OLLAMA_OSS_PROVIDER_ID.to_string());
+        if model_provider_id == codex_model_provider_info::BAIINF_PROVIDER_ID {
+            model_providers
+                .entry(model_provider_id.clone())
+                .or_insert_with(codex_model_provider_info::create_baiinf_provider);
+        }
         let model_provider = model_providers
             .get(&model_provider_id)
             .ok_or_else(|| {
@@ -4421,7 +4430,10 @@ impl Config {
 
         let forced_login_method = cfg.forced_login_method;
 
-        let model = model.or(cfg.model);
+        let model = model.or(cfg.model).or_else(|| {
+            (model_provider_id == codex_model_provider_info::BAIINF_PROVIDER_ID)
+                .then(|| codex_model_provider_info::BAIINF_DEFAULT_MODEL_SLUG.to_string())
+        });
         let notices = cfg.notice.unwrap_or_default();
         let service_tier = match service_tier_override {
             Some(Some(service_tier)) => Some(service_tier),
@@ -5017,6 +5029,7 @@ impl Config {
             analytics_enabled: cfg.analytics.as_ref().and_then(|a| a.enabled),
             feedback_enabled: false,
             tool_suggest,
+            baidec,
             tui_notifications: cfg
                 .tui
                 .as_ref()

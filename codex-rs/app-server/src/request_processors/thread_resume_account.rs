@@ -16,7 +16,10 @@ pub(super) fn check(
     thread: &StoredThread,
 ) -> Result<(), JSONRPCErrorError> {
     if !features.enabled(Feature::CliResumeAccountCheck)
-        || !matches!(client_name, Some("codex-tui" | "codex_exec"))
+        || !matches!(
+            client_name,
+            Some("baicode-tui" | "baicode_exec" | "codex-tui" | "codex_exec")
+        )
         || thread.rollout_path.is_none()
         || (thread.creator_user_id.is_none() && thread.creator_account_id.is_none())
     {

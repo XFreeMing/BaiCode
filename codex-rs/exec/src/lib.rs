@@ -285,7 +285,7 @@ pub async fn run_main(cli: Cli, arg0_paths: Arg0DispatchPaths) -> anyhow::Result
             "--trust cannot be combined with --ignore-user-config: saved project trust decisions must be checked"
         );
     }
-    if let Err(err) = set_default_originator("codex_exec".to_string()) {
+    if let Err(err) = set_default_originator("baicode_exec".to_string()) {
         tracing::warn!(
             ?err,
             "Failed to set baic exec originator override {err:?}"
@@ -721,8 +721,8 @@ pub async fn run_main(cli: Cli, arg0_paths: Arg0DispatchPaths) -> anyhow::Result
             None
         }
     };
-    codex_core::otel_init::record_process_start(otel.as_ref(), "codex_exec");
-    codex_core::otel_init::install_sqlite_telemetry(otel.as_ref(), "codex_exec");
+    codex_core::otel_init::record_process_start(otel.as_ref(), "baicode_exec");
+    codex_core::otel_init::install_sqlite_telemetry(otel.as_ref(), "baicode_exec");
 
     let otel_logger_layer = otel.as_ref().and_then(|o| o.logger_layer());
 
@@ -797,7 +797,7 @@ pub async fn run_main(cli: Cli, arg0_paths: Arg0DispatchPaths) -> anyhow::Result
         config_warnings,
         session_source: SessionSource::Exec,
         enable_codex_api_key_env: true,
-        client_name: "codex_exec".to_string(),
+        client_name: "baicode_exec".to_string(),
         client_version: env!("CARGO_PKG_VERSION").to_string(),
         experimental_api: true,
         mcp_server_openai_form_elicitation: false,

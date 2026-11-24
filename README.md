@@ -85,4 +85,9 @@ env_key = "BAICODE_MODEL_API_KEY"
 
 使用远端模型时，提示词、随对话提供的工作区上下文及工具结果会发送到该服务。常规模型请求省略安装 ID、会话标识和 Git 状态等附加元数据。
 
+## 调试与模型调用日志
+
+* 查看完整会话轨迹（Rollout）、Prompt 拼装快照、SSE 原始追踪及 SQLite 运行日志的方法见 [docs/model-call-logging.md](docs/model-call-logging.md)。
+* 内置代码结构索引（`code_map`）与 LSP MCP 接入指南见 [docs/code-analysis-and-lsp.md](docs/code-analysis-and-lsp.md)。
+
 本项目采用 [Apache-2.0 许可证](LICENSE)。

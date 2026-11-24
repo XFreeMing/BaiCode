@@ -448,7 +448,7 @@ fn create_filesystem_args(
                 };
                 // Automatic repo-metadata read masks are skipped here so the
                 // metadata handling below can apply the root-scoped
-                // protection consistently for `.git`, `.agents`, and `.codex`.
+                // protection consistently for `.git`, `.agents`, `.codex`, and `.BaiCode`.
                 // User-authored `read` rules for other subpaths and `none`
                 // rules should keep their normal bwrap behavior, which can mask
                 // the first missing component to prevent creation under writable
@@ -457,6 +457,7 @@ fn create_filesystem_args(
                 if project_subpath != Path::new(".git")
                     && project_subpath != Path::new(".agents")
                     && project_subpath != Path::new(".codex")
+                    && project_subpath != Path::new(".BaiCode")
                 {
                     return None;
                 }

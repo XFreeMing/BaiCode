@@ -1,4 +1,5 @@
 mod approvals;
+pub mod baidec;
 pub(crate) mod call_trace;
 pub(crate) mod code_mode;
 pub(crate) mod context;

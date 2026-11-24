@@ -28,6 +28,7 @@ use crate::types::PluginsConfigToml;
 use crate::types::SandboxWorkspaceWrite;
 use crate::types::ShellEnvironmentPolicyToml;
 use crate::types::SkillsConfig;
+use crate::types::BaiDecConfigToml;
 use crate::types::ToolSuggestConfig;
 use crate::types::Tui;
 use crate::types::UriBasedFileOpener;
@@ -499,6 +500,9 @@ pub struct ConfigToml {
 
     /// Additional discoverable tools that can be suggested for installation.
     pub tool_suggest: Option<ToolSuggestConfig>,
+
+    /// Local BaiDec (Jev-style typed decision model) tool routing and trajectory collection settings.
+    pub baidec: Option<BaiDecConfigToml>,
 
     /// Code Mode session settings.
     pub code_mode: Option<CodeModeToml>,

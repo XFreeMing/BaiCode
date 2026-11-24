@@ -12,6 +12,10 @@ pub const SESSION_SOURCE_TAG: &str = "session_source";
 
 const OTHER_ORIGINATOR_TAG_VALUE: &str = "other";
 const KNOWN_ORIGINATOR_TAG_VALUES: &[&str] = &[
+    "baicode_cli_rs",
+    "baicode-tui",
+    "baicode_exec",
+    "baicode-cli",
     "codex_desktop",
     "codex-app-server",
     "codex_mcp_server",

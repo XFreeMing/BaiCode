@@ -815,10 +815,10 @@ fn mounts_dev_before_writable_dev_binds() {
         synthetic_mount_target_paths(&args),
         vec![
             PathBuf::from("/.aws"),
-            PathBuf::from("/.BaiCode"),
             PathBuf::from("/.git"),
             PathBuf::from("/.agents"),
             PathBuf::from("/.codex"),
+            PathBuf::from("/.BaiCode"),
             PathBuf::from("/dev/.git"),
             PathBuf::from("/dev/.agents"),
             PathBuf::from("/dev/.codex"),
