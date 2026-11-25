@@ -440,7 +440,7 @@ def calibrate_thresholds(
         "url = \"http://127.0.0.1:18190/v1/decisions\"\n"
         f"min_action_confidence = {act_th:.2f}\n"
         f"min_tool_confidence = {tool_th:.2f}\n"
-        "secondary_tool_threshold = 0.18\n"
+        "secondary_tool_threshold = 0.10\n"
         "max_routed_tools = 3\n"
         "record_trajectories = true\n"
     )

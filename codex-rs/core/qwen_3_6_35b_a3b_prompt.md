@@ -30,6 +30,7 @@ When MCP tools backed by a language server (`mcp__serena__*`, `mcp__*_lsp__*`, o
 Always use the `apply_patch` function tool (`{"input": "..."}`) to create, update, or delete source files. Do NOT use `cat <<EOF`, `sed -i`, `awk`, or `python -c` to edit source files unless performing a large mechanical batch transformation.
 
 ## Required `apply_patch` `input` format
+For updating an existing file (`*** Update File:` uses bare `@@` hunk headers):
 ```text
 *** Begin Patch
 *** Update File: relative/path/to/file.py
@@ -41,10 +42,19 @@ Always use the `apply_patch` function tool (`{"input": "..."}`) to create, updat
      unchanged_context_line_3
 *** End Patch
 ```
-For new files, use `*** Add File: relative/path/to/new_file.py` with `+` prefixed lines. For deletions, use `*** Delete File: relative/path/to/old_file.py`.
+For adding a new file (`*** Add File:` MUST NOT contain an `@@` line — start directly with `+` lines):
+```text
+*** Begin Patch
+*** Add File: relative/path/to/new_file.py
++def example() -> int:
++    return 42
+*** End Patch
+```
+For deletions, use `*** Delete File: relative/path/to/old_file.py`.
 
 ## Q4 Patch Reliability Rules
-- **Use bare `@@` headers**: Always write a bare `@@` line (without partial function names after `@@`) followed by 2-3 exact unchanged context lines copied verbatim with their exact leading indentation! Writing a truncated header like `@@ def foo` when the real line is `def foo(x: int) -> int:` will fail context matching.
+- **Never put `@@` under `*** Add File:`**: Only `*** Update File:` uses `@@` headers. Under `*** Add File: <path>`, immediately emit `+` prefixed lines with NO `@@` line.
+- **Use bare `@@` headers for updates**: Always write a bare `@@` line (without partial function names after `@@`) followed by 2-3 exact unchanged context lines copied verbatim with their exact leading indentation! Writing a truncated header like `@@ def foo` when the real line is `def foo(x: int) -> int:` will fail context matching.
 - **Read before patching**: Never guess indentation or surrounding lines. Inspect target lines once (`code_map` `file_outline` + `exec_command` `sed -n 'A,Bp'`). Do NOT run `xxd` or read the same file multiple times.
 - **Exact context**: Include 2-3 unchanged lines immediately above and below every edit hunk, matching whitespace character-for-character.
 - **Focused hunks**: Keep each hunk small and targeted to the lines that actually change.
@@ -53,6 +63,7 @@ For new files, use `*** Add File: relative/path/to/new_file.py` with `+` prefixe
 # 4. Shell Execution, Verification & Anti-Loop Discipline
 
 - **Targeted shell commands (`exec_command`)**: Keep commands non-interactive, fast, and bounded (`rg -n`, `sed -n 'A,Bp'`, `git status -s`, `git diff`). Never run interactive editors (`vim`, `less`, `top`) or unbounded recursive dumps.
+- **Concise core tests first**: When creating a new feature and tests in the same turn, write a focused, high-signal core test suite first (5-8 tests covering primary behavior and key edge cases) rather than a sprawling 25+ test file on the first pass; verify it passes before expanding further.
 - **Mandatory verification**: After modifying code, run the narrowest relevant build/test/check command (`cargo test`, `cargo check`, `pytest`, `python3 -m unittest`, `npm test`, etc.) via `exec_command` and verify exit code `0` before concluding.
 - **Dirty worktree safety**: Preserve unrelated existing changes in the workspace. Never run destructive git commands (`git reset --hard`, `git checkout --`) unless explicitly requested by the user.
 - **No tool loops**: Never invoke the same tool with identical arguments twice in a row. Once the user's goal is implemented and verified (or a pure question is answered with concrete evidence), present a concise, self-contained final answer in the user's language.

@@ -70,7 +70,13 @@ record_trajectories = true
 
 ---
 
-## 四、BaiDec 编程场景持续微调与校准闭环（越用越好）
+## 四、BaiDec 编程场景持续微调与校准闭环（职责边界与 `BaiDecCode` 发布）
+
+> [!IMPORTANT]
+> **仓间职责边界**：
+> - **`BaiCode` 侧**：只负责运行时决策路由、结构化轨迹采集、线上统计与标准化数据导出（`intern_decision_sft.jsonl` 与 `baidec_replay_cases.json`），不承载模型训练与发布逻辑。
+> - **`BaiDec` 侧（`ai-infra/modules/baidec`）**：负责编程决策模型的微调研发与交付闭环（LoRA / SFT 训练、原生权重转换、温度缩放重校准、`scope_replay` 零回退门验收）。
+> - **自动发布与命名约定**：当微调候选版本在 `BaiDec` 侧验证有效（通过回放验收与校准门槛）后，自动发布至 **OSS**，模型名称命名为 **`BaiDecCode`**，供 `BaiCode` 本地与分发环境拉取切换。
 
 每次运行会话时，`BaiCode` 会在 `~/.BaiCode/baidec/trajectories/YYYY/MM/DD/decisions-<thread_id>.jsonl` 成对写入：
 - `decision_step`：发送给 `BaiDec` 的完整 `state`、`questions`、校准概率分布与路由计划；
