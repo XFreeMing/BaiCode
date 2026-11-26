@@ -106,6 +106,7 @@ use codex_model_provider_info::ModelProviderInfo;
 use codex_model_provider_info::OLLAMA_CHAT_PROVIDER_REMOVED_ERROR;
 use codex_model_provider_info::OLLAMA_OSS_PROVIDER_ID;
 use codex_model_provider_info::OPENAI_PROVIDER_ID;
+use codex_model_provider_info::WireApi;
 use codex_model_provider_info::built_in_model_providers;
 use codex_model_provider_info::merge_configured_model_providers;
 use codex_models_manager::ModelsManagerConfig;
@@ -4248,6 +4249,41 @@ impl Config {
                 .entry(model_provider_id.clone())
                 .or_insert_with(codex_model_provider_info::create_baiinf_provider);
         }
+        let cloud_model = if model_provider_id == "cloud"
+            && !model_providers.contains_key(&model_provider_id)
+        {
+            let missing_cloud_env = |_| {
+                std::io::Error::new(
+                    std::io::ErrorKind::InvalidInput,
+                    "Set BAICODE_CLOUD_ENV_FILE to the .env file for the cloud model",
+                )
+            };
+            let base_url = std::env::var("BAICODE_CLOUD_BASE_URL").map_err(missing_cloud_env)?;
+            let slug = std::env::var("BAICODE_CLOUD_MODEL").map_err(missing_cloud_env)?;
+            let wire_api = match std::env::var("BAICODE_CLOUD_WIRE_API").as_deref() {
+                Ok("responses") | Err(std::env::VarError::NotPresent) => WireApi::Responses,
+                Ok("messages") => WireApi::Messages,
+                _ => {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidInput,
+                        "Cloud model WIRE_API must be \"responses\" or \"messages\"",
+                    ));
+                }
+            };
+            model_providers.insert(
+                model_provider_id.clone(),
+                ModelProviderInfo {
+                    name: "Cloud".into(),
+                    base_url: Some(base_url),
+                    env_key: Some("BAICODE_CLOUD_API_KEY".into()),
+                    wire_api,
+                    ..Default::default()
+                },
+            );
+            Some(slug)
+        } else {
+            None
+        };
         let model_provider = model_providers
             .get(&model_provider_id)
             .ok_or_else(|| {
@@ -4430,7 +4466,7 @@ impl Config {
 
         let forced_login_method = cfg.forced_login_method;
 
-        let model = model.or(cfg.model).or_else(|| {
+        let model = model.or(cloud_model).or(cfg.model).or_else(|| {
             (model_provider_id == codex_model_provider_info::BAIINF_PROVIDER_ID)
                 .then(|| codex_model_provider_info::BAIINF_DEFAULT_MODEL_SLUG.to_string())
         });

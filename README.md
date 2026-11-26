@@ -70,6 +70,26 @@ baic exec --sandbox workspace-write "运行这个项目的测试，修复失败�
 
 ## 使用远端模型
 
+### 从 `.env` 选择云模型
+
+在 `.env` 中设置服务的基础地址、模型 ID 和密钥。`WIRE_API` 默认为 `responses`，BaiCode 会在基础地址后追加 `/responses`。如果服务提供 Anthropic 兼容接口，设置 `WIRE_API="messages"`，BaiCode 会追加 `/messages`。
+
+```dotenv
+BASE_URL="https://api.deepseek.com"
+MODEL="deepseek-flash"
+AUTH_TOKEN="your-deepseek-api-key"
+```
+
+需要自定义密钥变量名时，把 `AUTH_TOKEN` 改成所需名称，并添加 `CLOUD_ENV_KEY="新变量名"`。
+
+从 `.env` 所在目录运行以下命令。去掉 `exec` 和提示词即可进入交互模式。
+
+```sh
+BAICODE_CLOUD_ENV_FILE="$PWD/.env" baic -c 'model_provider="cloud"' exec "回复 OK"
+```
+
+### 从 `config.toml` 选择远端模型
+
 在同一个 `config.toml` 中填写模型服务的地址和模型 ID。以下域名和模型名为占位示例。服务需要密钥时，将密钥放在 `BAICODE_MODEL_API_KEY` 环境变量中，免鉴权服务可以省略 `env_key`。
 
 ```toml
@@ -82,6 +102,34 @@ base_url = "https://model.example/v1"
 wire_api = "responses"
 env_key = "BAICODE_MODEL_API_KEY"
 ```
+
+### 使用 DeepSeek V4.1 Flash 网关
+
+通过 `.env` 配置网关时，设置 `WIRE_API="messages"`，并将 `BASE_URL` 设为 `/messages` 之前的基础地址。使用网关给出的 `MODEL`，例如 `deepseek-v4.1-flash`。
+
+```sh
+BAICODE_CLOUD_ENV_FILE="$PWD/.env" baic -c 'model_provider="cloud"' exec --sandbox workspace-write "修复失败的测试并验证"
+```
+
+需要用 `baic -p deepseek` 切换模型时，在 `~/.BaiCode/config.toml` 注册网关。
+
+```toml
+[model_providers.deepseek]
+name = "DeepSeek"
+base_url = "https://model.example/v1"
+wire_api = "messages"
+env_key = "AUTH_TOKEN"
+```
+
+让 `~/.BaiCode/.env` 提供 `AUTH_TOKEN`。已有单独维护的 `.env` 文件时，可以将 `~/.BaiCode/.env` 链接到该文件。将下面的配置保存到 `~/.BaiCode/deepseek.config.toml`。
+
+```toml
+model_provider = "deepseek"
+model = "deepseek-v4.1-flash"
+model_reasoning_effort = "high"
+```
+
+运行 `baic -p deepseek`。模型 ID 使用服务商提供的名称。BaiCode 为 `deepseek-v4.1-flash` 和 `deepseek-flash` 应用同一套编码指令、推理档位和工具配置。默认使用 `high`，小改动可用 `low`，复杂排查可用 `max`。
 
 使用远端模型时，提示词、随对话提供的工作区上下文及工具结果会发送到该服务。常规模型请求省略安装 ID、会话标识和 Git 状态等附加元数据。
 

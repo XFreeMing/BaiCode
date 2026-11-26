@@ -47,6 +47,7 @@ use codex_api::AgentIdentityTelemetry;
 use codex_api::ApiError;
 use codex_api::AuthProvider;
 use codex_api::Compression;
+use codex_api::MESSAGES_PATH;
 use codex_api::MemoriesClient as ApiMemoriesClient;
 use codex_api::MemorySummarizeInput as ApiMemorySummarizeInput;
 use codex_api::MemorySummarizeOutput as ApiMemorySummarizeOutput;
@@ -1360,7 +1361,8 @@ impl ModelClient {
     ///
     /// WebSocket use is controlled by provider capability and session-scoped fallback state.
     pub fn responses_websocket_enabled(&self) -> bool {
-        if !self.state.provider.info().supports_websockets
+        if self.state.provider.info().wire_api != WireApi::Responses
+            || !self.state.provider.info().supports_websockets
             || self.state.disable_websockets.load(Ordering::Relaxed)
         {
             return false;
@@ -1404,11 +1406,18 @@ impl ModelClient {
             && url::Url::parse(&api.base_url)
                 .is_ok_and(|url| !codex_http_client::is_loopback_network_url(&url))
         {
-            let endpoints = ["responses", "responses/compact"]
-                .into_iter()
+            let wire_api = provider.info().wire_api;
+            let paths: &[&str] = match wire_api {
+                WireApi::Responses => &[RESPONSES_PATH, "/responses/compact"],
+                WireApi::Messages => &[MESSAGES_PATH],
+            };
+            let mut endpoints: std::collections::BTreeSet<_> = paths
+                .iter()
                 .filter_map(|path| url::Url::parse(&api.url_for_path(path)).ok())
-                .chain(api.websocket_url_for_path("responses").ok())
                 .collect();
+            if wire_api == WireApi::Responses {
+                endpoints.extend(api.websocket_url_for_path(RESPONSES_PATH).ok());
+            }
             let policy = setup
                 .http_client_factory
                 .network_policy()
@@ -2021,7 +2030,7 @@ impl ResponsesHttpExecutor<'_> {
         }
     }
 
-    /// Streams a turn via the OpenAI Responses API over HTTP.
+    /// Streams a turn over HTTP using the configured model protocol.
     ///
     /// Handles reasoning summaries, verbosity, and the `text` controls used for output schemas.
     #[allow(clippy::too_many_arguments)]
@@ -2050,6 +2059,11 @@ impl ResponsesHttpExecutor<'_> {
         responses_metadata: &CodexResponsesMetadata,
         inference_trace: &InferenceTraceContext,
     ) -> Result<OpenedModelResponse> {
+        let wire_api = self.client.state.provider.info().wire_api;
+        let endpoint = match wire_api {
+            WireApi::Responses => RESPONSES_PATH,
+            WireApi::Messages => MESSAGES_PATH,
+        };
         let auth_manager = self.client.state.provider.auth_manager();
         let mut auth_recovery = auth_manager
             .as_ref()
@@ -2079,8 +2093,8 @@ impl ResponsesHttpExecutor<'_> {
                 include_internal && self.client.captures_result_bodies(),
                 &responses_headers,
             );
-            tracing::Span::current().record("api.path", "/responses");
-            let transport = client_setup.http_transport("/responses")?;
+            tracing::Span::current().record("api.path", endpoint);
+            let transport = client_setup.http_transport(endpoint)?;
             let request_auth_context = AuthRequestTelemetryContext::new(
                 client_setup.auth.as_ref().map(CodexAuth::auth_mode),
                 client_setup.api_auth.as_ref(),
@@ -2091,7 +2105,7 @@ impl ResponsesHttpExecutor<'_> {
             let (request_telemetry, sse_telemetry) = ModelClientSession::build_streaming_telemetry(
                 session_telemetry,
                 request_auth_context,
-                RequestRouteTelemetry::for_endpoint("/responses"),
+                RequestRouteTelemetry::for_endpoint(endpoint),
                 self.client.state.auth_env_telemetry.clone(),
             );
             let compression = self.responses_request_compression(client_setup.auth.as_ref());
@@ -2184,17 +2198,31 @@ impl ResponsesHttpExecutor<'_> {
                 result_body_destination.as_ref(),
                 &request.input,
             );
-            let stream_result = client
-                .stream_request_with_observer(request, options, |wire| {
-                    inference_trace_attempt.record_started(
-                        wire.clone(),
-                        self.client
-                            .prepared_prompt_for_trace(&inference_trace_attempt, prompt),
-                        history_ids,
-                        || Ok(None),
-                    );
-                })
-                .await;
+            let observe_request = |wire| {
+                inference_trace_attempt.record_started(
+                    wire,
+                    self.client
+                        .prepared_prompt_for_trace(&inference_trace_attempt, prompt),
+                    history_ids,
+                    || Ok(None),
+                );
+            };
+            let stream_result = match wire_api {
+                WireApi::Responses => {
+                    client
+                        .stream_request_with_observer(request, options, |wire| {
+                            observe_request(wire.clone());
+                        })
+                        .await
+                }
+                WireApi::Messages => {
+                    client
+                        .stream_messages_with_observer(request, options.extra_headers, |wire| {
+                            observe_request(wire.clone());
+                        })
+                        .await
+                }
+            };
 
             match stream_result {
                 Ok(stream) => {
@@ -2793,44 +2821,39 @@ impl ModelClientSession {
         responses_metadata: &CodexResponsesMetadata,
         inference_trace: &InferenceTraceContext,
     ) -> Result<OpenedModelResponse> {
-        let wire_api = self.client.state.provider.info().wire_api;
-        match wire_api {
-            WireApi::Responses => {
-                if self.client.responses_websocket_enabled() {
-                    match self
-                        .stream_responses_websocket(
-                            prompt,
-                            model_info,
-                            session_telemetry,
-                            sampling.clone(),
-                            responses_metadata,
-                            /*warmup*/ false,
-                            inference_trace,
-                        )
-                        .await?
-                    {
-                        WebsocketStreamOutcome::Stream(stream) => return Ok(*stream),
-                        WebsocketStreamOutcome::FallbackToHttp => {
-                            self.try_switch_fallback_transport(session_telemetry, model_info);
-                        }
-                    }
+        if self.client.responses_websocket_enabled() {
+            match self
+                .stream_responses_websocket(
+                    prompt,
+                    model_info,
+                    session_telemetry,
+                    sampling.clone(),
+                    responses_metadata,
+                    /*warmup*/ false,
+                    inference_trace,
+                )
+                .await?
+            {
+                WebsocketStreamOutcome::Stream(stream) => return Ok(*stream),
+                WebsocketStreamOutcome::FallbackToHttp => {
+                    self.try_switch_fallback_transport(session_telemetry, model_info);
                 }
-
-                ResponsesHttpExecutor::new(&self.client)
-                    .stream_responses_http(
-                        &self.turn_state,
-                        /*expected_auth_owner*/ None,
-                        self.client.event_sender.as_ref(),
-                        prompt,
-                        model_info,
-                        session_telemetry,
-                        sampling,
-                        responses_metadata,
-                        inference_trace,
-                    )
-                    .await
             }
         }
+
+        ResponsesHttpExecutor::new(&self.client)
+            .stream_responses_http(
+                &self.turn_state,
+                /*expected_auth_owner*/ None,
+                self.client.event_sender.as_ref(),
+                prompt,
+                model_info,
+                session_telemetry,
+                sampling,
+                responses_metadata,
+                inference_trace,
+            )
+            .await
     }
 
     /// Permanently disables WebSockets for this Codex session and resets WebSocket state.

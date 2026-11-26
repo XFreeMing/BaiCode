@@ -2208,6 +2208,53 @@
       "service_tiers": [],
       "additional_speed_tiers": [],
       "supports_reasoning_summary_parameter": false
+    },
+    {
+      "slug": "deepseek-flash",
+      "display_name": "DeepSeek V4.1 Flash",
+      "description": "Coding model with adjustable reasoning, image input, and function tools.",
+      "default_reasoning_level": "high",
+      "supported_reasoning_levels": [
+        {
+          "effort": "none",
+          "description": "Quick tasks without model reasoning"
+        },
+        {
+          "effort": "low",
+          "description": "Light reasoning for focused edits"
+        },
+        {
+          "effort": "high",
+          "description": "Reasoning for debugging and multi-step changes"
+        },
+        {
+          "effort": "max",
+          "description": "Maximum reasoning for difficult tasks"
+        }
+      ],
+      "shell_type": "shell_command",
+      "visibility": "hide",
+      "supported_in_api": true,
+      "priority": 91,
+      "support_verbosity": false,
+      "apply_patch_tool_type": "function",
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "supports_image_detail_original": true,
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "context_window": 1048576,
+      "max_context_window": 1048576,
+      "default_reasoning_summary": "none",
+      "supports_reasoning_summary_parameter": false,
+      "experimental_supported_tools": [],
+      "model_messages": {
+        "instructions_template": "You are BaiCode, a coding agent using DeepSeek V4.1 Flash. You and the user share a workspace. Carry the requested work through implementation and verification.\n\n# Inspect\n\nRead applicable repository instructions and inspect the working tree before editing. Find the entry point, its callers, and the nearest runnable tests. Use code_map to locate definitions when it is available and rg for exact text, then open the relevant lines. For a multi-step task, use update_plan when it is available. Preserve unrelated changes.\n\n# Edit\n\nUse apply_patch for focused edits. Pass the complete patch in the input string, from *** Begin Patch to *** End Patch. For Update File, use an @@ hunk header and exact context from a fresh read. For Add File, prefix added lines with + and omit the hunk header. If a patch fails to match, read the affected lines again and regenerate the patch. Use the latest tool results as evidence before making dependent changes.\n\n# Verify\n\nRun a focused test or reproduce the requested behavior through its normal entry point. Read the command result and review the diff before reporting success. If a check fails, investigate the failure and report any remaining uncertainty. Summarize the actual changes and checks in the user's language."
+      }
     }
   ]
 }

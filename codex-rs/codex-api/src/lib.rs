@@ -6,6 +6,7 @@ pub(crate) mod error;
 pub(crate) mod files;
 mod guardian_assessment;
 pub(crate) mod images;
+mod messages;
 pub(crate) mod provider;
 pub(crate) mod rate_limits;
 pub(crate) mod requests;
@@ -17,6 +18,7 @@ pub(crate) mod telemetry;
 
 /// Path of the Responses endpoint, relative to a provider's base URL.
 pub const RESPONSES_PATH: &str = "/responses";
+pub const MESSAGES_PATH: &str = "/messages";
 
 pub use codex_client::RequestTelemetry;
 pub use codex_client::ReqwestTransport;

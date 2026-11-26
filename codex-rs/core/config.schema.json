@@ -8092,6 +8092,13 @@
             "responses"
           ],
           "type": "string"
+        },
+        {
+          "description": "The Anthropic-compatible Messages API at `/v1/messages`.",
+          "enum": [
+            "messages"
+          ],
+          "type": "string"
         }
       ]
     },

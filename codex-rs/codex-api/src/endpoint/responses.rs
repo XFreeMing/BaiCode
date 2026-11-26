@@ -4,6 +4,7 @@ use crate::common::ResponsesApiRequest;
 use crate::common::with_tool_results;
 use crate::endpoint::session::EndpointSession;
 use crate::error::ApiError;
+use crate::messages::MessagesRequest;
 use crate::provider::Provider;
 use crate::requests::Compression;
 use crate::sse::spawn_response_stream;
@@ -62,6 +63,42 @@ impl<T: HttpTransport> ResponsesClient<T> {
     ) -> Result<ResponseStream, ApiError> {
         self.stream_request_with_observer(request, options, |_| {})
             .await
+    }
+
+    pub async fn stream_messages_with_observer(
+        &self,
+        request: ResponsesApiRequest,
+        extra_headers: HeaderMap,
+        on_encoded: impl FnOnce(&bytes::Bytes),
+    ) -> Result<ResponseStream, ApiError> {
+        let request = MessagesRequest::from_responses(request)?;
+        let body = EncodedJsonBody::encode(&request.body).map_err(|error| {
+            ApiError::Stream(format!("failed to encode Messages request: {error}"))
+        })?;
+        on_encoded(body.shared_bytes());
+        let response = self
+            .session
+            .stream_encoded_json_with(
+                Method::POST,
+                crate::MESSAGES_PATH,
+                extra_headers,
+                Some(body),
+                |request| {
+                    request.headers.insert(
+                        http::header::ACCEPT,
+                        HeaderValue::from_static("text/event-stream"),
+                    );
+                    request
+                        .headers
+                        .insert("anthropic-version", HeaderValue::from_static("2023-06-01"));
+                },
+            )
+            .await?;
+        Ok(request.stream(
+            response,
+            self.session.provider().stream_idle_timeout,
+            self.sse_telemetry.clone(),
+        ))
     }
 
     /// Observes the encoded request before private connector results are attached.

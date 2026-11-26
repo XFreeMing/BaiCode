@@ -132,6 +132,10 @@ pub fn arg0_dispatch() -> Option<Arg0PathEntryGuard> {
     // This modifies the environment, which is not thread-safe, so do this
     // before creating any threads/the Tokio runtime.
     load_dotenv();
+    if let Err(error) = load_cloud_dotenv() {
+        eprintln!("Error loading BAICODE_CLOUD_ENV_FILE: {error}");
+        std::process::exit(1);
+    }
 
     let (path_entry_guard, updated_path_env_var) = prepare_path_env_var_with_aliases(
         InstallContext::current(),
@@ -281,6 +285,38 @@ fn load_dotenv() {
     {
         set_filtered(iter);
     }
+}
+
+/// Import only cloud provider settings from an explicitly selected dotenv file.
+fn load_cloud_dotenv() -> Result<(), String> {
+    let Some(path) = std::env::var_os("BAICODE_CLOUD_ENV_FILE") else {
+        return Ok(());
+    };
+    let entries = dotenvy::from_path_iter(path)
+        .map_err(|_| "could not open the file".to_string())?
+        .collect::<Result<std::collections::HashMap<_, _>, _>>()
+        .map_err(|_| "could not parse the file".to_string())?;
+    let key = entries
+        .get("CLOUD_ENV_KEY")
+        .map_or("AUTH_TOKEN", String::as_str);
+    let read = |name| {
+        entries
+            .get(name)
+            .map(|value| value.trim())
+            .filter(|value| !value.is_empty() && !value.contains('\0'))
+    };
+    let base_url = read("BASE_URL").ok_or("missing or invalid BASE_URL")?;
+    let model = read("MODEL").ok_or("missing or invalid MODEL")?;
+    let api_key = read(key).ok_or("missing or invalid AUTH_TOKEN or CLOUD_ENV_KEY target")?;
+    let wire_api = read("WIRE_API").unwrap_or("responses");
+    // This runs before the Tokio runtime starts, like the home dotenv loader.
+    unsafe {
+        std::env::set_var("BAICODE_CLOUD_BASE_URL", base_url);
+        std::env::set_var("BAICODE_CLOUD_MODEL", model);
+        std::env::set_var("BAICODE_CLOUD_API_KEY", api_key);
+        std::env::set_var("BAICODE_CLOUD_WIRE_API", wire_api);
+    }
+    Ok(())
 }
 
 /// Helper to set vars from a dotenvy iterator while filtering out `BAICODE_` keys.

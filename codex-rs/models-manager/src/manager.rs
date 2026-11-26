@@ -1261,6 +1261,17 @@ fn find_model_from_candidates(model: &str, candidates: &[ModelInfo]) -> Option<M
     // retry for namespaced slugs like `custom/gpt-5.3-codex`.
     find_model_by_longest_prefix(model, candidates)
         .or_else(|| find_model_by_namespaced_suffix(model, candidates))
+        .or_else(|| {
+            let slug = model.rsplit_once('/').map_or(model, |(_, slug)| slug);
+            if matches!(slug, "deepseek-v4.1-flash" | "deepseek-v4-flash") {
+                candidates
+                    .iter()
+                    .find(|candidate| candidate.slug == "deepseek-flash")
+                    .cloned()
+            } else {
+                None
+            }
+        })
 }
 
 pub(crate) fn construct_model_info_from_candidates(
